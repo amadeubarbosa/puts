@@ -1,0 +1,244 @@
+-- Description of tecmake oriented software, tipical tecgraf programs that needs
+-- of tecmake and tecgraf variables to be compiled. Some dummy packages could
+-- use it also, like packages that just need to copy files and make links.
+-- ATTENTION: place the fundamental packages first!
+-- if A depends of B then you should place the B description first than A
+packages = { 
+	{ name = "lua5.1",
+	  build = {
+		type = "tecmake",
+		src = PRODAPP .."/lib/lua5.1/src",
+		mf = { "config", --[["luac", "bin2c",]] },
+	  },
+	  install_files = {
+	  	["../lib/${TEC_UNAME}/liblua5.1.so"] = "libpath/${TEC_UNAME}",
+	  },
+	  dev_files = {
+	  	["../lib/${TEC_UNAME}/liblua5.1.*"] = "libpath/${TEC_UNAME}",
+	  	["../include/*"] = "incpath/lua5.1.2",
+	  },
+	},
+	{ name = "lua5.1-bin",
+	  build = {
+	  	type = "tecmake",
+	  	src = PRODAPP .."/lib/lua5.1/src",
+	  	mf = { "lua", --[["luac", "bin2c",]] },
+	  },
+	  install_files = {
+	  	["../bin/${TEC_UNAME}/lua5.1"] = "bin/${TEC_UNAME}",
+	  },
+	},
+	{ name = "tolua5.1",
+	  build = {
+	  	type = "tecmake",
+	  	src = PRODAPP .."/lib/tolua5.1/src",
+	  	mf = { "tolua5lib", "tolua5" },
+	  },
+	  dev_files = {
+	  	["../bin/${TEC_UNAME}/tolua5.1"] = "bin/${TEC_UNAME}",
+	  	["../lib/${TEC_UNAME}/libtolua5.1.*"] = "libpath/${TEC_UNAME}",
+	  	["../include/tolua.h"] = "incpath/tolua5.1",
+	  },
+	},
+	{ name = "lposix",
+	  build = {
+	  	type = "tecmake",
+	  	src = PRODAPP .."/lib/lposix/src",
+	  	mf = { "config", },
+	  },
+	  install_files = {
+	  	["../lib/${TEC_UNAME}/liblposix.so"] = "libpath/${TEC_UNAME}",
+	  },
+	  dev_files = {
+	  	["../lib/${TEC_UNAME}/liblposix.*"] = "libpath/${TEC_UNAME}",
+	  	["../include/*"] = "incpath/lposix",
+	  },
+	},
+	{ name = "luasocket",
+	  build = {
+	  	type = "tecmake",
+	  	src = PRODAPP .."/lib/luasocket2/src",
+	  	mf = { "config", },
+	  },
+	  install_files = {
+	  	["../lib/${TEC_UNAME}/libluasocket.so"] = "libpath/${TEC_UNAME}",
+	  },
+	  dev_files = {
+	  	["../lib/${TEC_UNAME}/libluasocket.*"] = "libpath/${TEC_UNAME}",
+	  	["../include/*"] = "incpath/luasocket2",
+	  },
+	},
+	{ name = "oilall",
+	  build = {
+	  	type = "tecmake",
+	  	src = PRODAPP .."/lib/oil04/src",
+	  	mf = { "oilall", },
+	  },
+	  install_files = {
+	  	["../lib/${TEC_UNAME}/liboilall.so"] = "libpath/${TEC_UNAME}",
+	  },
+	  dev_files = {
+	  	["../lib/${TEC_UNAME}/liboilall.*"] = "libpath/${TEC_UNAME}",
+	  	["../include/*"] = "incpath/oil04",
+	  },
+	},
+	{ name = "luuid",
+	  build = {
+	  	type = "tecmake",
+	  	src = PRODAPP .."/lib/luuid/src",
+	  	mf = { "config", },
+	  },
+	  install_files = {
+	  	["../lib/${TEC_UNAME}/libluuid.so"] = "libpath/${TEC_UNAME}",
+	  },
+	  dev_files = {
+	  	["../lib/${TEC_UNAME}/libluuid.*"] = "libpath/${TEC_UNAME}",
+	  	["../include/*"] = "incpath/luuid",
+	  },
+	},
+	{ name = "lualdap",
+	  build = {
+	  	type = "tecmake",
+	  	src = PRODAPP .."/lib/lualdap-1.0.1/src",
+	  	mf = { "config", },
+	  },
+	  install_files = {
+	  	["../lib/${TEC_UNAME}/liblualdap.so"] = "libpath/${TEC_UNAME}",
+	  },
+	  dev_files = {
+	  	["../lib/${TEC_UNAME}/liblualdap.*"] = "libpath/${TEC_UNAME}",
+	  	["../include/*"] = "incpath/lualdap-1.0.1",
+	  },
+	},
+	{ name = "latt",
+	  build = {
+	  	type = "tecmake",
+	  	src = PRODAPP .."/lib/latt",
+	  	mf = { },
+	  },
+	  dev_files = {
+	  	["lua/*"] = "libpath/lua/5.1"
+	  },
+	},
+	{ name = "scsoil",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/lib/scs/src",
+	  	mf = { "oil", },
+	  },
+	  install_files = {
+			["../lib/${TEC_UNAME}/libscsoil.so"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
+	  },
+	  dev_files = {
+			["../lib/${TEC_UNAME}/libscsoil.*"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
+			["../include/scs"] = "incpath/scs",
+	  },
+	},
+	-- TIP: precompiler.lua precisa do loop!
+	{ name = "loop",
+	  build = {
+	  	type = "tecmake",
+	  	src = PRODAPP .. "/lib/oil04",
+	  	mf = { },
+	  },
+	  dev_files = {
+		  ["lua/loop"] = "libpath/lua/5.1",
+	  },
+	},
+	{ name = "scsall",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/lib/scs/src",
+	  	mf = { "scsall", },
+	  },
+	  install_files = {
+			["../lib/${TEC_UNAME}/libscsall.so"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath/",
+	  },
+	  dev_files = {
+			["../lib/${TEC_UNAME}/libscsall.*"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath/",
+			["../include/scsall.h"] = "incpath/scs",
+	  },
+	},
+	{ name = "ftc",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/lib/ftc/src",
+	  	mf = { "config", "without_oil", },
+	  },
+	  install_files = {
+	  	["../lib/${TEC_UNAME}/libftc*.so"] = "libpath/${TEC_UNAME}",
+	  },
+	  dev_files = {
+	  	["../include/ftc.h"] = "incpath/ftc/",
+	  	["../lib/${TEC_UNAME}/libftc.*"] = "libpath/${TEC_UNAME}",
+	  },
+	},
+	{ name = "lce",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/lib/lce/src",
+	  	mf = { "config", },
+	  },
+	  install_files = {
+	  	["../lib/${TEC_UNAME}/liblce*.so"] = "libpath/${TEC_UNAME}",
+	  },
+	  dev_files = {
+	  	["../include/*"] = "incpath/lce/",
+	  	["../lib/${TEC_UNAME}/liblce.*"] = "libpath/${TEC_UNAME}",
+	  },
+	},
+	{ name = "openbus-core",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/core/services",
+	  	mf = { "config", },
+	  	--env LFLAGS="-undefined dynamic_lookup"
+	  },
+	  install_files = {
+			["../bin/${TEC_UNAME}/*"] = "core/bin/${TEC_UNAME}",
+			["../bin/*.sh"] = "core/bin",
+			["../bin/servicelauncher"] = "core/bin",
+			["../certificates"] = "core",
+			["../conf"] = "core",
+			["../idl/*"] = "idlpath",
+			["../services/accesscontrol"] = "core/services",
+			["../services/registry"] = "core/services",
+			["../services/session"] = "core/services",
+			["../utilities/lua/openbus"] = "core/utilities/lua",
+	  },
+		dev_files = {
+			["../test/lua"] = "core/test",
+		},
+	},
+	-- TIP: precompiler.lua precisa do loop!
+	{ name = "openbus-cppoil",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/core/utilities/cppoil",
+	  	mf = { "config", },
+	  },
+	  dev_files = {
+			["lib/${TEC_UNAME}/libopenbus*.*"] = "core/utilities/cppoil/lib/${TEC_UNAME}",
+			["openbus.h"] = "core/utilities/cppoil", --include
+			["common"] = "core/utilities/cppoil",    --include
+			["luaidl"] = "core/utilities/cppoil",    --include
+			["stubs"] = "core/utilities/cppoil",     --include
+			["openbus.lua"] = "core/utilities/cppoil",
+			["../../test/cppoil"] = "core/test",
+	  },
+	},
+--	{ name = "ldap-Linux26g4",
+--		src = "/",
+--		mf = { },
+--		install_files = {
+--			["/usr/lib/libldap.so.2"] = "libpath/${TEC_UNAME}/",
+--		},
+--		dev_files = {
+--			["/usr/include/ldap.h"] = "incpath/ldap/",
+--		},
+--	},
+}

@@ -1,0 +1,10 @@
+openssl-0.9.9
+lua5.1
+lposix
+luasocket
+oilall
+luuid
+lualdap
+scsall
+lce
+openbus-core

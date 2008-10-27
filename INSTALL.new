@@ -1,0 +1,36 @@
+Projeto: OpenBUS
+Empacotamento: Amadeu A. B. Jr <amadeu@tecgraf.puc-rio.br>
+TecGRAF / PUC-Rio
+
+======== [ Instalar o OpenBUS a partir do pacote final ] =========
+
+1. Escolha um caminho para instalação e defina a variável OPENBUS_HOME:
+
+       É preciso manter esta configuração em seu profile!
+       
+       Por exemplo, em BASH:
+       export OPENBUS_HOME=/usr/local
+       
+       Já em CSH:
+       setenv OPENBUS_HOME /usr/local
+
+2. Também adicione as seguintes linhas ao seu profile:
+
+         Se o seu SHELL padrão for BASH:
+       -----------8<-------------------------------------
+       . ${OPENBUS_HOME}/tools/shell/kshrc
+       -------------------------------------->8----------
+       
+         Se o seu SHELL padrão for CSH:
+       -----------8<-------------------------------------
+       . ${OPENBUS_HOME}/tools/shell/cshrc
+       -------------------------------------->8----------
+  
+3. Extraia o pacote diretamente no mesmo caminho apontado por OPENBUS_HOME
+
+4. Pronto! Agora basta usar o OpenBUS:
+
+cd ${OPENBUS_HOME}/core/bin
+./run_access_control_server.sh      # lançamento do Serviço de Acesso
+./run_registry_server.sh            # lançamento do Serviço de Registro
+./run_session_server.sh             # lançamento do Serviço de Sessão

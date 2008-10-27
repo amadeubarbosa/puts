@@ -1,0 +1,20 @@
+# my settings
+alias ll='ls -l'
+export PATH="$HOME/bin:$PATH"
+
+export OPENBUS_HOME="${HOME}/work/install"
+export OPENSSL_HOME="${OPENBUS_HOME}/openssl"
+
+export LUA51="${HOME}/prodapp/lib/lua5.1"
+
+export PATH="${OPENBUS_HOME}/bin/${TEC_UNAME}:${OPENBUS_HOME}/bin:${PATH}"
+
+export CPATH="${OPENBUS_HOME}/incpath/cxxtest:${OPENBUS_HOME}/incpath/e2fsprogs-1.40.8:${OPENBUS_HOME}/incpath/db-4.6.21:${OPENBUS_HOME}/incpath/openldap-2.1.30:${OPENBUS_HOME}/incpath/openssl-0.9.9:${CPATH}:${OPENBUS_HOME}/incpath/cyrus-sasl2-2.1.22.dfsg1"
+
+export LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}:${LIBRARY_PATH}"
+export LD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}:${LD_LIBRARY_PATH}"
+export DYLD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}:${DYLD_LIBRARY_PATH}"
+
+export LUA_PATH="${OPENBUS_HOME}/?.lua;${OPENBUS_HOME}/core/utilities/lua/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?/init.lua;./?.lua"
+export LUA_CPATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}/lib?.so;./?.so"
+
