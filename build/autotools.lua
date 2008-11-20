@@ -11,10 +11,10 @@ local myplat = platforms[TEC_SYSNAME]
 module("tools.build.autotools",package.seeall)
 
 -- Ensure tempdirs for bogus ./configure
-os.execute("mkdir -p ".. TMPDIR)
-os.execute("mkdir -p ".. TMPDIR .."/bin")
-os.execute("mkdir -p ".. TMPDIR .."/lib")
-os.execute("mkdir -p ".. TMPDIR .."/include")
+os.execute(myplat.cmd.mkdir .. TMPDIR)
+os.execute(myplat.cmd.mkdir .. TMPDIR .."/bin")
+os.execute(myplat.cmd.mkdir .. TMPDIR .."/lib")
+os.execute(myplat.cmd.mkdir .. TMPDIR .."/include")
 
 -- Build dependencies check (originaly) to basesoft packages
 function check_external_deps(pkgtable)
@@ -73,7 +73,7 @@ function run(t,arguments)
 			-- assert ensure that we could continue
 			assert(ret == 0,"ERROR compiling the software ".. t.name .."")
 
-			-- re-using copy method to parse install_files, dev_files
+			-- re-using copy method to parse install_files, conf_files, dev_files
 			copy.run(t,arguments,build_dir)
 			break
 		end

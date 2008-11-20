@@ -11,15 +11,36 @@ local platforms = require "tools.platforms"
 local myplat = platforms[TEC_SYSNAME]
 local default_assert = assert
 
+-- Parses package description and delegates to tools.build.<method>.run
+function parseDescriptions(desc, arguments)
+	for _, t in ipairs(desc) do
+		print "----------------------------------------------------------------------"
+		-- hack when no build is provided, to _always_ copy install_files , dev_files
+		if not t.build then
+			t.build = { type = "copy" }
+		end
+
+		assert(t.build.type, "ERROR: build.type is missing for package: "..t.name)
+		-- loading specific build methods
+		ok, build_type = pcall(require, "tools.build." .. t.build.type)
+		assert(ok and type(build_type) == "table","ERROR: failed initializing "..
+		                    "build back-end for build type: '".. t.build.type ..
+		                    "' for package: ".. t.name)
+
+		-- starting specific build methods
+		build_type.run(t,arguments)
+
+		print " [info] Done!"
+		print "----------------------------------------------------------------------"
+	end
+end
+
 --------------------------------------------------------------------------------
--- Parsing arguments, filtering descriptions and reaching basic requests -------
+-- Main code -------------------------------------------------------------------
 --------------------------------------------------------------------------------
+
 -- Parsing arguments
-assert(arg,"Table arg missing! This program should be loaded from console.")
-local arguments = {}
-local patt="%-?%-?(%w+)(=?)(.*)"
-local usage_msg=[[ Usage: ]]..arg[0]..[[ OPTIONS
-	Valid OPTIONS:
+local arguments = util.parse_args(arg,[[
 	--help                   : show this help
 	--verbose                : turn ON the VERBOSE mode (show the system commands)
 	--basesoft=filename      : use the 'filename' as input for basic
@@ -33,24 +54,14 @@ local usage_msg=[[ Usage: ]]..arg[0]..[[ OPTIONS
 	                           already = to debug or devel purpose)
 	--list                   : list all package names from description files. When
 	                           '--select' is used, it'll confirm the selection.
-	--select="pkg1 pkg2 ..." : choose which packages to compile and install    ]]
+	--select="pkg1 pkg2 ..." : choose which packages to compile and install    ]])
 
-for i,param in ipairs(arg) do
-	local opt,_,value = string.match(param,patt)
-	if opt == "h" or opt == "help" then
-		print(usage_msg)
-		os.exit(0)
-	end
-	if opt and value then
-		if opt == "select" then
-			-- selecting packages to build with multiple '--select' support
-			if not arguments[opt] then arguments[opt] = {} end
-			for _,pkg in ipairs({value:split("[^%s]+")}) do
-				arguments[opt][pkg] = pkg
-			end
-		else
-			arguments[opt] = value
-		end
+if arguments.select then
+	local value = arguments.select
+	-- selecting packages to build with multiple '--select' support
+	arguments.select = {}
+	for _,pkg in ipairs({value:split("[^%s]+")}) do
+		arguments.select[pkg] = pkg
 	end
 end
 
@@ -64,8 +75,8 @@ assert(loadfile(arguments["packages"] or DEPLOYDIR .."/packages.desc"))()
 
 -- Filtering the descriptions tables with '--select' arguments
 -- preparing the tables to provide t[pkg_name] fields
-function rehashByName(mytable)
-	-- REMEMBER: loop.ordered.set is better but insert loop dependency
+local function rehashByName(mytable)
+	-- REMEMBER: loop.ordered.set is better but insert 'loop' module dependency
 	for i,t in ipairs(mytable) do
 		mytable[t.name] = t
 	end
@@ -105,60 +116,29 @@ if arguments["list"] then
 	os.exit(0)
 end
 
---------------------------------------------------------------------------------
--- Useful functions (overloading, install and link) ----------------------------
---------------------------------------------------------------------------------
-
 -- Setting verbose level if requested
 if arguments["verbose"] or arguments["v"] then
 	util.verbose(1)
 end
 
---------------------------------------------------------------------------------
--- Main code -------------------------------------------------------------------
---------------------------------------------------------------------------------
-
 -- Creating the build environment to create .tar.gz (later) from it
-os.execute("mkdir -p ".. INSTALL.TOP)
-os.execute("mkdir -p ".. INSTALL.LIB)
-os.execute("mkdir -p ".. INSTALL.BIN)
-os.execute("mkdir -p ".. INSTALL.INC)
-os.execute("mkdir -p ".. TMPDIR)
-os.execute("mkdir -p ".. PKGDIR)
+os.execute(myplat.cmd.mkdir .. INSTALL.TOP)
+os.execute(myplat.cmd.mkdir .. INSTALL.LIB)
+os.execute(myplat.cmd.mkdir .. INSTALL.BIN)
+os.execute(myplat.cmd.mkdir .. INSTALL.INC)
+os.execute(myplat.cmd.mkdir .. TMPDIR)
+os.execute(myplat.cmd.mkdir .. PKGDIR)
 os.execute(FETCH_CMD)
 
 -- Cleaning the temp dir to execute install rules of autotools softwares
-os.execute("rm -rf "..TMPDIR.."/*")
+os.execute(myplat.cmd.rm .. TMPDIR .."/*")
 
--- Parsing basesoft and compiling+installing on WORKDIR environment
-function parseDescriptions(desc)
-	for _, t in ipairs(desc) do
-		print "----------------------------------------------------------------------"
-		-- hack when no build is provided, to _always_ copy install_files , dev_files
-		if not t.build then
-			t.build = { type = "copy" }
-		end
-
-		assert(t.build.type, "ERROR: build.type is missing for package: "..t.name)
-		-- loading specific build methods
-		ok, build_type = pcall(require, "tools.build." .. t.build.type)
-		assert(ok and type(build_type) == "table","ERROR: failed initializing "..
-		                    "build back-end for build type: '".. t.build.type ..
-		                    "' for package: ".. t.name)
-
-		-- starting build methods
-		build_type.run(t,arguments)
-
-		print " [info] Done!"
-		print "----------------------------------------------------------------------"
-	end
-end
-
-parseDescriptions(basesoft)
-parseDescriptions(packages)
+-- Parsing descriptions and proceed to compile & install procedures
+parseDescriptions(basesoft, arguments)
+parseDescriptions(packages, arguments)
 
 -- Cleaning environment
-os.execute("rm -rf ".. TMPDIR)
+os.execute(myplat.cmd.rm .. TMPDIR)
 --~ I shouldn't need this!!
 --~ os.execute("cd ".. INSTALL.TOP.. "; unlink lib/lib")
 --~ os.execute("cd ".. INSTALL.TOP.. "; unlink include/include")

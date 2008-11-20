@@ -13,6 +13,8 @@ module("tools.build.tecmake", package.seeall)
 function run(t, arguments)
 	print(" [info] Compiling package via tecmake: ".. t.name)
 	local build_dir = t.build.src
+	if not build_dir:match("/$") then build_dir = build_dir.."/" end
+	
 	for _, mf in ipairs(t.build.mf) do
 		-- compiling all targets
 		local build_cmd = "cd ".. build_dir .. "; ".. "tecmake MF=".. mf
@@ -36,6 +38,6 @@ function run(t, arguments)
 		util.install(t.name.."-dev", build_dir .. "../include/*", INSTALL.INC .. t.name )
 	end
 
-	-- re-using copy method to parse install_files, dev_files
+	-- re-using copy method to parse install_files, conf_files, dev_files
 	copy.run(t,arguments,build_dir)
 end

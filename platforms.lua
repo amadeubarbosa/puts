@@ -10,6 +10,7 @@ platforms = {
 		local pipe = io.popen(cmd,"r")
 		local stdout = pipe:read("*a")
 		pipe:close()
+		-- BETTER: 'if stdout:len() == 0 then return nil end' useful with assert!
 		return stdout
 	end,
 	search_ldlibpath = function(self,file,dirs,libpath_var)
@@ -25,10 +26,10 @@ platforms = {
 		end
 		return realpath
 	end,
-	cmd = { install = "cp -Rf ", make = "make", },
+	cmd = { install = "cp -Rf ", make = "make ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls " },
 }
 platforms.Linux = { 
-	cmd = { install = "cp -L -Rf ", make = "make", },
+	cmd = { install = "cp -L -Rf ", make = "make ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls " },
 	exec = platforms.exec, 
 	unknown_symbols = function(self,file) 
 		return self.exec("nm -f sysv -u -D ".. file .. " |awk -F'|' '/UND/ {print $1}'"):gsub("^%d*$","")
@@ -79,7 +80,7 @@ platforms.SunOS = {
 }
 platforms.IRIX = {
 	exec = platforms.exec,
-	cmd = { install = "cp -Rf ", make = "gmake", },
+	cmd = { install = "cp -Rf ", make = "gmake ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls "},
 	unknown_symbols = function(self,file) 
 		return self.exec("nm -u ".. file .. " |awk -F'|' '/UNDEF/ {print $8}'"):gsub("^%d*$","") 
 	end,
@@ -132,5 +133,14 @@ platforms.Darwin = {
 		return miss
 	end,
 }
+--~ platforms.Windows = {
+	--~ exec = platforms.exec, -- Lua provides pipe semantic
+	--~ cmd = {
+		--~ install = "xcopy /E /H ", -- xcopy don't copy orig dir also, only subdirs
+		--~ make = "nmake ",
+		--~ mkdir = "mkdir ",
+		--~ ls = "dir ",
+	--~ }
+--~ }
 
 return platforms

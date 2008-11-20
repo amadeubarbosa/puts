@@ -202,14 +202,18 @@ packages = {
 			["../bin/${TEC_UNAME}/*"] = "core/bin/${TEC_UNAME}",
 			["../bin/*.sh"] = "core/bin",
 			["../bin/servicelauncher"] = "core/bin",
-			["../certificates"] = "core",
-			["../conf"] = "core",
 			["../idl/*"] = "idlpath",
 			["../services/accesscontrol"] = "core/services",
 			["../services/registry"] = "core/services",
 			["../services/session"] = "core/services",
 			["../utilities/lua/openbus"] = "core/utilities/lua",
 	  },
+	  conf_files = {
+			["../conf"] = "core",
+			["../certificates"] = "core",
+	  },
+	  -- TODO: include here all templates/openbus.lua messages table!!
+	  conf_template = DEPLOYDIR .. "/templates/openbus.lua",
 		dev_files = {
 			["../test/lua"] = "core/test",
 		},

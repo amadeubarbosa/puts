@@ -27,6 +27,20 @@ function run(t,arguments,build_dir)
 			util.install(t.name, build_dir .. orig, dest)
 		end
 	end
+	-- copying files related to configuration with '-conf' suffix
+	if t.conf_files then
+		for orig, dest in pairs(t.conf_files) do
+			-- if absolute path we assume that you know where get the files
+			if orig:match("^/") then build_dir = "" end
+			util.install(t.name.."-conf", build_dir.. orig, dest)
+		end
+	end
+	-- temp behaviour, future: each package as a <name>.desc and <name>.template
+	-- important for configuration procedure in installation time
+	if t.conf_template then
+		local content = assert(io.open(t.conf_template,"r")):read("*a")
+		assert(io.open(PKGDIR.."/"..t.name..".template", "w")):write(content)
+	end
 	-- copying files to special packages with '-dev' suffix
 	if t.dev_files then
 		for orig, dest in pairs(t.dev_files) do

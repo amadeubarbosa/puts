@@ -12,6 +12,7 @@ oilall-dev
 scsall-dev
 lce-dev
 openbus-core
+openbus-core-conf
 openbus-core-dev
 tolua5.1-dev
 latt-dev
