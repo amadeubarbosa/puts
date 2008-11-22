@@ -1,8 +1,47 @@
 #!/bin/ksh
 
+# helpers
+function is_dir {
+	dir=$1
+	if [ ! -d "$dir" ]; then
+		echo "ERROR: Missing directory $dir"
+		return 1
+	fi
+	return 0
+}
+function die {
+	echo $@
+	exit 1
+}
+
+TOOLSDIR=$OPENBUS_HOME/../trunk/tools
+LOGDIR=$OPENBUS_HOME/../
+
+# all checks before execute
+if [ "$OPENBUS_HOME" == "" ]
+then 
+	die "ERROR: Missing OPENBUS_HOME system variable"
+else
+	echo "INFO: Using OPENBUS_HOME as $OPENBUS_HOME"
+	# we don't test core/bin/$TEC_UNAME because this script could be run from any host
+	is_dir "$OPENBUS_HOME/core/bin" || die "ERROR: $OPENBUS_HOME seems an invalid OPENBUS_HOME"
+fi
+
+if [ ! -f $TOOLSDIR/compile.lua ]
+then
+	echo "INFO: We assume by default compile.lua on: $TOOLSDIR/compile.lua"
+	echo "INFO:                 and the log file on: $LOGDIR"
+	echo "INFO: But the compile.lua was not found!"
+	echo "INFO: Where is the compile.lua? Please inform us or CTRL+C to abort."
+	read NEWDIR
+	[  -f "$NEWDIR/compile.lua" ] || die "ERROR: Invalid directory $NEWDIR!"
+	echo "INFO: Thanks! Proceeding..."
+	TOOLSDIR=$NEWDIR
+fi
+
 timestamp=$(date +%Y%m%d)
-logfile="work/arch-built.$timestamp"
-compile_cmd="lua5.1 tools/compile.lua $@"
+logfile="$LOGDIR/arch-built.$timestamp"
+compile_cmd="cd $TOOLSDIR; ./compile.lua $@"
 
 rm -f $logfile
 touch $logfile

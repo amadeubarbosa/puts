@@ -20,8 +20,10 @@ basesoft = {
 			         " --enable-bsd-shlibs && cd lib/uuid && make && make install",
 			Linux =  "gmake clean; ./configure --prefix=".. TMPDIR ..
 			         " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
-			SunOS =  "gmake clean; ./configure --with-cc=gcc --prefix=".. TMPDIR ..
+			SunOS =  "gmake clean; env CC=gcc ./configure --prefix=".. TMPDIR ..
 			         " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
+			SunOS510 =  "make clean; env CC=gcc CFLAGS=-UTLS ./configure --prefix=".. TMPDIR ..
+			         " --enable-elf-shlibs && cd lib/uuid && make && make install",
 			IRIX =   "gmake clean; ./configure --prefix=".. TMPDIR ..
 			         " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
 		},
@@ -94,6 +96,8 @@ basesoft = {
 			         " && gmake && gmake install",
 			SunOS =  "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
 			         " && gmake && gmake install",
+			SunOS510 = "cd build_unix; make clean; ../dist/configure CC=gcc --prefix=".. TMPDIR ..
+			         " && make && make install",
 			SunOS510x86 = "cd build_unix; gmake clean; ../dist/configure CC=gcc --prefix=".. TMPDIR ..
 			         " && gmake && gmake install",
 			IRIX =   "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
@@ -129,6 +133,9 @@ basesoft = {
 			SunOS =  "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
 			         " && cd include/ && make && make install "..
 			         " && cd ../lib/ && make && make install ",
+			SunOS510 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
+			         " && cd include/ && make && make install "..
+			         " && cd ../lib/ && make && make install ",
 			SunOS510x86 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
 			         " && cd include/ && make && make install "..
 			         " && cd ../lib/ && make && make install ",
@@ -161,6 +168,9 @@ basesoft = {
 			Linux =  "./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
 			         " && make depend && make && make install",
 			SunOS =  "./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+			         " && make depend && make && make install",
+			-- problem on sunos510 openldap compile: http://www.openldap.org/its/index.cgi/Build?id=4607
+			SunOS510 = "env CC=gcc CFLAGS='-D_AVL_H' ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
 			         " && make depend && make && make install",
 			SunOS510x86 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
 			         " && make depend && make && make install",

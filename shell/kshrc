@@ -1,11 +1,12 @@
-# my settings
-alias ll='ls -l'
+# personal settings
 export PATH="$HOME/bin:$PATH"
 
-export OPENBUS_HOME="${HOME}/work/install"
-export OPENSSL_HOME="${OPENBUS_HOME}/openssl"
+# openbus settings
 
-export LUA51="${HOME}/prodapp/lib/lua5.1"
+# common path
+#export OPENBUS_HOME="${HOME}/work/install"
+
+export OPENSSL_HOME="${OPENBUS_HOME}/openssl"
 
 export PATH="${OPENBUS_HOME}/bin/${TEC_UNAME}:${OPENBUS_HOME}/bin:${PATH}"
 

@@ -32,7 +32,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/lib/tolua5.1/src",
-	  	mf = { "tolua5lib", "tolua5" },
+	  	mf = { "tolua5lib LUA51=../../lua5.1", "tolua5 LUA51=../../lua5.1" },
 	  },
 	  dev_files = {
 	  	["../bin/${TEC_UNAME}/tolua5.1"] = "bin/${TEC_UNAME}",
