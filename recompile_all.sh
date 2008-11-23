@@ -56,5 +56,5 @@ done
 # creating the tarballs
 for tec_uname in `cat $logfile`
 do 
-	ssh Linux26g4 "lua5.1 tools/makepack.lua --profile=admin --arch=$tec_uname"
+	ssh Linux26g4 "cd $TOOLSDIR; ./makepack.lua --profile=admin --arch=$tec_uname"
 done
