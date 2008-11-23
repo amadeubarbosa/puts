@@ -96,7 +96,7 @@ function close_log()
 end
 
 -- Parsing arguments and returns a 'table[option]=value'
-function parse_args(arg, usage_msg)
+function parse_args(arg, usage_msg, allowempty)
 	assert(type(arg)=="table","ERROR: Missing arguments! This program should be loaded from console.")
 	local arguments = {}
 	local patt="%-?%-?(%w+)(=?)(.*)"
@@ -106,7 +106,7 @@ function parse_args(arg, usage_msg)
  Valid OPTIONS:
 ]] ..usage_msg
 
-	if not (arg[1]) then print(usage_msg) ; os.exit(1) end
+	if not (arg[1]) and not allowempty then print(usage_msg) ; os.exit(1) end
 
 	for i,param in ipairs(arg) do
 		local opt,_,value = param:match(patt)

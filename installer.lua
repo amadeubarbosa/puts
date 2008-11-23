@@ -177,14 +177,22 @@ if arguments.package then
 		extract_cmd = extract_cmd .. "tar -C ".. TMPDIR .." -x metadata.tar.gz && "
 		extract_cmd = extract_cmd .. "gzip -c -d ".. TMPDIR .."/metadata.tar.gz |"
 		extract_cmd = extract_cmd .. "tar -C ".. TMPDIR .." -x"
-		assert(os.execute(extract_cmd) == 0, "ERROR: '".. arguments.package ..
-					 "' is not a valid package! Please contact the administrator!")
+		assert(os.execute(extract_cmd) == 0, "ERROR: '".. arguments.package .."'"..
+					 " is not a valid package! Please contact the administrator!")
 
 		-- Unpacking the openbus-<<release>>_plat.tar.gz package
 		-- Grant to user's configure_action functions that could operate over an
 		-- instalation tree and at the end all files will be copied to real path
 		assert(os.execute("gzip -c -d "..arguments.package.." |tar -C ".. TMPDIR .." -x") == 0)
 		print(INSTALL, "Unpack DONE.")
+
+		-- Verifying the openbus libraries consistency for this system
+		print(INSTALL, "Searching missing dependencies...")
+		local libchecker = require "tools.check-lib-deps"
+		local ok, msg = libchecker:start(TMPDIR)
+		if not ok then error(msg.."\n '"..arguments.package.."'"..
+		               " is not a valid package! Please contact the administrator!")
+		else print(INSTALL,msg) end
 
 		print(CONFIG, "Configuring the package based on package metadata")
 		-- Configure main step, using all .template of this package metadata
