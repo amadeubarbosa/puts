@@ -5,6 +5,13 @@ local print,io  = print,io
 
 module("platforms")
 
+-- PROBLEMA: como identificar corretamente quais diretórios padrões são usados
+-- pelo link editor em tempo de carga? se a LD_LBIRARY_PATH estiver vazia
+-- esses diretórios padrões serão usados na busca por símbolos, mas aí nosso
+-- search_ldlibpath não saberá identificar que não é uma falta de lib!
+-- REFLEXAO: nossa intenção com search_ldlibpath é reproduzir o mecanismo por
+-- plataforma de busca de bibliotecas dependentes! precisamos mesmo?
+
 platforms = {
 	dylibext = "so",
 	cmd = { install = "cp -Rf ", make = "make ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls " },
@@ -22,9 +29,11 @@ platforms = {
 		if ld_var then dirs = ld_var .. ":" .. dirs end
 		local realpath = false
 		for _,dir in ipairs({dirs:split("[^:]+")})
-		do 
-			realpath = self.exec("find ".. dir .." -name ".. file)
-			if realpath == "" then realpath = false else break end
+		do
+			if io.open(dir .."/"..file, "r") then
+				realpath = dir .."/"..file
+				break
+			end
 		end
 		return realpath
 	end,
@@ -40,7 +49,7 @@ platforms.Linux = {
 		if dir and not dir:find(":$") then dir = dir:gsub("$",":")
 		                              else dir = "" end
 		local libpath = dir.."/lib:/usr/lib:/usr/local/lib:/lib32:/lib64:/usr/lib32:/usr/lib64"
-		return platforms:search_ldlibpath(file,libpath)
+		return platforms.search_ldlibpath(self,file,libpath)
 	end,
 	-- sample ldd output on Linux:
 	-- 	linux-gate.so.1 =>  (0xffffe000)
@@ -80,7 +89,7 @@ platforms.SunOS = {
 		if dir and not dir:find(":$") then dir = dir:gsub("$",":")
 		                              else dir = "" end
 		local libpath = dir.."/lib:/usr/lib:/usr/sfw/lib:/usr/local/lib"
-		return platforms:search_ldlibpath(file,libpath) 
+		return platforms.search_ldlibpath(self,file,libpath) 
 	end,
 	-- sample ldd output on Solaris:
 	--	libcrypto.so.0.9.9 =>    (file not found)
@@ -102,7 +111,7 @@ platforms.IRIX = {
 		if dir and not dir:find(":$") then dir = dir:gsub("$",":")
 		                              else dir = "" end
 		local libpath = dir.."/usr/lib:/usr/lib32:/usr/lib64:/usr/freeware/lib32"
-		return platforms:search_ldlibpath(file,libpath)
+		return platforms.search_ldlibpath(self,file,libpath)
 	end,
 	missing_libraries = function(self,file)
 		local str = self.exec("elfdump -Dl ".. file)
@@ -134,7 +143,7 @@ platforms.Darwin = {
 		if dir and not dir:find(":$") then dir = dir:gsub("$",":")
 		                              else dir = "" end
 		local libpath = dir.."/usr/lib"
-		return platforms:search_ldlibpath(file,libpath,"DYLD_LIBRARY_PATH")
+		return platforms.search_ldlibpath(self,file,libpath,"DYLD_LIBRARY_PATH")
 	end,
 	missing_libraries = function(self,file)
 		local str = self.exec("otool -L ".. file)

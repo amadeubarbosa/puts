@@ -173,17 +173,19 @@ if arguments.package then
 		
 		-- Trying extract the metadata.tar.gz from package
 		print(INSTALL, "Extracting metadata.")
-		extract_cmd = "gzip -c -d "..arguments.package.." | "
-		extract_cmd = extract_cmd .. "tar -C ".. TMPDIR .." -x metadata.tar.gz && "
-		extract_cmd = extract_cmd .. "gzip -c -d ".. TMPDIR .."/metadata.tar.gz |"
-		extract_cmd = extract_cmd .. "tar -C ".. TMPDIR .." -x"
+		extract_cmd = myplat.cmd.install..arguments.package.." ".. TMPDIR .."/tempinstall.tar.gz;"
+		extract_cmd = extract_cmd .. " cd "..TMPDIR.." ; gzip -c -d tempinstall.tar.gz | "
+		extract_cmd = extract_cmd .. "tar -xf - metadata.tar.gz && "
+		extract_cmd = extract_cmd .. "gzip -c -d metadata.tar.gz |"
+		extract_cmd = extract_cmd .. "tar -xf -"
 		assert(os.execute(extract_cmd) == 0, "ERROR: '".. arguments.package .."'"..
 					 " is not a valid package! Please contact the administrator!")
 
 		-- Unpacking the openbus-<<release>>_plat.tar.gz package
 		-- Grant to user's configure_action functions that could operate over an
 		-- instalation tree and at the end all files will be copied to real path
-		assert(os.execute("gzip -c -d "..arguments.package.." |tar -C ".. TMPDIR .." -x") == 0)
+		assert(os.execute("cd "..TMPDIR.."; gzip -c -d tempinstall.tar.gz|tar -xf -") == 0)
+		assert(os.remove(TMPDIR.."/tempinstall.tar.gz"))
 		print(INSTALL, "Unpack DONE.")
 
 		-- Verifying the openbus libraries consistency for this system
@@ -191,7 +193,7 @@ if arguments.package then
 		local libchecker = require "tools.check-lib-deps"
 		local ok, msg = libchecker:start(TMPDIR)
 		if not ok then error(msg.."\n '"..arguments.package.."'"..
-		               " is not a valid package! Please contact the administrator!")
+		               " has missing dependencies! Please contact the administrator!")
 		else print(INSTALL,msg) end
 
 		print(CONFIG, "Configuring the package based on package metadata")

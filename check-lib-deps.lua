@@ -16,7 +16,9 @@ local checker = {}
 -- Checks libraries dependencies in an OpenBus installation
 function checker:libraries_deps(openbus_home)
 	assert(type(openbus_home) == "string", "ERROR: Check libraries function receives a nil parameter.")
-
+	local myplat = platforms[TEC_SYSNAME]
+	assert(type(myplat.dylibext) == "string", "ERROR: Missing dynamic libraries extension information on 'platforms'.")
+	
 	local function rollback()
 		-- Recovering important variables to LuaVM
 		package.path = package_path
@@ -24,34 +26,33 @@ function checker:libraries_deps(openbus_home)
 	end
 	
 	local msg = "[ checker:libraries_deps ] "
-	local libpath = openbus_home.."/libpath/"..TEC_UNAME
-
-	local myplat = platforms[TEC_SYSNAME]
-	assert(type(myplat.dylibext) == "string", "ERROR: Missing dynamic libraries extension information on 'platforms'.")
-
+	local check_paths = { 
+		openbus_home.."/libpath/"..TEC_UNAME,
+		openbus_home.."/bin/"..TEC_UNAME,
+		openbus_home.."/core/bin/"..TEC_UNAME,
+	}
+	
 	print(msg.."assuming that libraries has '"..myplat.dylibext.."' extension.")
 	print(msg.."assuming OpenBus installation: "..openbus_home)
-	print(msg.."assuming additional path for libs: "..libpath)
+	print(msg.."assuming additional path for libs: "..check_paths[1])
 	package.cpath = package.cpath .. ";"..
 		-- posix module uses an unusual lua_open name!
-		libpath .."/libl?."..myplat.dylibext..";"..
+		check_paths[1] .."/libl?."..myplat.dylibext..";"..
 		-- others openbus libs uses lib<name>.<dylibext>
-		libpath .."/lib?."..myplat.dylibext..";"
-
-	-- trying load the posix module
-	local posix = require "posix"
+		check_paths[1] .."/lib?."..myplat.dylibext..";"
 
 	local misses = {}
-	local libpath_files = posix.dir(libpath)
-	if not libpath_files then
-		rollback()
-		return nil, {}, "ERROR: Invalid OpenBus path for your platform."
-	end
-	-- testing all dynamic library files
-	for _,file in ipairs(libpath_files) do
-		local fullname = libpath.."/"..file
-		if fullname:find("."..myplat.dylibext) then
+	for _, path in ipairs(check_paths) do
+		local files = {myplat.exec(myplat.cmd.ls..path):split("[^%s]+")}
+		if #files == 0 then
+			rollback()
+			return nil, {}, "ERROR: Invalid OpenBus path for your platform."
+		end
+		-- testing all dynamic library files
+		for _,file in ipairs(files) do
+			local fullname = path.."/"..file
 			--print("DEBUG: looking for "..file.." dynamic dependencies")
+			-- returns a table containing the misses
 			local miss = myplat:missing_libraries(fullname)
 			-- parse plat format to represent the unknown symbols
 			-- good for more information about the miss library
@@ -61,10 +62,24 @@ function checker:libraries_deps(openbus_home)
 			-- print(s)
 
 			if miss then
-				-- second check: trying use openbus libpath (that can being installed!!)
-				local willbefine = myplat:search_ldlibpath(file,libpath)
-				if not willbefine then
-					table.insert(misses,{name = file, miss = miss})
+				-- maybe the openbus package will provide the miss libraries
+				-- if not then we will report a system_misses list!
+				local system_misses = {name = file, miss = {}}
+				for i,missfile in ipairs(miss) do
+					-- second check: trying use openbus libpath (that can being installed!!)
+					local willbefine = io.open(check_paths[1].."/"..missfile, "r")
+					if not willbefine then
+						if not system_misses.miss[missfile] then
+							system_misses.miss[missfile] = true
+							system_misses.miss[#system_misses.miss+1] = missfile
+						end
+					else
+						willbefine:close()
+					end
+				end
+				-- we actually don't known these libraries
+				if #system_misses.miss > 0 then
+					table.insert(misses,system_misses)
 				end
 			end
 		end
@@ -72,8 +87,8 @@ function checker:libraries_deps(openbus_home)
 
 	-- return nil if we got misses
 	if #misses > 0 then
-		return nil, misses, "ERROR: Check if your system variable for dynamic "..
-		                    "libraries is right."
+		return nil, misses, "ERROR: Check your system variable that contains dynamic "..
+		                    "libraries paths."
 	else
 		print(msg.."done!")
 		return true
@@ -89,8 +104,8 @@ function checker:start(openbus_home)
 	if not ok then
 		for i,t in ipairs(misses) do
 			if #t.miss > 0 then
-				print("   ERROR: missing for ",t.name)
-				table.foreach(t.miss,print)
+				print("   ERROR: "..t.name.." depends on:")
+				for _,libname in ipairs(t.miss) do print(libname) end
 			end
 		 end
 		return nil, errmsg
