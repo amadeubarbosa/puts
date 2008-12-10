@@ -33,6 +33,14 @@ platforms = {
 			if io.open(dir .."/"..file, "r") then
 				realpath = dir .."/"..file
 				break
+			else
+				-- if file is a regular expression we must check filenames on dir 
+				realpath = self.exec("ls ".. dir .."/".. file)
+				if realpath == "" then 
+					realpath = false 
+				else 
+					break 
+				end
 			end
 		end
 		return realpath

@@ -44,7 +44,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/lib/lposix/src",
-	  	mf = { "config", },
+	  	mf = { "config LUA51=../../lua5.1", },
 	  },
 	  install_files = {
 	  	["../lib/${TEC_UNAME}/liblposix.so"] = "libpath/${TEC_UNAME}",
@@ -58,7 +58,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/lib/luasocket2/src",
-	  	mf = { "config", },
+	  	mf = { "config LUA51=../../lua5.1", },
 	  },
 	  install_files = {
 	  	["../lib/${TEC_UNAME}/libluasocket.so"] = "libpath/${TEC_UNAME}",
@@ -72,7 +72,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/lib/oil04/src",
-	  	mf = { "oilall", },
+	  	mf = { "oilall LUA51=../../lua5.1", },
 	  },
 	  install_files = {
 	  	["../lib/${TEC_UNAME}/liboilall.so"] = "libpath/${TEC_UNAME}",
@@ -86,7 +86,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/lib/luuid/src",
-	  	mf = { "config", },
+	  	mf = { "config LUA51=../../lua5.1", },
 	  },
 	  install_files = {
 	  	["../lib/${TEC_UNAME}/libluuid.so"] = "libpath/${TEC_UNAME}",
@@ -100,7 +100,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/lib/lualdap-1.0.1/src",
-	  	mf = { "config", },
+	  	mf = { "config LUA51=../../lua5.1", },
 	  },
 	  install_files = {
 	  	["../lib/${TEC_UNAME}/liblualdap.so"] = "libpath/${TEC_UNAME}",
@@ -124,7 +124,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/lib/scs/src",
-	  	mf = { "oil", },
+	  	mf = { "oil LUA51="..PRODAPP.."/lib/lua5.1", },
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsoil.so"] = "libpath/${TEC_UNAME}",
@@ -151,7 +151,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/lib/scs/src",
-	  	mf = { "scsall", },
+	  	mf = { "scsall LUA51="..PRODAPP.."/lib/lua5.1", },
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsall.so"] = "libpath/${TEC_UNAME}",
@@ -167,7 +167,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/lib/ftc/src",
-	  	mf = { "config", "without_oil", },
+	  	mf = { "config LUA51="..PRODAPP.."/lib/lua5.1", "without_oil LUA51="..PRODAPP.."/lib/lua5.1", },
 	  },
 	  install_files = {
 	  	["../lib/${TEC_UNAME}/libftc*.so"] = "libpath/${TEC_UNAME}",
@@ -181,7 +181,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/lib/lce/src",
-	  	mf = { "config", },
+	  	mf = { "config LUA51="..PRODAPP.."/lib/lua5.1", },
 	  },
 	  install_files = {
 	  	["../lib/${TEC_UNAME}/liblce*.so"] = "libpath/${TEC_UNAME}",
@@ -195,7 +195,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/core/services",
-	  	mf = { "config", },
+	  	mf = { "config LUA51="..PRODAPP.."/lib/lua5.1", },
 	  	--env LFLAGS="-undefined dynamic_lookup"
 	  },
 	  install_files = {
@@ -223,7 +223,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/core/utilities/cppoil",
-	  	mf = { "config", },
+	  	mf = { "config LUA51="..PRODAPP.."/lib/lua5.1", },
 	  },
 	  dev_files = {
 			["lib/${TEC_UNAME}/libopenbus*.*"] = "core/utilities/cppoil/lib/${TEC_UNAME}",
