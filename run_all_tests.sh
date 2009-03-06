@@ -10,7 +10,7 @@ function is_dir {
 	return 0
 }
 function die {
-	echo $@
+	echo -e $@
 	exit 1
 }
 
@@ -22,8 +22,8 @@ then
 	export OPENBUS_HOME=$1
 	## it'll be used just on launching of unit tests
 	export OPENBUS_HOME_DEVEL=$2
-	echo "INFO: We will run basic services from $OPENBUS_HOME"
-	echo "INFO: and the test suite will run from $OPENBUS_HOME_DEVEL \n"
+	echo -e "INFO: We will run basic services from $OPENBUS_HOME"
+	echo -e "INFO: and the test suite will run from $OPENBUS_HOME_DEVEL \n"
 else
 	if [ "$OPENBUS_HOME" == "" ] || [ "$OPENBUS_HOME_DEVEL" == "" ]
 	then
@@ -93,6 +93,6 @@ done
 echo " >>>>>>>>>>>> Waiting 10s for kill basic services... <<<<<<<<<<<<<< "
 sleep 10
 kill -9 $ACS_PID $RS_PID $SS_PID
-killall -9 servicelauncher
+pkill -9 servicelauncher
 
 cd -

@@ -7,9 +7,17 @@ luuid-dev
 lualdap-dev
 oilall-dev
 scsall-dev
+scsoil-dev
+scsorbix-dev
 lce-dev
+ftc-dev
 openbus-core
 openbus-core-conf
 openbus-core-dev
+openbus-demo-lua-dev
+openbus-cppoil-dev
+openbus-demo-cppoil-dev
+openbus-orbix-dev
+openbus-demo-orbix-dev
 tolua5.1-dev
 latt-dev

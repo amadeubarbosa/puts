@@ -120,22 +120,6 @@ packages = {
 	  	["lua/*"] = "libpath/lua/5.1"
 	  },
 	},
-	{ name = "scsoil",
-	  build = {
-	  	type = "tecmake",
-	  	src = SVNDIR .."/lib/scs/src",
-	  	mf = { "oil LUA51="..PRODAPP.."/lib/lua5.1", },
-	  },
-	  install_files = {
-			["../lib/${TEC_UNAME}/libscsoil.so"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
-	  },
-	  dev_files = {
-			["../lib/${TEC_UNAME}/libscsoil.*"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
-			["../include/scs"] = "incpath/scs",
-	  },
-	},
 	-- TIP: precompiler.lua precisa do loop!
 	{ name = "loop",
 	  build = {
@@ -163,6 +147,56 @@ packages = {
 			["../include/scsall.h"] = "incpath/scs",
 	  },
 	},
+	{ name = "scsoil",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/lib/scs/src",
+	  	mf = { "oil LUA51="..PRODAPP.."/lib/lua5.1", },
+	  },
+	  install_files = {
+			["../lib/${TEC_UNAME}/libscsoil.so"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
+	  },
+	  dev_files = {
+			["../lib/${TEC_UNAME}/libscsoil.*"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
+			["../include/scs"] = "incpath/scs",
+	  },
+	},
+	{ name = "scsorbix",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/lib/scs/src",
+	  	mf = { "orbix" },
+	  },
+	  install_files = {
+			["../lib/${TEC_UNAME}/libscsorbix.so"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
+	  },
+	  dev_files = {
+			["../lib/${TEC_UNAME}/libscsorbix.*"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
+			["../include/scs"] = "incpath/scs",
+	  },
+	},
+--[[
+	{ name = "scsmico",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/lib/scs/src",
+	  	mf = { "mico" },
+	  },
+	  install_files = {
+			["../lib/${TEC_UNAME}/libscsmico.so"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
+	  },
+	  dev_files = {
+			["../lib/${TEC_UNAME}/libscsmico.*"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
+			["../include/scs"] = "incpath/scs",
+	  },
+	},
+--]]
 	{ name = "ftc",
 	  build = {
 	  	type = "tecmake",
@@ -218,6 +252,19 @@ packages = {
 			["../test/lua"] = "core/test",
 		},
 	},
+	{ name = "openbus-demo-lua",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/demo/hello/lua",
+	  	mf = { },
+	  },
+	  dev_files = {
+			["consumer.lua"] = "demo/hello/lua",
+			["publisher.lua"] = "demo/hello/lua",
+			["run"] = "demo/hello/lua",
+			["../idl"] = "demo/hello",
+	  },
+	},
 	-- TIP: precompiler.lua precisa do loop!
 	{ name = "openbus-cppoil",
 	  build = {
@@ -233,6 +280,58 @@ packages = {
 			["stubs"] = "core/utilities/cppoil",     --include
 			["openbus.lua"] = "core/utilities/cppoil",
 			["../../test/cppoil"] = "core/test",
+	  },
+	},
+	{ name = "openbus-demo-cppoil",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/demo/hello/cppoil",
+	  	mf = { "client LUA51="..PRODAPP.."/lib/lua5.1", "server LUA51="..PRODAPP.."/lib/lua5.1"},
+	  },
+	  dev_files = {
+			["bin/${TEC_UNAME}/*"] = "demo/hello/cppoil/bin/${TEC_UNAME}",
+			["hello.cpp"] = "demo/hello/cppoil",
+			["hello.hpp"] = "demo/hello/cppoil",
+			["helloStub.h"] = "demo/hello/cppoil",
+			["helloStub.cpp"] = "demo/hello/cppoil",
+			["client.cpp"] = "demo/hello/cppoil",
+			["server.cpp"] = "demo/hello/cppoil",
+			["*.mak"] = "demo/hello/cppoil",
+			["../idl"] = "demo/hello",
+	  },
+	},
+	{ name = "openbus-orbix",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/core/utilities/orbix",
+	  	mf = { "config genstubs", "config" },
+	  },
+	  dev_files = {
+			["lib/${TEC_UNAME}/libopenbus*.*"] = "core/utilities/orbix/lib/${TEC_UNAME}",
+			["openbus.h"] = "core/utilities/orbix", --include
+			["openbus"] = "core/utilities/orbix",    --include
+			["services"] = "core/utilities/orbix",    --include
+			-- ["stubs"] = "core/utilities/orbix",     --include
+			["../../test/orbix"] = "core/test",
+	  },
+	},
+	{ name = "openbus-demo-orbix",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/demo/hello/orbix63",
+	  	mf = { "server genstubs", "client", "server" },
+	  },
+	  dev_files = {
+			["bin/${TEC_UNAME}/*"] = "demo/hello/orbix63/bin/${TEC_UNAME}",
+			["hello.idl"] = "demo/hello/orbix63",
+			["client.cpp"] = "demo/hello/orbix63",
+			["server.cpp"] = "demo/hello/orbix63",
+			["run*"] = "demo/hello/orbix63",
+			["*.mak"] = "demo/hello/orbix63",
+			["*config"] = "demo/hello/orbix63",
+			["run*"] = "demo/hello/orbix63",
+			["client"] = "demo/hello/orbix63",
+			["server"] = "demo/hello/orbix63",
 	  },
 	},
 --	{ name = "ldap-Linux26g4",

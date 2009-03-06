@@ -10,7 +10,7 @@ function is_dir {
 	return 0
 }
 function die {
-	echo $@
+	echo -e $@
 	exit 1
 }
 
@@ -47,7 +47,7 @@ rm -f $logfile
 touch $logfile
 
 # compiling for each platform
-for host_build in Linux24g3 Linux24g3_64 Linux26 Linux26_64 Linux26g4 Linux26g4_64 Linux26_ia64 SunOS58 SunOS510x86 murubira
+for host_build in Linux24g3 Linux24g3_64 Linux26 Linux26_64 Linux26g4 Linux26g4_64 Linux26_ia64 SunOS510 SunOS510x86 murubira
 do
 	# registering on work/arch-built.$timestamp the platforms that compiles fine
 	ssh $host_build $compile_cmd && ssh $host_build 'echo ${TEC_UNAME}' >> $logfile

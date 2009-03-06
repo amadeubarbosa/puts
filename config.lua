@@ -42,7 +42,8 @@ SUPPORTED_ARCH = {
 	"Linux26g4", 
 	"Linux26g4_64", 
 	"Linux26_ia64", 
-	"SunOS58", 
+	--"SunOS58",
+	"SunOS510",
 	"SunOS510x86", 
 	"Darwin811x86",
 }
