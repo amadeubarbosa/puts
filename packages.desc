@@ -163,7 +163,7 @@ packages = {
 			["../include/scs"] = "incpath/scs",
 	  },
 	},
-	{ name = "scsorbix",
+--[[	{ name = "scsorbix",
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/lib/scs/src",
@@ -179,6 +179,7 @@ packages = {
 			["../include/scs"] = "incpath/scs",
 	  },
 	},
+--]]
 --[[
 	{ name = "scsmico",
 	  build = {
