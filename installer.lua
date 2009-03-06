@@ -255,7 +255,7 @@ print("\t ksh/bash shell : export OPENBUS_HOME=\""..config.installPath.."\"")
 --~ print("\t windows shell  : set OPENBUS_HOME=\""..config.installPath.."\"")
 
 -- Persisting the answers to future interactions
-util.serialize_table("/tmp/lastest.answers",config)
-print(INSTALL,"Saving your answers at '/tmp/lastest.answers' please backup it if you need.")
+util.serialize_table("/tmp/latest.answers",config)
+print(INSTALL,"Saving your answers at '/tmp/latest.answers' please backup it if you need.")
 
 print(INSTALL,"Installation DONE!")
