@@ -167,7 +167,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/lib/scs/src",
-	  	mf = { "orbix" },
+	  	mf = { "orbix genstubs", "orbix" },
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsorbix.so"] = "libpath/${TEC_UNAME}",
@@ -312,7 +312,7 @@ packages = {
 			["openbus.h"] = "core/utilities/orbix", --include
 			["openbus"] = "core/utilities/orbix",    --include
 			["services"] = "core/utilities/orbix",    --include
-			-- ["stubs"] = "core/utilities/orbix",     --include
+			["stubs"] = "core/utilities/orbix",     --include
 			["../../test/orbix"] = "core/test",
 	  },
 	},

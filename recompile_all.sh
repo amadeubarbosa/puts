@@ -57,4 +57,7 @@ done
 for tec_uname in `cat $logfile`
 do 
 	ssh Linux26g4 "cd $TOOLSDIR; ./makepack.lua --profile=admin --arch=$tec_uname"
+	ssh Linux26g4 "cd $TOOLSDIR; ./makepack.lua --profile=fulladmin --arch=$tec_uname"
+	ssh Linux26g4 "cd $TOOLSDIR; ./makepack.lua --profile=devel --arch=$tec_uname"
+	ssh Linux26g4 "cd $TOOLSDIR; ./makepack.lua --profile=fulldevel --arch=$tec_uname"
 done
