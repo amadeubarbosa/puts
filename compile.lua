@@ -59,10 +59,7 @@ local arguments = util.parse_args(arg,[[
 if arguments.select then
 	local value = arguments.select
 	-- selecting packages to build with multiple '--select' support
-	arguments.select = {}
-	for _,pkg in ipairs({value:split("[^%s]+")}) do
-		arguments.select[pkg] = pkg
-	end
+	arguments.select = {value:split("[^%s]+")}
 end
 
 print("\nINFO: We are going to install full openbus dependencies on \
@@ -89,7 +86,7 @@ rehashByName(packages)
 local newbasesoft = {}
 local newpackages = {}
 if arguments["select"] then
-	for pkg,_ in pairs(arguments["select"]) do
+	for _,pkg in ipairs(arguments["select"]) do
 		-- cloning the references in new tables
 		if basesoft[pkg] then
 			table.insert(newbasesoft,basesoft[pkg])
