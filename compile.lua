@@ -54,7 +54,7 @@ local arguments = util.parse_args(arg,[[
 	                           already = to debug or devel purpose)
 	--list                   : list all package names from description files. When
 	                           '--select' is used, it'll confirm the selection.
-	--select="pkg1 pkg2 ..." : choose which packages to compile and install    ]])
+	--select="pkg1 pkg2 ..." : choose which packages to compile and install    ]],true)
 
 if arguments.select then
 	local value = arguments.select

@@ -154,8 +154,8 @@ basesoft = {
 			[TMPDIR .."/include/sasl"] = "incpath/cyrus-sasl2-2.1.22.dfsg1",
 		},
 	},
-	{ name = "openldap-2.1.30",
-		source = "http://www.tecgraf.puc-rio.br/~amadeu/tarballs/openldap-2.1.30.tar.gz",
+	{ name = "openldap-2.4.11",
+		source = "http://www.tecgraf.puc-rio.br/~amadeu/tarballs/openldap-2.4.11.tar.gz",
 		build = {
 			type = "autotools",
 			test_libs = {"libldap*.*"},
@@ -165,7 +165,7 @@ basesoft = {
 			},
 			Darwin = "env LIBS=-lresolv ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
 			         " && make depend && make && make install",
-			Linux =  "./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+			Linux =  "env CC=gcc CPPFLAGS='-D_GNU_SOURCE' ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
 			         " && make depend && make && make install",
 			SunOS =  "./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
 			         " && make depend && make && make install",
@@ -190,8 +190,8 @@ basesoft = {
 			[TMPDIR .."/lib/liblber*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
 			[TMPDIR .."/lib/liblber*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
 			[TMPDIR .."/lib/liblber*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-			[TMPDIR .."/include/ldap*"] = "incpath/openldap-2.1.30",
-			[TMPDIR .."/include/lber*"] = "incpath/openldap-2.1.30",
+			[TMPDIR .."/include/ldap*"] = "incpath/openldap-2.4.11",
+			[TMPDIR .."/include/lber*"] = "incpath/openldap-2.4.11",
 		},
 	},
 }

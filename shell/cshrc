@@ -10,11 +10,37 @@ setenv OPENSSL_HOME "${OPENBUS_HOME}/openssl"
 
 setenv PATH "${OPENBUS_HOME}/bin/${TEC_UNAME}:${OPENBUS_HOME}/bin:${PATH}"
 
-setenv CPATH "${OPENBUS_HOME}/incpath/cxxtest:${OPENBUS_HOME}/incpath/e2fsprogs-1.40.8:${OPENBUS_HOME}/incpath/db-4.6.21:${OPENBUS_HOME}/incpath/openldap-2.1.30:${OPENBUS_HOME}/incpath/openssl-0.9.9:${CPATH}:${OPENBUS_HOME}/incpath/cyrus-sasl2-2.1.22.dfsg1"
+set OPENBUS_CPATH="${OPENBUS_HOME}/incpath/cxxtest:${OPENBUS_HOME}/incpath/e2fsprogs-1.40.8:${OPENBUS_HOME}/incpath/db-4.6.21:${OPENBUS_HOME}/incpath/openldap-2.4.11:${OPENBUS_HOME}/incpath/openssl-0.9.9:${OPENBUS_HOME}/incpath/cyrus-sasl2-2.1.22.dfsg1"
+if ($?CPATH == 0) then
+  setenv CPATH "${OPENBUS_CPATH}"
+else
+  setenv CPATH "${OPENBUS_CPATH}:${CPATH}"
+endif
 
-setenv LIBRARY_PATH "${OPENBUS_HOME}/libpath/${TEC_UNAME}:${LIBRARY_PATH}"
-setenv LD_LIBRARY_PATH "${OPENBUS_HOME}/libpath/${TEC_UNAME}:${LD_LIBRARY_PATH}"
-setenv DYLD_LIBRARY_PATH "${OPENBUS_HOME}/libpath/${TEC_UNAME}:${DYLD_LIBRARY_PATH}"
+set OPENBUS_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+if ($?LIBRARY_PATH == 0) then
+  setenv LIBRARY_PATH "${OPENBUS_LIBRARY_PATH}"
+else
+  setenv LIBRARY_PATH "${OPENBUS_LIBRARY_PATH}:${LIBRARY_PATH}"
+endif
+
+set OPENBUS_LD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+if ($?LD_LIBRARY_PATH == 0) then
+  setenv LD_LIBRARY_PATH "${OPENBUS_LD_LIBRARY_PATH}"
+else
+  setenv LD_LIBRARY_PATH "${OPENBUS_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH}"
+endif
+
+if ($?TEC_SYSNAME == 1) then
+  if ($TEC_SYSNAME == 'Darwin') then
+    set OPENBUS_DYLD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+    if ($?DYLD_LIBRARY_PATH == 0) then
+      setenv DYLD_LIBRARY_PATH "${OPENBUS_DYLD_LIBRARY_PATH}"
+    else
+      setenv DYLD_LIBRARY_PATH "${OPENBUS_DYLD_LIBRARY_PATH}:${DYLD_LIBRARY_PATH}"
+    endif
+  endif
+endif
 
 setenv LUA_PATH "${OPENBUS_HOME}/?.lua;${OPENBUS_HOME}/core/utilities/lua/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?/init.lua;./?.lua"
 setenv LUA_CPATH "${OPENBUS_HOME}/libpath/${TEC_UNAME}/lib?.so;./?.so"

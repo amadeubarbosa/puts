@@ -10,11 +10,35 @@ export OPENSSL_HOME="${OPENBUS_HOME}/openssl"
 
 export PATH="${OPENBUS_HOME}/bin/${TEC_UNAME}:${OPENBUS_HOME}/bin:${PATH}"
 
-export CPATH="${OPENBUS_HOME}/incpath/cxxtest:${OPENBUS_HOME}/incpath/e2fsprogs-1.40.8:${OPENBUS_HOME}/incpath/db-4.6.21:${OPENBUS_HOME}/incpath/openldap-2.1.30:${OPENBUS_HOME}/incpath/openssl-0.9.9:${CPATH}:${OPENBUS_HOME}/incpath/cyrus-sasl2-2.1.22.dfsg1"
+OPENBUS_CPATH="${OPENBUS_HOME}/incpath/cxxtest:${OPENBUS_HOME}/incpath/e2fsprogs-1.40.8:${OPENBUS_HOME}/incpath/db-4.6.21:${OPENBUS_HOME}/incpath/openldap-2.4.11:${OPENBUS_HOME}/incpath/openssl-0.9.9:${OPENBUS_HOME}/incpath/cyrus-sasl2-2.1.22.dfsg1"
+if [ -z ${CPATH} ]; then
+  export CPATH="${OPENBUS_CPATH}"
+else
+  export CPATH="${OPENBUS_CPATH}:${CPATH}"
+fi
 
-export LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}:${LIBRARY_PATH}"
-export LD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}:${LD_LIBRARY_PATH}"
-export DYLD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}:${DYLD_LIBRARY_PATH}"
+OPENBUS_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+if [ -z ${LIBRARY_PATH} ]; then
+  export LIBRARY_PATH="${OPENBUS_LIBRARY_PATH}"
+else
+  export LIBRARY_PATH="${OPENBUS_LIBRARY_PATH}:${LIBRARY_PATH}"
+fi
+
+OPENBUS_LD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+if [ -z ${LD_LIBRARY_PATH} ]; then
+  export LD_LIBRARY_PATH="${OPENBUS_LD_LIBRARY_PATH}"
+else
+  export LD_LIBRARY_PATH="${OPENBUS_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH}"
+fi
+
+if [ ${TEC_SYSNAME} == 'Darwin' ]; then
+  OPENBUS_DYLD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+  if [ -z ${DYLD_LIBRARY_PATH} ]; then
+    export DYLD_LIBRARY_PATH="${OPENBUS_DYLD_LIBRARY_PATH}"
+  else
+    export DYLD_LIBRARY_PATH="${OPENBUS_DYLD_LIBRARY_PATH}:${DYLD_LIBRARY_PATH}"
+  fi
+fi
 
 export LUA_PATH="${OPENBUS_HOME}/?.lua;${OPENBUS_HOME}/core/utilities/lua/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?/init.lua;./?.lua"
 export LUA_CPATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}/lib?.so;./?.so"
