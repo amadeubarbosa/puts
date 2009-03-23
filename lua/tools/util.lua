@@ -82,7 +82,7 @@ function fetch_and_unpack(package,from,to)
 	if exists ~= 0 then
 		print(" [info] Downloading "..package)
 		local fetch_cmd = "curl -o ".. package ..".tar.gz ".. from .." || wget ".. from
-		os.execute("cd ".. PRODAPP .."; ".. fetch_cmd)
+		assert(os.execute("cd ".. PRODAPP .."; ".. fetch_cmd) == 0, "ERROR: Unable to download the package '"..package.."' using 'curl' neither 'wget' commands. You must download this package manually from '"..from.."' and extract it in the '"..PRODAPP.."' directory.")
 		local unpack_cmd = "gzip -c -d ".. package ..".tar.gz |tar -x"
 		os.execute("cd ".. PRODAPP .."; ".. unpack_cmd)
 	end
@@ -95,11 +95,11 @@ function close_log()
 	end
 end
 
+patt="%-?%-?(%w+)(=?)(.*)"
 -- Parsing arguments and returns a 'table[option]=value'
 function parse_args(arg, usage_msg, allowempty)
 	assert(type(arg)=="table","ERROR: Missing arguments! This program should be loaded from console.")
 	local arguments = {}
-	local patt="%-?%-?(%w+)(=?)(.*)"
 	-- concatenates with the custom usage_msg
 	usage_msg=[[
  Usage: ]]..arg[0]..[[ OPTIONS

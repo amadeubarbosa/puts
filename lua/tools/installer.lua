@@ -141,6 +141,9 @@ local arguments = util.parse_args(arg,[[
 	If you give '--package' so the '--template' will be discard !
 	The '--template' is useful in manual reconfiguration only !
 
+ 	The prefix '--' is optional in all options.
+	So '--help' or '-help' or yet 'help' all are the same option.
+
  EXAMPLES:
 	]].. arg[0].. [[ --package=myOpenBus.tar.gz --config=myPrevious.answers ]])
 
@@ -156,7 +159,7 @@ local template, config
 if arguments.config then
 	print(CONFIG,"Input configuration file given, checking it for updates!")
 	local dump = assert(io.open(arguments.config,"r"),
-	                    "ERROR: Opening file"..arguments.config):read("*a")
+	                    "ERROR: Opening file '"..arguments.config.."'."):read("*a")
 
 	assert(loadstring("fromconsole = "..dump), "ERROR: Invalid syntax of file")()
 	assert(type(fromconsole) == "table", "ERROR: Configuration should be a table")
@@ -190,7 +193,7 @@ if arguments.package then
 
 		-- Verifying the openbus libraries consistency for this system
 		print(INSTALL, "Searching missing dependencies...")
-		local libchecker = require "tools.check-lib-deps"
+		local libchecker = require "tools.checklibdeps"
 		local ok, msg = libchecker:start(TMPDIR)
 		if not ok then error(msg.."\n '"..arguments.package.."'"..
 		               " has missing dependencies! Please contact the administrator!")

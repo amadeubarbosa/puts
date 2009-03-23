@@ -9,7 +9,7 @@ local string = require "tools.split"
 local platforms = require "tools.platforms"
 local util = require "tools.util"
 
-module("tools.check-lib-deps",package.seeall)
+module("tools.checklibdeps",package.seeall)
 
 local checker = {}
 

@@ -54,7 +54,12 @@ local arguments = util.parse_args(arg,[[
 	                           already = to debug or devel purpose)
 	--list                   : list all package names from description files. When
 	                           '--select' is used, it'll confirm the selection.
-	--select="pkg1 pkg2 ..." : choose which packages to compile and install    ]],true)
+	--select="pkg1 pkg2 ..." : choose which packages to compile and install
+	--nosvn			 : don't try to checkout from svn
+
+ NOTES:
+ 	The prefix '--' is optional in all options.
+	So '--help' or '-help' or yet 'help' all are the same option.]],true)
 
 if arguments.select then
 	local value = arguments.select
@@ -67,8 +72,19 @@ print("\nINFO: We are going to install full openbus dependencies on \
 (for autotools based packages) on ".. TMPDIR .." .\n")
 
 -- Loading basesoft and package descriptions tables
-assert(loadfile(arguments["basesoft"] or DEPLOYDIR .."/basesoft.desc"))()
-assert(loadfile(arguments["packages"] or DEPLOYDIR .."/packages.desc"))()
+local f, err = loadfile(arguments["basesoft"] or DEPLOYDIR .."/basesoft.desc")
+if not f then
+	io.stdout:write("[ ERROR ] "); io.stdout:flush()
+	error("The file '".. (arguments["basesoft"] or DEPLOYDIR.."/basesoft.desc") .. "' cannot be opened!\nTry use the --basesoft option in command line with a valid filename.\n")
+end
+f()
+
+local f, err = loadfile(arguments["packages"] or DEPLOYDIR .."/packages.desc")
+if not f then
+	io.stdout:write("[ ERROR ] "); io.stdout:flush()
+	error("The file '".. (arguments["packages"] or DEPLOYDIR.."/packages.desc") .. "' cannot be opened!\nTry use the --packages option in command line with a valid filename.\n")
+end
+f()
 
 -- Filtering the descriptions tables with '--select' arguments
 -- preparing the tables to provide t[pkg_name] fields
@@ -125,7 +141,9 @@ os.execute(myplat.cmd.mkdir .. INSTALL.BIN)
 os.execute(myplat.cmd.mkdir .. INSTALL.INC)
 os.execute(myplat.cmd.mkdir .. TMPDIR)
 os.execute(myplat.cmd.mkdir .. PKGDIR)
-os.execute(FETCH_CMD)
+if not arguments["nosvn"]  then
+	assert(os.execute(FETCH_CMD) == 0, "ERROR: Unable to update the OpenBUS sources automatically from TecGraf repository. Try use the '--nosvn' option to bypass this check.")
+end
 
 -- Cleaning the temp dir to execute install rules of autotools softwares
 os.execute(myplat.cmd.rm .. TMPDIR .."/*")

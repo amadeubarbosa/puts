@@ -89,7 +89,10 @@ local arguments = util.parse_args(arg,[[
 	--profile=filename       : use the 'filename' as input for profile with the
 	                           list of packages to packaging
 	--arch=tecmake_arch      : specifies the arch based on tecmake way. Use 'all'
-	                           to pack all supported architectures  ]])
+	                           to pack all supported architectures
+ NOTES:
+ 	The prefix '--' is optional in all options.
+	So '--help' or '-help' or yet 'help' all are the same option.]])
 
 -- Overloading the os.execute to dummy verbose
 if arguments["verbose"] or arguments["v"] then
