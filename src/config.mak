@@ -36,9 +36,9 @@ ${PRECMP_DIR}/toolsall.c: ${PRECMP_DIR}/tools.c
 #Descomente a linha abaixo caso deseje ativar o VERBOSE
 #DEFINES=VERBOSE
 
-SRC= ${PRECMP_DIR}/toolsall.c ${PRECMP_DIR}/tools.c lua.c
+SRC= ${PRECMP_DIR}/tools.c ${PRECMP_DIR}/toolsall.c lua.c
 
-INCLUDES= ${PRECMP_DIR}
+INCLUDES= . ${PRECMP_DIR}
 LDIR += ${OPENBUSLIB}
 
 USE_LUA51=YES
