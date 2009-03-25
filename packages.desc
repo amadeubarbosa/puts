@@ -168,41 +168,6 @@ packages = {
 			["../include/scs"] = "incpath/scs",
 	  },
 	},
---[[	{ name = "scsorbix",
-	  build = {
-	  	type = "tecmake",
-	  	src = SVNDIR .."/lib/scs/src",
-	  	mf = { "orbix genstubs", "orbix" },
-	  },
-	  install_files = {
-			["../lib/${TEC_UNAME}/libscsorbix.so"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
-	  },
-	  dev_files = {
-			["../lib/${TEC_UNAME}/libscsorbix.*"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
-			["../include/scs"] = "incpath/scs",
-	  },
-	},
---]]
---[[
-	{ name = "scsmico",
-	  build = {
-	  	type = "tecmake",
-	  	src = SVNDIR .."/lib/scs/src",
-	  	mf = { "mico" },
-	  },
-	  install_files = {
-			["../lib/${TEC_UNAME}/libscsmico.so"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
-	  },
-	  dev_files = {
-			["../lib/${TEC_UNAME}/libscsmico.*"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
-			["../include/scs"] = "incpath/scs",
-	  },
-	},
---]]
 	{ name = "ftc",
 	  build = {
 	  	type = "tecmake",
@@ -271,39 +236,21 @@ packages = {
 			["../idl"] = "demo/hello",
 	  },
 	},
-	-- TIP: precompiler.lua precisa do loop!
-	{ name = "openbus-cppoil",
+	-- Orbix related packages
+	{ name = "scsorbix",
 	  build = {
 	  	type = "tecmake",
-	  	src = SVNDIR .."/core/utilities/cppoil",
-	  	mf = { "config LUA51="..PRODAPP.."/lualibs/lua5.1", },
+	  	src = SVNDIR .."/lib/scs/src",
+	  	mf = { "orbix genstubs", "orbix" },
+	  },
+	  install_files = {
+			["../lib/${TEC_UNAME}/libscsorbix.so"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
 	  },
 	  dev_files = {
-			["lib/${TEC_UNAME}/libopenbus*.*"] = "core/utilities/cppoil/lib/${TEC_UNAME}",
-			["openbus.h"] = "core/utilities/cppoil", --include
-			["common"] = "core/utilities/cppoil",    --include
-			["luaidl"] = "core/utilities/cppoil",    --include
-			["stubs"] = "core/utilities/cppoil",     --include
-			["openbus.lua"] = "core/utilities/cppoil",
-			["../../test/cppoil"] = "core/test",
-	  },
-	},
-	{ name = "openbus-demo-cppoil",
-	  build = {
-	  	type = "tecmake",
-	  	src = SVNDIR .."/demo/hello/cppoil",
-	  	mf = { "client LUA51="..PRODAPP.."/lualibs/lua5.1", "server LUA51="..PRODAPP.."/lualibs/lua5.1"},
-	  },
-	  dev_files = {
-			["bin/${TEC_UNAME}/*"] = "demo/hello/cppoil/bin/${TEC_UNAME}",
-			["hello.cpp"] = "demo/hello/cppoil",
-			["hello.hpp"] = "demo/hello/cppoil",
-			["helloStub.h"] = "demo/hello/cppoil",
-			["helloStub.cpp"] = "demo/hello/cppoil",
-			["client.cpp"] = "demo/hello/cppoil",
-			["server.cpp"] = "demo/hello/cppoil",
-			["*.mak"] = "demo/hello/cppoil",
-			["../idl"] = "demo/hello",
+			["../lib/${TEC_UNAME}/libscsorbix.*"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
+			["../include/scs"] = "incpath/scs",
 	  },
 	},
 	{ name = "openbus-orbix",
@@ -338,6 +285,75 @@ packages = {
 			["run*"] = "demo/hello/orbix63",
 			["client"] = "demo/hello/orbix63",
 			["server"] = "demo/hello/orbix63",
+	  },
+	},
+	-- CPPOiL related packages, it needs of loop to work (precompiler.lua dependency)
+	{ name = "openbus-cppoil",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/core/utilities/cppoil",
+	  	mf = { "config LUA51="..PRODAPP.."/lualibs/lua5.1", },
+	  },
+	  dev_files = {
+			["lib/${TEC_UNAME}/libopenbus*.*"] = "core/utilities/cppoil/lib/${TEC_UNAME}",
+			["openbus.h"] = "core/utilities/cppoil", --include
+			["common"] = "core/utilities/cppoil",    --include
+			["luaidl"] = "core/utilities/cppoil",    --include
+			["stubs"] = "core/utilities/cppoil",     --include
+			["openbus.lua"] = "core/utilities/cppoil",
+			["../../test/cppoil"] = "core/test",
+	  },
+	},
+	{ name = "openbus-demo-cppoil",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/demo/hello/cppoil",
+	  	mf = { "client LUA51="..PRODAPP.."/lualibs/lua5.1", "server LUA51="..PRODAPP.."/lualibs/lua5.1"},
+	  },
+	  dev_files = {
+			["bin/${TEC_UNAME}/*"] = "demo/hello/cppoil/bin/${TEC_UNAME}",
+			["hello.cpp"] = "demo/hello/cppoil",
+			["hello.hpp"] = "demo/hello/cppoil",
+			["helloStub.h"] = "demo/hello/cppoil",
+			["helloStub.cpp"] = "demo/hello/cppoil",
+			["client.cpp"] = "demo/hello/cppoil",
+			["server.cpp"] = "demo/hello/cppoil",
+			["*.mak"] = "demo/hello/cppoil",
+			["../idl"] = "demo/hello",
+	  },
+	},
+	-- Mico related packages 
+--[[
+	{ name = "scsmico",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/lib/scs/src",
+	  	mf = { "mico" },
+	  },
+	  install_files = {
+			["../lib/${TEC_UNAME}/libscsmico.so"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
+	  },
+	  dev_files = {
+			["../lib/${TEC_UNAME}/libscsmico.*"] = "libpath/${TEC_UNAME}",
+			["../idl/*"] = "idlpath",
+			["../include/scs"] = "incpath/scs",
+	  },
+	},
+--]]
+	-- self-packaging the tools as an important bootstrap strategy to deployment!
+	{ name = "tools",
+	  build = {
+		type = "tecmake",
+		src = SVNDIR .."/tools/src",
+	  	mf = { "config LUA51="..PRODAPP.."/lualibs/lua5.1", },
+	  },
+	  install_files = {
+			["../bin/${TEC_UNAME}/*"] = "tools/bin/${TEC_UNAME}",
+			["../*.desc"] = "tools/",
+			["../profiles"] = "tools/",
+			["../shell"] = "tools/",
+			["../templates"] = "tools/",
 	  },
 	},
 --	{ name = "ldap-Linux26g4",
