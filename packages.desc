@@ -165,7 +165,8 @@ packages = {
 	  dev_files = {
 			["../lib/${TEC_UNAME}/libscsoil.*"] = "libpath/${TEC_UNAME}",
 			["../idl/*"] = "idlpath",
-			["../include/scs"] = "incpath/scs",
+			["../include/scs/scs/core/*Oil*"] = "incpath/scs/scs/core/",
+			["../include/scs/scs/core/luaidl"] = "incpath/scs/scs/core/",
 	  },
 	},
 	{ name = "ftc",
@@ -250,7 +251,8 @@ packages = {
 	  dev_files = {
 			["../lib/${TEC_UNAME}/libscsorbix.*"] = "libpath/${TEC_UNAME}",
 			["../idl/*"] = "idlpath",
-			["../include/scs"] = "incpath/scs",
+			["../include/scs/core/*Orbix*"] = "incpath/scs/scs/core/",
+			["../include/scs/core/ComponentBuilder.h"] = "incpath/scs/scs/core/",
 	  },
 	},
 	{ name = "openbus-orbix",
@@ -262,10 +264,28 @@ packages = {
 	  dev_files = {
 			["lib/${TEC_UNAME}/libopenbus*.*"] = "core/utilities/orbix/lib/${TEC_UNAME}",
 			["openbus.h"] = "core/utilities/orbix", --include
-			["openbus"] = "core/utilities/orbix",    --include
-			["services"] = "core/utilities/orbix",    --include
+			["openbus/common/*.h"] = "core/utilities/orbix/openbus/common/",    --include
+			["services/*.h"] = "core/utilities/orbix/services/",    --include
 			["stubs"] = "core/utilities/orbix",     --include
-			["../../test/orbix"] = "core/test",
+			["../../test/orbix/acs/*.cpp"] = "core/test/orbix/acs/",
+			["../../test/orbix/acs/config.mak"] = "core/test/orbix/acs/",
+			["../../test/orbix/rgs/*.cpp"] = "core/test/orbix/rgs/",
+			["../../test/orbix/rgs/config.mak"] = "coore/test/orbix/rgs/",
+			["../../test/orbix/config*"] = "core/test/orbix/",
+			["../../test/orbix/runtests"] = "core/test/orbix/",
+	  },
+	},
+	{ name = "openbus-orbix-test",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/core/test/orbix",
+	  	mf = { "config cxxtest -C acs", "config -C acs", "config cxxtest -C rgs", "config -C rgs" },
+	  },
+	  install_files = {
+			["../../test/orbix/acs/bin/${TEC_UNAME}"] = "core/test/orbix/acs/bin/",
+			["../../test/orbix/rgs/bin/${TEC_UNAME}"] = "core/test/orbix/rgs/bin/",
+			["../../test/orbix/config*"] = "core/test/orbix/",
+			["../../test/orbix/runtests"] = "core/test/orbix/",
 	  },
 	},
 	{ name = "openbus-demo-orbix",
