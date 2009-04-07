@@ -14,7 +14,7 @@ module("platforms")
 
 platforms = {
 	dylibext = "so",
-	cmd = { install = "cp -Rf ", make = "make ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls " },
+	cmd = { install = "cp -rf ", make = "make ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls " },
 	exec = function(cmd)
 		local pipe = io.popen(cmd,"r")
 		local stdout = pipe:read("*a")

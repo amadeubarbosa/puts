@@ -49,9 +49,6 @@ USE_NODEPEND=YES
 LIBS += dl
 
 .PHONY: clean-custom
-clean-custom: clean
+clean-custom-obj:
 	rm -f ${PRECMP_DIR}/*.c
 	rm -f ${PRECMP_DIR}/*.h
-
-.PHONY: rebuild-custom
-rebuild-custom: clean-custom rebuild

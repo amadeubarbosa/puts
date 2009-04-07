@@ -68,8 +68,7 @@ function pack(arch,profile)
 
 	-- Call the 'tar' command
 	local tar_cmd = "cd ".. INSTALL.TOP ..";"
-	tar_cmd = tar_cmd .. "tar --exclude '.svn'"
-	tar_cmd = tar_cmd .. " -cf - "
+	tar_cmd = tar_cmd .. "find . -name .svn -type d |sed \"s#./##\" >/tmp/exclude && tar cfX - /tmp/exclude "
 	tar_cmd = tar_cmd .. tarball_files
 	tar_cmd = tar_cmd .. "|gzip > ../openbus-".. name .."_".. arch .. ".tar.gz "
 	assert(os.execute(tar_cmd) == 0, "Cannot execute the command \n"..tar_cmd..

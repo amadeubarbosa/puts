@@ -45,8 +45,14 @@ function checker:libraries_deps(openbus_home)
 	for _, path in ipairs(check_paths) do
 		local files = {myplat.exec(myplat.cmd.ls..path):split("[^%s]+")}
 		if #files == 0 then
-			rollback()
-			return nil, {}, "ERROR: Invalid OpenBus path for your platform."
+			-- TODO:
+			-- quando o pacote nÃo tem bin/TEC_UNAME ou
+			-- libpath/TEC_UNAME seria gerado um erro, mas pode
+			-- ser um pacote apenas com outros artefatos
+			-- [questao] serÃ¡ que preciso mesmo fazer esses checks?
+			--
+			--rollback()
+			--return nil, {}, "ERROR: Invalid OpenBus path for your platform."
 		end
 		-- testing all dynamic library files
 		for _,file in ipairs(files) do
@@ -84,7 +90,8 @@ function checker:libraries_deps(openbus_home)
 			end
 		end
 	end
-
+	-- restore the LuaVM package variables
+	rollback()
 	-- return nil if we got misses
 	if #misses > 0 then
 		return nil, misses, "ERROR: Check your system variable that contains dynamic "..
