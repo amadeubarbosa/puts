@@ -1,7 +1,7 @@
 --- Default configuration used by package assistants.
 -- Using the following directories structure.
 -- <ul>
--- <li> prodapp/lualibs/{a,b,c} = lua libs like lposix,luasocket,oil04,latt </li>
+-- <li> prodapp/{a,b,c} = lua libs like lposix,luasocket,oil04,latt </li>
 -- <li> prodapp/{d,e,f}     = base softwares like openldap,openssl </li>
 -- <li> work/trunk          = svn export or checkout </li>
 -- <li> work/install        = install dir to use install_files table to copy here like: <br />

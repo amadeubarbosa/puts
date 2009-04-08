@@ -173,7 +173,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/lib/ftc/src",
-	  	mf = { "config LUA51="..PRODAPP.."/lua5.1", "without_oil LUA51="..PRODAPP.."/lualibs/lua5.1", },
+	  	mf = { "config LUA51="..PRODAPP.."/lua5.1", "without_oil LUA51="..PRODAPP.."/lua5.1", },
 	  },
 	  install_files = {
 	  	["../lib/${TEC_UNAME}/libftc*.so"] = "libpath/${TEC_UNAME}",
@@ -328,7 +328,7 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/demo/hello/cppoil",
-	  	mf = { "client LUA51="..PRODAPP.."/lua5.1", "server LUA51="..PRODAPP.."/lualibs/lua5.1"},
+	  	mf = { "client LUA51="..PRODAPP.."/lua5.1", "server LUA51="..PRODAPP.."/lua5.1"},
 	  },
 	  dev_files = {
 			["bin/${TEC_UNAME}/*"] = "demo/hello/cppoil/bin/${TEC_UNAME}",
