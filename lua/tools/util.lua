@@ -84,7 +84,7 @@ function fetch_and_unpack(package,from,to)
 		local fetch_cmd = "curl -o ".. package ..".tar.gz ".. from .." || wget ".. from
 		assert(os.execute("cd ".. PRODAPP .."; ".. fetch_cmd) == 0, "ERROR: Unable to download the package '"..package.."' using 'curl' neither 'wget' commands. You must download this package manually from '"..from.."' and extract it in the '"..PRODAPP.."' directory.")
 		local unpack_cmd = "gzip -c -d ".. package ..".tar.gz |tar -xf -"
-		os.execute("cd ".. PRODAPP .."; ".. unpack_cmd)
+		assert(os.execute("cd ".. PRODAPP .."; ".. unpack_cmd) ==0, "ERROR: Unable to extract the package '".. package.."' in the directory '"..PRODAPP.."'.")
 	end
 end
 
