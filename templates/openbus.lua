@@ -81,15 +81,11 @@ messages = {
 		type = "list",
 		check = Types.vector,
 	},
-	{ name = "installPath",
-		msg = "Diretório local onde o OpenBus deve ser instalado",
-		type = "string",
-	},
 }
 
 configure_action = function(answers, tempdir, util)
 	-- Loading original OpenBus file config (its loads for tables)
-	local acsConfFile = tempdir.."/core/conf/AccessControlServerConfiguration.lua"
+	local acsConfFile = tempdir.."/data/conf/AccessControlServerConfiguration.lua"
 	assert(loadfile(acsConfFile))()
 	AccessControlServerConfiguration.hostName = answers.hostName
 	AccessControlServerConfiguration.hostPort = answers.hostPort
@@ -98,13 +94,13 @@ configure_action = function(answers, tempdir, util)
 	AccessControlServerConfiguration.oilVerboseLevel = answers.oilVerboseLevel
 	AccessControlServerConfiguration.logLevel = answers.logLevel
 
-	local rgsConfFile = tempdir.."/core/conf/RegistryServerConfiguration.lua"
+	local rgsConfFile = tempdir.."/data/conf/RegistryServerConfiguration.lua"
 	assert(loadfile(rgsConfFile))()
 	-- this configuration depends of AccessControlServerConfiguration
 	RegistryServerConfiguration.accessControlServerHostName = answers.hostName
 	RegistryServerConfiguration.accessControlServerHostPort = answers.hostPort
 
-	local sesConfFile = tempdir.."/core/conf/SessionServerConfiguration.lua"
+	local sesConfFile = tempdir.."/data/conf/SessionServerConfiguration.lua"
 	assert(loadfile(sesConfFile))()
 	-- this configuration depends of AccessControlServerConfiguration
 	SessionServerConfiguration.accessControlServerHostName = answers.hostName

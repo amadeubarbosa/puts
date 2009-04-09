@@ -4,7 +4,7 @@ setenv PATH "$HOME/bin:$PATH"
 # openbus settings
 
 # common path
-#setenv OPENBUS_HOME "${HOME}/work/install"
+#setenv OPENBUS_HOME "${HOME}/openbus/install"
 
 setenv OPENSSL_HOME "${OPENBUS_HOME}/openssl"
 

@@ -20,7 +20,6 @@ ERROR = "[ ERROR ] "
 
 -- Configures with user interation
 function wizard(template, save)
-
 	local function parser(_,t)
 		-- for a complex type delegates to __call metamethod
 		if t.type == "list" then
@@ -106,24 +105,43 @@ end
 function loadTemplate(tmplname)
 	assert(type(tmplname) == "string")
 	assert(not _G.messages and not _G.configure_action,
-	       "ERROR: Possible BUG = Lua global environment already "..
-	       "has _G.messages or _G.configure_action !")
+		"ERROR: Possible BUG = Lua global environment already "..
+		"has _G.messages or _G.configure_action !")
 	assert(loadfile(tmplname),
-				 "ERROR: Cannot import the configuration template '"..tmplname.."'")()
+		 "ERROR: Cannot import the configuration template '"..tmplname.."'.")()
+
+	local template = {
+		messages = _G.messages,
+		configure_action = _G.configure_action,
+	}
+	_G.messages = nil
+	_G.configure_action = nil
+
 	-- We assume that template contains a 'messages' table
-	assert(type(_G.messages) == "table",
+	assert(type(template.messages) == "table",
 				 "ERROR: Invalid template. Table 'messages' not found inside it.")
-	if _G.configure_action then
-		assert(type(_G.configure_action) == "function",
+	if template.configure_action then
+		assert(type(template.configure_action) == "function",
 				 "ERROR: Invalid template. Function 'configure_action' not found inside it.")
 	end
 
-	local template = { messages = _G.messages,
-	                   configure_action = _G.configure_action,
-	                 }
-	_G.messages = nil
-	_G.configure_action = nil
 	return template
+end
+
+function parseTemplate(filename, config)
+	-- parses the template
+	local tmpl_table = loadTemplate(filename)
+	-- launch the wizard to ask what it needs to user
+	local config = launchWizard(tmpl_table, config)
+	-- if all right then take a custom action (if exists)
+	if not tmpl_table.configure_action then
+		print(CONFIG, "WARNING: Template '"..filename.."' has no action.")
+	else
+		-- Takes the action planned by developer
+		assert(tmpl_table.configure_action(config, TMPDIR, util), "ERROR: Custom action"..
+				" from template '"..filename.."' has failed!")
+	end
+	return config
 end
 
 --------------------------------------------------------------------------------
@@ -167,6 +185,13 @@ if arguments.config then
 	fromconsole = nil
 end
 
+-- Loading configuration from template file provided or from default
+if arguments.template then
+	config = assert(parseTemplate(arguments.template,config), "ERROR: Failed parsing template '"..arguments.template.."'.")	
+else
+	config = assert(parseTemplate(DEFAULT_TEMPLATE,config), "ERROR: Failed parsing template '"..DEFAULT_TEMPLATE.."'.")	
+end
+
 -- When no package is given assumes reconfiguration
 if arguments.package then
 	if arguments.package:match(".*openbus.*tar.gz$") then
@@ -176,10 +201,11 @@ if arguments.package then
 		
 		-- Trying extract the metadata.tar.gz from package
 		print(INSTALL, "Extracting metadata.")
+		local _,release,profile,arch = arguments.package:match("(.*)openbus%-(.+)%-(.+)%-(.+).tar.gz$")
 		extract_cmd = myplat.cmd.install..arguments.package.." ".. TMPDIR .."/tempinstall.tar.gz;"
 		extract_cmd = extract_cmd .. " cd "..TMPDIR.." ; gzip -c -d tempinstall.tar.gz | "
-		extract_cmd = extract_cmd .. "tar -xf - metadata.tar.gz && "
-		extract_cmd = extract_cmd .. "gzip -c -d metadata.tar.gz |"
+		extract_cmd = extract_cmd .. "tar -xf - metadata-"..release.."-"..profile..".tar.gz && "
+		extract_cmd = extract_cmd .. "gzip -c -d metadata-"..release.."-"..profile..".tar.gz |"
 		extract_cmd = extract_cmd .. "tar -xf -"
 		assert(os.execute(extract_cmd) == 0, "ERROR: '".. arguments.package .."'"..
 					 " is not a valid package! Please contact the administrator!")
@@ -200,32 +226,23 @@ if arguments.package then
 		else print(INSTALL,msg) end
 
 		print(CONFIG, "Configuring the package based on package metadata")
+		local metadata_dirname = "metadata-"..release.."-"..profile
 		-- Configure main step, using all .template of this package metadata
-		local files = myplat.exec(myplat.cmd.ls .. TMPDIR .."/metadata/")
+		local files = myplat.exec(myplat.cmd.ls .. TMPDIR .."/".. metadata_dirname)
 		local nexttmpl = files:gmatch("%S+.template")
 		local tmplname, template
 		tmplname = nexttmpl()
 		-- For each template ...
 		while type(tmplname) == "string" do
-			-- ... parses the template
-			template = loadTemplate(TMPDIR.."/metadata/"..tmplname)
-			-- ... and launch the wizard to ask what it needs to user
-			config = launchWizard(template, config)
-			-- ... if all right then take a custom action (if exists)
-			if not template.configure_action then
-				print(CONFIG, "WARNING: Template '"..tmplname.."' don't take any action")
-			else
-				-- Takes the action planned by developer
-				assert(template.configure_action(config, TMPDIR, util), "ERROR: Custom action"..
-							" from template '"..tmplname.."' has failed!")
-			end
-			-- ... go to next template!
+			-- parse the template
+			local filename = TMPDIR.."/"..metadata_dirname.."/"..tmplname
+			config = assert(parseTemplate(filename, config), "ERROR: Failed parsing template '"..filename.."'.")
+			-- go to next template!
 			tmplname = nexttmpl()
 		end
-		print(CONFIG, "Configure DONE.")
-
 		-- Removing metadata files to clean the temporary tree
-		assert(os.execute(myplat.cmd.rm .. TMPDIR .."/metadata*") == 0)
+		-- Maybe it's important for futher actions like uninstall or pos-install checks
+		assert(os.execute(myplat.cmd.rm .. TMPDIR .."/".. metadata_dirname) == 0)
 		-- Moving the temporary tree to real tree (given by user)
 		assert(os.execute(myplat.cmd.mkdir .. config.installPath) == 0,
 					 "ERROR: The installation path is invalid or you cannot write there!")
@@ -233,24 +250,16 @@ if arguments.package then
 		assert(os.execute(myplat.cmd.rm .. TMPDIR) == 0)
 	else
 		print(INSTALL,"Do nothing. You MUST provide a valid package filename "..
-					"'openbus-<profile>_<plat>.tar.gz' to install the OpenBus.")
+					"'openbus-<release>-<profile>-<plat>.tar.gz' to install the OpenBus.")
 		print(INSTALL,"Please check --help for more instructions.")
 		os.exit(0)
 	end
 else
-	local tmplname = arguments.template or "templates/openbus.lua"
-	-- Loads the template or a default one
-	template = loadTemplate(tmplname)
-	config = launchWizard(template, config, true)
-	-- ... if all right then take a custom action (if exists)
-	if not template.configure_action then
-		print(CONFIG, "WARNING: Template '"..tmplname.."' don't take any action")
-	else
-		-- Takes the action planned by developer
-		assert(template.configure_action(config, config.installPath, util), "ERROR: Custom action"..
-					" from template '"..tmplname.."' has failed!")
-	end
+	--TODO: reconfiguration isn't implemented yet!
+	error("ERROR: Mandatory argument --package was not provided. Aborting!")
 end
+
+print(CONFIG, "Configure DONE.")
 
 print(INSTALL,"You MUST set in your profile the sytem variable OPENBUS_HOME as:")
 print("\t csh shell      : setenv OPENBUS_HOME \""..config.installPath.."\"")

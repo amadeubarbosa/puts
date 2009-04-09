@@ -4,7 +4,7 @@ export PATH="$HOME/bin:$PATH"
 # openbus settings
 
 # common path
-#export OPENBUS_HOME="${HOME}/work/install"
+#export OPENBUS_HOME="${HOME}/openbus/install"
 
 export OPENSSL_HOME="${OPENBUS_HOME}/openssl"
 

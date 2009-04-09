@@ -215,8 +215,8 @@ packages = {
 			["../utilities/lua/openbus"] = "core/utilities/lua",
 	  },
 	  conf_files = {
-			["../conf"] = "core",
-			["../certificates"] = "core",
+			["../../data/conf"] = "data",
+			["../../data/certificates"] = "data",
 	  },
 	  -- TODO: include here all templates/openbus.lua messages table!!
 	  conf_template = DEPLOYDIR .. "/templates/openbus.lua",
@@ -238,7 +238,7 @@ packages = {
 	  },
 	},
 	-- Orbix related packages
-	{ name = "scsorbix",
+--[[	{ name = "scsorbix",
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/lib/scs/src",
@@ -342,7 +342,7 @@ packages = {
 			["../idl"] = "demo/hello",
 	  },
 	},
-	-- Mico related packages 
+--]]	-- Mico related packages 
 --[[
 	{ name = "scsmico",
 	  build = {

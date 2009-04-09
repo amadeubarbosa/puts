@@ -17,7 +17,7 @@ function run(t, arguments)
 	
 	for _, mf in ipairs(t.build.mf) do
 		-- compiling all targets
-		local build_cmd = "cd ".. build_dir .. "; ".. "tecmake MF=".. mf
+		local build_cmd = "cd ".. build_dir .. " && ".. "tecmake MF=".. mf
 		if arguments["rebuild"] then build_cmd = build_cmd .. " rebuild" end
 		local ret = os.execute(build_cmd)
 		assert(ret == 0,"ERROR compiling the software ".. t.name .."")

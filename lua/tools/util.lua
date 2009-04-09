@@ -36,7 +36,7 @@ function install(package, orig, dest)
 	end
 
 	-- parsing possible regular expression of orig specification and listing
-	local files = myplat.exec("ls -d "..orig)
+	local files = myplat.exec(myplat.cmd.ls.." -d "..orig)
 	-- foreach filename...
 	local next = files:gmatch("[^\n]+")
 	local line = next()
@@ -77,13 +77,14 @@ function fetch_and_unpack(package,from,to)
 	if not to then
 		to = PRODAPP .."/".. package
 	end
+	assert(os.execute(myplat.cmd.mkdir .. DOWNLOADDIR) == 0, "ERROR: Cannot create the directory '".. DOWNLOADDIR .."' to download the package into it.")
 -- just fetch the tarball source once
 	local exists = os.execute("test -d ".. to)
 	if exists ~= 0 then
 		print(" [info] Downloading "..package)
 		local fetch_cmd = "curl -o ".. package ..".tar.gz ".. from .." || wget ".. from
-		assert(os.execute("cd ".. PRODAPP .."; ".. fetch_cmd) == 0, "ERROR: Unable to download the package '"..package.."' using 'curl' neither 'wget' commands. You must download this package manually from '"..from.."' and extract it in the '"..PRODAPP.."' directory.")
-		local unpack_cmd = "gzip -c -d ".. package ..".tar.gz |tar -xf -"
+		assert(os.execute("cd ".. DOWNLOADDIR .."; ".. fetch_cmd) == 0, "ERROR: Unable to download the package '"..package.."' using 'curl' neither 'wget' commands. You must download this package manually from '"..from.."' and extract it in the '"..PRODAPP.."' directory.")
+		local unpack_cmd = "gzip -c -d ".. DOWNLOADDIR .."/".. package ..".tar.gz |tar -xf -"
 		assert(os.execute("cd ".. PRODAPP .."; ".. unpack_cmd) ==0, "ERROR: Unable to extract the package '".. package.."' in the directory '"..PRODAPP.."'.")
 	end
 end

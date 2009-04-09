@@ -10,7 +10,36 @@ local string = require "tools.split"
 local platforms = require "tools.platforms"
 local myplat = platforms[TEC_SYSNAME]
 
--- Packs in a tarball named by profile
+--- Retrieves the release information
+function getrelease()
+	-- Identifying the release by 2 ways:
+	-- 1. if the svn command is available
+	local url,tag
+	if os.execute("which svn >/dev/null") == 0 then
+		url = myplat.exec("cd "..SVNDIR.." && env LANG=C svn info |grep URL")
+		url = url:match("URL:%s*(.+)([%p%c%s]+)$")
+		print("[ DEBUG ] Generating release information: Parsing the URL '".. url .."'")
+	end
+	-- 2. or if the config already provides it
+	url = url or SVNURL
+
+	url,tag = url:match("(.+)/(.+)$")
+	if tag and tag == "trunk" and os.execute("which svn >/dev/null") == 0 then
+		local rev = myplat.exec("cd "..SVNDIR.." && env LANG=C svn info|grep Revision")
+		rev = rev:match("Revision:%s*(%w+).*$")
+		if rev then
+			tag = "OB_HEAD_r"..rev
+		end
+		print("[ DEBUG ] Generating release information: Parsing the Revision '".. rev.."'")
+	end
+	-- when ...openbus/trunk ; url = ...openbus and tag = OB_r27387 ??
+	-- when ...openbus/branches/OB_v1_10_2008_12_12 ; url = ...openbus/branches and tag = OB_v1_10..
+
+	print("[ WARNING ] Using the following release information to create packages: "..tag)
+	return assert(tag)
+end
+
+--- Packs in a tarball named by profile
 function pack(arch,profile)
 	-- Overwriting some global variables with arch values
 	-- Using 'tools.config.changePlatform' global function
@@ -59,18 +88,21 @@ function pack(arch,profile)
 	until (p == nil)
 
 	-- Creates a metadata.tar.gz and include it in tarball_files
-	assert(os.execute(myplat.cmd.mkdir .. TMPDIR .."/metadata") == 0)
-	assert(os.execute(myplat.cmd.install .. metadata_files .." "..TMPDIR.."/metadata") == 0)
-	assert(os.execute("cd ".. TMPDIR .."; tar -cf - metadata |gzip > metadata.tar.gz") == 0)
-	assert(os.execute("mv ".. TMPDIR .."/metadata.tar.gz ".. INSTALL.TOP) == 0)
+	-- Tip: the installation actually is inside of INSTALL.TOP !
+	local release = getrelease()
+	local metadata_dirname = "metadata-"..release.."-"..name
+	assert(os.execute(myplat.cmd.mkdir .. TMPDIR .."/"..metadata_dirname) == 0)
+	assert(os.execute(myplat.cmd.install .. metadata_files .." "..TMPDIR.."/"..metadata_dirname) == 0)
+	assert(os.execute("cd ".. TMPDIR .." && tar -cf - ".. metadata_dirname .." |gzip > ".. metadata_dirname ..".tar.gz") == 0)
+	assert(os.execute("mv ".. TMPDIR .."/".. metadata_dirname ..".tar.gz ".. INSTALL.TOP) == 0)
 	assert(os.execute(myplat.cmd.rm .. TMPDIR) == 0)
-	tarball_files = tarball_files .. " metadata.tar.gz "
+	tarball_files = tarball_files .." ".. metadata_dirname..".tar.gz "
 
 	-- Call the 'tar' command
-	local tar_cmd = "cd ".. INSTALL.TOP ..";"
-	tar_cmd = tar_cmd .. "find . -name .svn -type d |sed \"s#./##\" >/tmp/exclude && tar cfX - /tmp/exclude "
+	local tar_cmd = "cd ".. INSTALL.TOP .." && "
+	tar_cmd = tar_cmd .. "find . -name .svn -type d |sed \"s#^./##\" >/tmp/exclude && tar cfX - /tmp/exclude "
 	tar_cmd = tar_cmd .. tarball_files
-	tar_cmd = tar_cmd .. "|gzip > ../openbus-".. name .."_".. arch .. ".tar.gz "
+	tar_cmd = tar_cmd .. "|gzip > "..DOWNLOADDIR.."/openbus-".. release .."-"..name.."-".. arch .. ".tar.gz "
 	assert(os.execute(tar_cmd) == 0, "Cannot execute the command \n"..tar_cmd..
 	                  "\n, ensure that 'tar' command has --exclude option!")
 	print " [info] Done!"

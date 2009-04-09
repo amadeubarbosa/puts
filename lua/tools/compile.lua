@@ -140,6 +140,8 @@ os.execute(myplat.cmd.mkdir .. INSTALL.LIB)
 os.execute(myplat.cmd.mkdir .. INSTALL.BIN)
 os.execute(myplat.cmd.mkdir .. INSTALL.INC)
 os.execute(myplat.cmd.mkdir .. TMPDIR)
+os.execute(myplat.cmd.mkdir .. PRODAPP)
+os.execute(myplat.cmd.mkdir .. DOWNLOADDIR)
 os.execute(myplat.cmd.mkdir .. PKGDIR)
 if not arguments["nosvn"]  then
 	assert(os.execute(FETCH_CMD) == 0, "ERROR: Unable to update the OpenBUS sources automatically from TecGraf repository. Try use the '--nosvn' option to bypass this check.")
