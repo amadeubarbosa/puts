@@ -25,8 +25,8 @@ function getrelease()
 
 	url,tag = url:match("(.+)/(.+)$")
 	if tag and tag == "trunk" and os.execute("which svn >/dev/null") == 0 then
-		local rev = myplat.exec("cd "..SVNDIR.." && env LANG=C svn info|grep Revision")
-		rev = rev:match("Revision:%s*(%w+).*$")
+		local rev = myplat.exec("cd "..SVNDIR.." && env LANG=C svn info|grep Rev:")
+		rev = rev:match(".*Rev:%s*(%w+).*$")
 		if rev then
 			tag = "OB_HEAD_r"..rev
 		end
