@@ -99,12 +99,16 @@ function pack(arch,profile)
 	tarball_files = tarball_files .." ".. metadata_dirname..".tar.gz "
 
 	-- Call the 'tar' command
+	local excludefile = os.tmpname()
 	local tar_cmd = "cd ".. INSTALL.TOP .." && "
-	tar_cmd = tar_cmd .. "find . -name .svn -type d |sed \"s#^./##\" >/tmp/exclude && tar cfX - /tmp/exclude "
+	tar_cmd = tar_cmd .. "find . -name .svn -type d |sed \"s#^./##\" >"..excludefile.." && tar cfX - "..excludefile.." "
 	tar_cmd = tar_cmd .. tarball_files
 	tar_cmd = tar_cmd .. "|gzip > "..DOWNLOADDIR.."/openbus-".. release .."-"..name.."-".. arch .. ".tar.gz "
 	assert(os.execute(tar_cmd) == 0, "Cannot execute the command \n"..tar_cmd..
 	                  "\n, ensure that 'tar' command has --exclude option!")
+
+	-- Cleans the temporary excludefile
+	os.remove(excludefile)
 	print " [info] Done!"
 	print "----------------------------------------------------------------------"
 end

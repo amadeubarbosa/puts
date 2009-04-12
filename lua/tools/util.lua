@@ -68,6 +68,90 @@ function link(package, orig, linkpath)
 	-- ... and real link to destination
 	os.execute("ln -sf "..orig.." "..INSTALL.TOP.."/"..linkpath)
 end
+------------------------------------------------------------------------------
+-- LuaRocks (http://www.luarocks.org) code. Thanks LuaRocks Team!
+-- ... from "luarocks/fs/unix.lua"
+
+--- Strip the path off a path+filename.
+-- @param pathname string: A path+name, such as "/a/b/c".
+-- @return string: The filename without its path, such as "c".
+function base_name(pathname)
+   assert(type(pathname) == "string")
+
+   local base = pathname:match(".*/([^/]*)")
+   return base or pathname
+end
+
+-- URLs should be in the "protocol://path" format.
+-- For local pathnames, "file" is returned as the protocol.
+-- @param url string: an URL or a local pathname.
+-- @return string, string: the protocol, and the absolute pathname without the protocol.
+function split_url(url)
+	assert(type(url) == "string")
+	local protocol, pathname = url:match("^([^:]*)://(.*)")
+	if not protocol then
+		protocol = "file"
+		pathname = url
+	end
+	return protocol, pathname
+end
+
+--- Unpack an archive.
+-- Extract the contents of an archive, detecting its format by
+-- filename extension.
+-- @param path string: Pathname of directory where extract the archive.
+-- @param archive string: Filename of archive.
+-- @return boolean or (boolean, string): true on success, false and an error message on failure.
+function unpack_archive(path,archive)
+	assert(type(archive) == "string")
+	
+	local unpack_cmd
+	if archive:match("%.tar%.gz$") or archive:match("%.tgz$") then
+		unpack_cmd = "gunzip -c "..archive.."|tar -xf -"
+	elseif archive:match("%.tar%.bz2$") then
+		unpack_cmd = "bunzip2 -c "..archive.."|tar -xf -"
+	elseif archive:match("%.zip$") then
+		unpack_cmd = "unzip "..archive
+	else
+		local ext = archive:match(".*(%..*)")
+		return false, "Unrecognized filename extension "..(ext or "")
+	end
+	local ok = os.execute("cd "..path.." && "..unpack_cmd)
+	if ok ~= 0 then
+		return false, "Failed extracting "..archive
+	end
+	return true
+end
+------------------------------------------------------------------------------
+-- Downloading 
+function download(path, url)
+	assert(type(path) == "string" and type(url) == "string")
+
+	local download_cmd
+	if os.execute("which wget 2>/dev/null") == 0 then
+		download_cmd = "wget "..url
+	elseif os.execute("which curl 2>/dev/null") == 0 then
+		local filename = base_name(url)
+		download_cmd = "curl -o "..filename.." "..url
+	end
+	assert(download_cmd, "ERROR: Downloader commands unavailable (tried wget,curl).")
+	download_cmd = "cd "..path.." && ".. download_cmd
+	return (os.execute(download_cmd) == 0)
+end
+
+-- Testing the archive existance
+function exists_pkgfile(path,pkgname)
+	assert(type(pkgname) == "string")
+	local known_exts = ".tar.gz .tgz .tar.bz2 .zip"
+	local ext
+	while(type(known_exts) == "string") do
+		ext,known_exts = known_exts:match("(%S+)(.*)")
+		if ext and (os.execute("test -e "..path.."/"..pkgname..ext) == 0) then
+			return true
+		end
+	end
+	return false
+end
 
 -- Downloading tarballs
 function fetch_and_unpack(package,from,to)
@@ -78,14 +162,20 @@ function fetch_and_unpack(package,from,to)
 		to = PRODAPP .."/".. package
 	end
 	assert(os.execute(myplat.cmd.mkdir .. DOWNLOADDIR) == 0, "ERROR: Cannot create the directory '".. DOWNLOADDIR .."' to download the package into it.")
--- just fetch the tarball source once
+	-- just extract the tarball source once
 	local exists = os.execute("test -d ".. to)
 	if exists ~= 0 then
-		print(" [info] Downloading "..package)
-		local fetch_cmd = "curl -o ".. package ..".tar.gz ".. from .." || wget ".. from
-		assert(os.execute("cd ".. DOWNLOADDIR .."; ".. fetch_cmd) == 0, "ERROR: Unable to download the package '"..package.."' using 'curl' neither 'wget' commands. You must download this package manually from '"..from.."' and extract it in the '"..PRODAPP.."' directory.")
-		local unpack_cmd = "gzip -c -d ".. DOWNLOADDIR .."/".. package ..".tar.gz |tar -xf -"
-		assert(os.execute("cd ".. PRODAPP .."; ".. unpack_cmd) ==0, "ERROR: Unable to extract the package '".. package.."' in the directory '"..PRODAPP.."'.")
+		if not exists_pkgfile(DOWNLOADDIR, package) then
+			local proto, url = split_url(from)
+			if proto == "http" or proto == "https" or proto == "ftp" then
+				print(" [info] Downloading "..package)
+				assert(download(DOWNLOADDIR,from), "ERROR: Unable to download the package. You must download this package manually from '"..from.."' and extract it in the '"..PRODAPP.."' directory.")
+			else
+				error("ERROR: Protocol '"..proto.."' unrecognized related the URL '"..from.."'.")
+			end
+		end
+		local filename = base_name(from)
+		assert(unpack_archive(PRODAPP,DOWNLOADDIR.."/"..filename), "ERROR: Unable to extract the package '".. package.."' in the directory '"..PRODAPP.."'.")
 	end
 end
 
