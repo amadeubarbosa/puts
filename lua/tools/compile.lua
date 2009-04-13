@@ -112,8 +112,13 @@ if arguments["select"] then
 		end
 	end
 	-- replace the main references to cloned tables
-	if #newbasesoft > 0 then basesoft = newbasesoft end
-	if #newpackages > 0 then packages = newpackages end
+	--it only updates the references when some package was selected
+	--if #newbasesoft > 0 then basesoft = newbasesoft end
+	--if #newpackages > 0 then packages = newpackages end
+
+	-- always updates the references
+	basesoft = newbasesoft
+	packages = newpackages
 end
 
 -- Listing packages when '--list' arguments
