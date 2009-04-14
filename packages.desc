@@ -7,7 +7,7 @@ packages = {
 	-- fake package to easy the download of the prodapp tarball that contains all 
 	-- source code to lualibs.
 	{ name = "lualibs",
-	  source = "http://www.tecgraf.puc-rio.br/~amadeu/tarballs/lualibs.tar.gz",
+	  source = "http://www.tecgraf.puc-rio.br/~openbus/repository/lualibs.tar.gz",
 	},
 	{ name = "lua5.1",
 	  build = {
