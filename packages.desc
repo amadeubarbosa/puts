@@ -1,8 +1,8 @@
--- Description of tecmake oriented software, tipical tecgraf programs that needs
--- of tecmake and tecgraf variables to be compiled. Some dummy packages could
--- use it also, like packages that just need to copy files and make links.
+-- Description of tecmake oriented software, typical tecgraf programs that need
+-- tecmake and tecgraf variables to be compiled. Some dummy packages could
+-- also use it, like packages that just need to copy files and make links.
 -- ATTENTION: place the fundamental packages first!
--- if A depends of B then you should place the B description first than A
+-- If A depends on B then you should place B's description before than A's.
 packages = {
 	-- fake package to easy the download of the prodapp tarball that contains all 
 	-- source code to lualibs.
@@ -139,34 +139,34 @@ packages = {
 	{ name = "scsall",
 	  build = {
 	  	type = "tecmake",
-	  	src = SVNDIR .."/lib/scs/src",
-	  	mf = { "scsall LUA51="..PRODAPP.."/lua5.1", },
+	  	src = PRODAPP .."/scs/src/cpp/cppoil",
+	  	mf = { SVNDIR.."/etc/scs/cppoil/scsall LOOP_HOME="..INSTALL.TOP.."/libpath/lua/5.1 LUA51="..PRODAPP.."/lua5.1", },
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsall.so"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath/",
+			["../../../idl/*"] = "idlpath/",
 	  },
 	  dev_files = {
 			["../lib/${TEC_UNAME}/libscsall.*"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath/",
-			["../include/scsall.h"] = "incpath/scs",
+			["../../../idl/*"] = "idlpath/",
+			["../obj/${TEC_UNAME}/scsall.h"] = "incpath/scs",
 	  },
 	},
 	{ name = "scsoil",
 	  build = {
 	  	type = "tecmake",
-	  	src = SVNDIR .."/lib/scs/src",
-	  	mf = { "oil LUA51="..PRODAPP.."/lua5.1", },
+	  	src = PRODAPP .."/scs/src/cpp/cppoil",
+	  	mf = { "config LUA51="..PRODAPP.."/lua5.1", },
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsoil.so"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
+			["../../../idl/*"] = "idlpath",
 	  },
 	  dev_files = {
 			["../lib/${TEC_UNAME}/libscsoil.*"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
-			["../include/scs/scs/core/*Oil*"] = "incpath/scs/scs/core/",
-			["../include/scs/scs/core/luaidl"] = "incpath/scs/scs/core/",
+			["../../../idl/*"] = "idlpath",
+			["*.h"] = "incpath/scs/cppoil/",
+			["luaidl/*.h"] = "incpath/scs/cppoil/luaidl/",
 	  },
 	},
 	{ name = "ftc",
@@ -238,21 +238,20 @@ packages = {
 	  },
 	},
 	-- Orbix related packages
---[[	{ name = "scsorbix",
+	{ name = "scsorbix",
 	  build = {
 	  	type = "tecmake",
-	  	src = SVNDIR .."/lib/scs/src",
-	  	mf = { "orbix genstubs", "orbix" },
+	  	src = PRODAPP .."/scs/src/cpp/orbix",
+	  	mf = { "config genstubs", "config" },
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsorbix.so"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
+			["../../../idl/*"] = "idlpath",
 	  },
 	  dev_files = {
 			["../lib/${TEC_UNAME}/libscsorbix.*"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
-			["../include/scs/core/*Orbix*"] = "incpath/scs/scs/core/",
-			["../include/scs/core/ComponentBuilder.h"] = "incpath/scs/scs/core/",
+			["../../../idl/*"] = "idlpath",
+			["*.h"] = "incpath/scs/orbix/",
 	  },
 	},
 	{ name = "openbus-orbix",
@@ -270,7 +269,7 @@ packages = {
 			["../../test/orbix/acs/*.cpp"] = "core/test/orbix/acs/",
 			["../../test/orbix/acs/config.mak"] = "core/test/orbix/acs/",
 			["../../test/orbix/rgs/*.cpp"] = "core/test/orbix/rgs/",
-			["../../test/orbix/rgs/config.mak"] = "coore/test/orbix/rgs/",
+			["../../test/orbix/rgs/config.mak"] = "core/test/orbix/rgs/",
 			["../../test/orbix/config*"] = "core/test/orbix/",
 			["../../test/orbix/runtests"] = "core/test/orbix/",
 	  },
@@ -282,10 +281,9 @@ packages = {
 	  	mf = { "config cxxtest -C acs", "config -C acs", "config cxxtest -C rgs", "config -C rgs" },
 	  },
 	  install_files = {
-			["../../test/orbix/acs/bin/${TEC_UNAME}"] = "core/test/orbix/acs/bin/",
-			["../../test/orbix/rgs/bin/${TEC_UNAME}"] = "core/test/orbix/rgs/bin/",
-			["../../test/orbix/config*"] = "core/test/orbix/",
-			["../../test/orbix/runtests"] = "core/test/orbix/",
+			["bin/${TEC_UNAME}/*"] = "core/test/orbix/bin/${TEC_UNAME}",
+			["config*"] = "core/test/orbix/",
+			["runtests"] = "core/test/orbix/",
 	  },
 	},
 	{ name = "openbus-demo-orbix",
@@ -307,6 +305,7 @@ packages = {
 			["server"] = "demo/hello/orbix63",
 	  },
 	},
+--[[
 	-- CPPOiL related packages, it needs of loop to work (precompiler.lua dependency)
 	{ name = "openbus-cppoil",
 	  build = {
@@ -347,17 +346,17 @@ packages = {
 	{ name = "scsmico",
 	  build = {
 	  	type = "tecmake",
-	  	src = SVNDIR .."/lib/scs/src",
-	  	mf = { "mico" },
+	  	src = PRODAPP .."/scs/src/cpp/mico",
+	  	mf = { "config" },
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsmico.so"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
+			["../../../idl/*"] = "idlpath",
 	  },
 	  dev_files = {
 			["../lib/${TEC_UNAME}/libscsmico.*"] = "libpath/${TEC_UNAME}",
-			["../idl/*"] = "idlpath",
-			["../include/scs"] = "incpath/scs",
+			["../../../idl/*"] = "idlpath",
+			["*.h"] = "incpath/scs/mico",
 	  },
 	},
 --]]
