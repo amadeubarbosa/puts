@@ -133,14 +133,16 @@ packages = {
 	  	mf = { },
 	  },
 	  dev_files = {
-		  ["lua/loop"] = "libpath/lua/5.1",
+		  ["lua/loop"] = "libpath/lua/5.1", 
+		  ["lua/precompiler.lua"] = "libpath/lua/5.1",
+		  ["lua/preloader.lua"] = "libpath/lua/5.1",
 	  },
 	},
 	{ name = "scsall",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/scs/src/cpp/cppoil",
-	  	mf = { SVNDIR.."/etc/scs/cppoil/scsall LOOP_HOME="..INSTALL.TOP.."/libpath/lua/5.1 LUA51="..PRODAPP.."/lua5.1", },
+	  	mf = { "scsall LOOP_HOME="..INSTALL.TOP.."/libpath/lua/5.1 LUA51="..PRODAPP.."/lua5.1", },
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsall.so"] = "libpath/${TEC_UNAME}",
