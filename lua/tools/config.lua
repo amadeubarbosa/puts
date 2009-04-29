@@ -32,6 +32,7 @@ assert(BASEDIR or os.getenv("HOME"), "ERROR: HOME env var not defined")
 
 PRODAPP = PRODAPP or BASEDIR .."/lib"
 
+SVNURL = SVNURL or "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/openbus/trunk"
 SVNDIR = SVNDIR or BASEDIR .."/trunk"
 DEPLOYDIR = DEPLOYDIR or SVNDIR .."/tools"
 DOWNLOADDIR = DOWNLOADDIR or BASEDIR .."/packs"
@@ -45,10 +46,6 @@ INSTALL.BIN = INSTALL.BIN or INSTALL.TOP .."/bin/".. TEC_UNAME .."/"
 INSTALL.LIB = INSTALL.LIB or INSTALL.TOP .."/libpath/".. TEC_UNAME .."/"
 INSTALL.INC = INSTALL.INC or INSTALL.TOP .."/incpath/"
 TMPDIR = TMPDIR or "/tmp/openbus-building_".. math.random(os.time()%100000)
-
--- We must fill the work/trunk in any way
-SVNURL = SVNURL or "https://subversion.tecgraf.puc-rio.br/engsoftware/openbus/trunk"
-FETCH_CMD = FETCH_CMD or "svn co ".. SVNURL .." ".. SVNDIR .." || svn up ".. SVNDIR .."/"
 
 -- Supported arch to makepack
 SUPPORTED_ARCH = SUPPORTED_ARCH or {

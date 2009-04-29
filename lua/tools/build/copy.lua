@@ -8,16 +8,16 @@ local myplat = platforms[TEC_SYSNAME]
 
 module("tools.build.copy", package.seeall)
 
-function run(t,arguments,build_dir)
+function run(t,arguments,build_dir,is_downloaded)
 	assert(type(t) == "table")
+	-- fetching and unpacking
+	if t.source and not is_downloaded then
+		util.fetch_and_unpack(t.name, t.source)
+	end
 	-- we assume a default build_dir pointing to PRODAPP
 	if not build_dir then
 		build_dir = PRODAPP .."/".. t.name .."/"
-		print(" [info] Assuming build_dir as '"..build_dir.."' for pkg: ".. t.name)
-	end
-	-- fetching and unpacking
-	if t.source then
-		util.fetch_and_unpack(t.name, t.source, build_dir)
+		print("[ INFO ] Using source directory '"..build_dir.."' for the package: ".. t.name)
 	end
 	-- copying files described on packages table
 	if t.install_files then

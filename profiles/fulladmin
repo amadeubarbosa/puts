@@ -5,10 +5,10 @@ openldap-2.4.11
 openssl-0.9.9
 lua5.1
 lposix
-luasocket
+luasocket2
 oilall
 luuid
-lualdap
+lualdap-1.0.1
 scsall
 lce
 openbus-core

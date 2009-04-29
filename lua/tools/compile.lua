@@ -30,7 +30,7 @@ function parseDescriptions(desc, arguments)
 		-- starting specific build methods
 		build_type.run(t,arguments)
 
-		print " [info] Done!"
+		print "[ INFO ] Done!"
 		print "----------------------------------------------------------------------"
 	end
 end
@@ -67,7 +67,7 @@ if arguments.select then
 	arguments.select = {value:split("[^%s]+")}
 end
 
-print("\nINFO: We are going to install full openbus dependencies on \
+print("[ INFO ] We are going to install full openbus dependencies on \
 ".. INSTALL.TOP .." and temporary install directories \
 (for autotools based packages) on ".. TMPDIR .." .\n")
 
@@ -149,7 +149,7 @@ os.execute(myplat.cmd.mkdir .. PRODAPP)
 os.execute(myplat.cmd.mkdir .. DOWNLOADDIR)
 os.execute(myplat.cmd.mkdir .. PKGDIR)
 if not arguments["nosvn"]  then
-	assert(os.execute(FETCH_CMD) == 0, "ERROR: Unable to update the OpenBUS sources automatically from TecGraf repository. Try use the '--nosvn' option to bypass this check.")
+	assert(util.download("openbus-source", SVNURL, SVNDIR), "ERROR: Unable to update the OpenBUS sources automatically from TecGraf repository. Try use the '--nosvn' option to bypass this check.")
 end
 
 -- Cleaning the temp dir to execute install rules of autotools softwares

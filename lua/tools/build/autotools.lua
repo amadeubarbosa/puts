@@ -39,7 +39,7 @@ end
 
 -- Function that implements the autotools building
 function run(t,arguments)
-	print(" [info] Verifying if needs to compile via autotools: "..t.name)
+	print("[ INFO ] Verifying if needs to compile via autotools: "..t.name)
 	local plat = TEC_UNAME
 	if not t.build[plat] then 
 		plat = TEC_SYSNAME
@@ -53,9 +53,11 @@ function run(t,arguments)
 			-- verifying if all build dependencies are ok, if don't we'll abort
 			check_external_deps(t)
 
+			-- fetching and unpacking
+			if t.source then
+				util.fetch_and_unpack(t.name, t.source)
+			end
 			local build_dir = PRODAPP .."/".. t.name .."/"
-			-- downloading package just one time
-			util.fetch_and_unpack(t.name, t.source, build_dir)
 
 			-- running the build and install command
 			local build_cmd = t.build[plat]
@@ -68,13 +70,13 @@ function run(t,arguments)
 			-- prepend the command to enter on software directory
 			build_cmd = "cd ".. build_dir .."; ".. build_cmd
 
-			print(" [info] Compiling "..t.name)
+			print("[ INFO ] Compiling package via autotools: "..t.name)
 			local ret = os.execute(build_cmd)
 			-- assert ensure that we could continue
 			assert(ret == 0,"ERROR compiling the software ".. t.name .."")
 
 			-- re-using copy method to parse install_files, conf_files, dev_files
-			copy.run(t,arguments,build_dir)
+			copy.run(t,arguments,build_dir,true)
 			break
 		end
 	end

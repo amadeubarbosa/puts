@@ -13,6 +13,7 @@ module("platforms")
 -- plataforma de busca de bibliotecas dependentes! precisamos mesmo?
 
 platforms = {
+	pipe_stderr = " 2>/dev/null",
 	dylibext = "so",
 	cmd = { install = "cp -rf ", make = "make ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls " },
 	exec = function(cmd)
@@ -35,7 +36,7 @@ platforms = {
 				break
 			else
 				-- if file is a regular expression we must check filenames on dir 
-				realpath = self.exec("ls ".. dir .."/".. file)
+				realpath = self.exec("ls ".. dir .."/".. file .. self.pipe_stderr)
 				if realpath == "" then 
 					realpath = false 
 				else 
@@ -47,6 +48,7 @@ platforms = {
 	end,
 }
 platforms.Linux = {
+	pipe_stderr = platforms.pipe_stderr,
 	dylibext = platforms.dylibext,
 	cmd = { install = "cp -L -Rf ", make = "make ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls " },
 	exec = platforms.exec, 
@@ -87,6 +89,7 @@ platforms.Linux = {
 	end,
 }
 platforms.SunOS = {
+	pipe_stderr = platforms.pipe_stderr,
 	dylibext = platforms.dylibext,
 	exec = platforms.exec,
 	cmd = platforms.cmd,
@@ -109,6 +112,7 @@ platforms.SunOS = {
 	missing_libraries = platforms.Linux.missing_libraries
 }
 platforms.IRIX = {
+	pipe_stderr = platforms.pipe_stderr,
 	dylibext = platforms.dylibext,
 	exec = platforms.exec,
 	cmd = { install = "cp -Rf ", make = "gmake ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls "},
@@ -141,6 +145,7 @@ platforms.IRIX = {
 	end,
 }
 platforms.Darwin = {
+	pipe_stderr = platforms.pipe_stderr,
 	dylibext = "dylib",
 	exec = platforms.exec,
 	cmd = platforms.Linux.cmd,
@@ -180,6 +185,7 @@ platforms.Darwin = {
 	end,
 }
 --~ platforms.Windows = {
+	--~ pipe_stderr = " >STDERR.txt",
 	--~ dylibext = "dll",
 	--~ cmd = {
 		--~ install = "xcopy /E /H ", -- xcopy don't copy orig dir also, only subdirs

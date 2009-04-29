@@ -66,7 +66,7 @@ function pack(arch,profile)
 	name = name:gsub(".profile","")           --deletes the suffix ".profile"
 
 	print "----------------------------------------------------------------------"
-	print(" [info] Generating the tarball for arch:".. arch .." profile:".. name)
+	print("[ INFO ] Generating the tarball for arch:".. arch .." profile:".. name)
 	local file = assert(io.open(profile,"r") or 
 			io.open(name..".profile","r") or 
 			io.open(DEPLOYDIR .."/profiles/".. name,"r") or 
@@ -109,7 +109,7 @@ function pack(arch,profile)
 
 	-- Cleans the temporary excludefile
 	os.remove(excludefile)
-	print " [info] Done!"
+	print "[ INFO ] Done!"
 	print "----------------------------------------------------------------------"
 end
 

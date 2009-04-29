@@ -18,6 +18,8 @@ TOOLS_LUA= $(addprefix ../lua/,\
 	tools/build/tecmake.lua \
 	tools/build/copy.lua \
 	tools/build/autotools.lua \
+	tools/fetch/http.lua \
+	tools/fetch/svn.lua \
 	tools/checklibdeps.lua \
 	tools/platforms.lua \
 	tools/split.lua \
@@ -25,7 +27,7 @@ TOOLS_LUA= $(addprefix ../lua/,\
 	tools/compile.lua \
 	tools/installer.lua \
 	tools/makepack.lua \
-        tools/console.lua )
+	tools/console.lua )
 
 ${PRECMP_DIR}/tools.c: $(TOOLS_LUA)
 	$(LUABIN) $(LUA_FLAGS) $(PRECMP_LUA)   $(PRECMP_FLAGS) $(TOOLS_LUA) 

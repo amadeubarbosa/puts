@@ -124,19 +124,34 @@ function unpack_archive(path,archive)
 end
 ------------------------------------------------------------------------------
 -- Downloading 
-function download(path, url)
-	assert(type(path) == "string" and type(url) == "string")
+function download(pkgname, from, targetdir)
+	assert(type(pkgname) == "string" and type(from) == "string")
+	local proto, url = split_url(from)
 
-	local download_cmd
-	if os.execute("which wget 2>/dev/null") == 0 then
-		download_cmd = "wget "..url
-	elseif os.execute("which curl 2>/dev/null") == 0 then
-		local filename = base_name(url)
-		download_cmd = "curl -o "..filename.." "..url
+	local handler
+	if proto == "http" or proto == "https" or proto == "ftp" then
+		-- location where put the downloaded file
+		targetdir = targetdir or DOWNLOADDIR
+		if exists_pkgfile(targetdir, pkgname) then
+			return true
+		end
+		handler = require "tools.fetch.http"
+	elseif proto:match("^svn") then
+		-- location as the checkout directory
+		targetdir = targetdir or PRODAPP .."/".. pkgname
+		handler = require "tools.fetch.svn"
+		-- https or http isn't a valid tunnel in subversion syntax
+		-- we use the "svn+https" to represent "svn" protocol using an "https" url
+		local tunnel = proto:match("^svn%+(.*)")
+		if tunnel == "https" or tunnel == "http" then
+			proto = tunnel
+			from = proto .."://".. url
+		end
+	else
+		error("ERROR: Unknown protocol '"..proto.."'. The URL was '"..from.."'.")
 	end
-	assert(download_cmd, "ERROR: Downloader commands unavailable (tried wget,curl).")
-	download_cmd = "cd "..path.." && ".. download_cmd
-	return (os.execute(download_cmd) == 0)
+	print("[ INFO ] Downloading "..pkgname.." via the protocol "..proto)
+	return assert(handler.run(targetdir,from))
 end
 
 -- Testing the archive existance
@@ -146,7 +161,7 @@ function exists_pkgfile(path,pkgname)
 	local ext
 	while(type(known_exts) == "string") do
 		ext,known_exts = known_exts:match("(%S+)(.*)")
-		if ext and (os.execute("test -e "..path.."/"..pkgname..ext) == 0) then
+		if ext and (os.execute("test -f "..path.."/"..pkgname..ext) == 0) then
 			return true
 		end
 	end
@@ -162,21 +177,14 @@ function fetch_and_unpack(package,from,to)
 		to = PRODAPP .."/".. package
 	end
 	assert(os.execute(myplat.cmd.mkdir .. DOWNLOADDIR) == 0, "ERROR: Cannot create the directory '".. DOWNLOADDIR .."' to download the package into it.")
-	-- just extract the tarball source once
+	assert(download(package,from), "ERROR: Unable to download the package. You must download this package manually from '"..from.."' and extract it in the '"..PRODAPP.."' directory.")
+	-- it only extracts the source once
 	local exists = os.execute("test -d ".. to)
 	if exists ~= 0 then
-		if not exists_pkgfile(DOWNLOADDIR, package) then
-			local proto, url = split_url(from)
-			if proto == "http" or proto == "https" or proto == "ftp" then
-				print(" [info] Downloading "..package)
-				assert(download(DOWNLOADDIR,from), "ERROR: Unable to download the package. You must download this package manually from '"..from.."' and extract it in the '"..PRODAPP.."' directory.")
-			else
-				error("ERROR: Protocol '"..proto.."' unrecognized related the URL '"..from.."'.")
-			end
-		end
 		local filename = base_name(from)
 		assert(unpack_archive(PRODAPP,DOWNLOADDIR.."/"..filename), "ERROR: Unable to extract the package '".. package.."' in the directory '"..PRODAPP.."'.")
 	end
+	return true
 end
 
 -- Closing install log files

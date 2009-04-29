@@ -11,11 +11,18 @@ local myplat = platforms[TEC_SYSNAME]
 module("tools.build.tecmake", package.seeall)
 
 function run(t, arguments)
-	print(" [info] Compiling package via tecmake: ".. t.name)
+	print("[ INFO ] Compiling package via tecmake: ".. t.name)
 	local build_dir = t.build.src
 	if not build_dir:match("/$") then build_dir = build_dir.."/" end
+
+	-- fetching and unpacking
+	if t.source then
+		util.fetch_and_unpack(t.name, t.source)
+	end
 	
-	for _, mf in ipairs(t.build.mf) do
+	-- using per-platform tables to take the specific build actions
+	local build = t.build[TEC_UNAME] or t.build[TEC_SYSNAME] or t.build
+	for _, mf in ipairs(build.mf) do
 		-- compiling all targets
 		local build_cmd = "cd ".. build_dir .. " && ".. "tecmake MF=".. mf
 		if arguments["rebuild"] then build_cmd = build_cmd .. " rebuild" end
@@ -24,8 +31,8 @@ function run(t, arguments)
 	end
 
 	-- installing software compiled previously
-	-- defaut behaviour is the automatic installation on INSTALL dirs
-	if #t.build.mf > 0 and not t.install_files and not t.dev_files then
+	-- defaut behaviour is the automatic installation of the tecmake generated binaries and libraries in INSTALL dirs
+	if #build.mf > 0 and not t.install_files and not t.dev_files then
 		util.install(t.name, build_dir .. "../bin/".. TEC_UNAME .. "/*", INSTALL.BIN )
 		util.install(t.name, build_dir .. "../lib/".. TEC_UNAME .. "/*".. t.name .."*.so*", INSTALL.LIB )
 		util.install(t.name, build_dir .. "../lib/".. TEC_UNAME .. "/*".. t.name .."*.dylib*", INSTALL.LIB )
@@ -39,5 +46,5 @@ function run(t, arguments)
 	end
 
 	-- re-using copy method to parse install_files, conf_files, dev_files
-	copy.run(t,arguments,build_dir)
+	copy.run(t,arguments,build_dir,true)
 end

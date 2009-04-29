@@ -4,12 +4,15 @@
 -- ATTENTION: place the fundamental packages first!
 -- If A depends on B then you should place B's description before than A's.
 packages = {
-	-- fake package to easy the download of the prodapp tarball that contains all 
-	-- source code to lualibs.
-	{ name = "lualibs",
-	  source = "http://www.tecgraf.puc-rio.br/~openbus/repository/lualibs.tar.gz",
+	-- fake package to easy the download of the oil04 and scs sources
+	{ name = "oil04",
+	  source = "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/openbus/libs/trunk/oil04",
+	},
+	{ name = "scs",
+	  source = "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/scs/trunk",
 	},
 	{ name = "lua5.1",
+	  source = "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/openbus/libs/trunk/lua5.1.2",
 	  build = {
 		type = "tecmake",
 		src = PRODAPP .."/lua5.1/src",
@@ -34,6 +37,7 @@ packages = {
 	  },
 	},
 	{ name = "tolua5.1",
+	  source = "http://www.tecgraf.puc-rio.br/~openbus/repository/tolua5.1.tar.gz",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/tolua5.1/src",
@@ -46,6 +50,7 @@ packages = {
 	  },
 	},
 	{ name = "lposix",
+	  source = "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/openbus/libs/trunk/lposix",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/lposix/src",
@@ -59,7 +64,8 @@ packages = {
 	  	["../include/*"] = "incpath/lposix",
 	  },
 	},
-	{ name = "luasocket",
+	{ name = "luasocket2",
+	  source = "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/openbus/libs/trunk/luasocket2",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/luasocket2/src",
@@ -88,6 +94,7 @@ packages = {
 	  },
 	},
 	{ name = "luuid",
+	  source = "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/openbus/libs/trunk/luuid",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/luuid/src",
@@ -101,7 +108,8 @@ packages = {
 	  	["../include/*"] = "incpath/luuid",
 	  },
 	},
-	{ name = "lualdap",
+	{ name = "lualdap-1.0.1",
+	  source = "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/openbus/libs/trunk/lualdap-1.0.1",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/lualdap-1.0.1/src",
@@ -116,6 +124,7 @@ packages = {
 	  },
 	},
 	{ name = "latt",
+	  source = "http://www.tecgraf.puc-rio.br/~openbus/repository/latt.tar.gz",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/latt",
@@ -245,6 +254,10 @@ packages = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/scs/src/cpp/orbix",
 	  	mf = { "config genstubs", "config" },
+		-- special compile instructions for solaris8
+		SunOS58 = {
+			mf = { "config genstubs", "config sunos58" },
+		},
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsorbix.so"] = "libpath/${TEC_UNAME}",
@@ -261,6 +274,10 @@ packages = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/core/utilities/orbix",
 	  	mf = { "config genstubs", "config" },
+		-- special compile instructions for solaris8
+		SunOS58 = {
+			mf = { "config genstubs", "config sunos58" },
+		}
 	  },
 	  dev_files = {
 			["lib/${TEC_UNAME}/libopenbus*.*"] = "core/utilities/orbix/lib/${TEC_UNAME}",
