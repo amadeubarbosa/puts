@@ -184,14 +184,14 @@ packages = {
 	  source = "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/ftc/trunk",
 	  build = {
 	  	type = "tecmake",
-	  	src = SVNDIR .."/lib/ftc/cpp/src",
+	  	src = PRODAPP .."/ftc/cpp/src",
 	  	mf = { "config LUA51="..PRODAPP.."/lua5.1", "without_oil LUA51="..PRODAPP.."/lua5.1", },
 	  },
 	  install_files = {
 	  	["../lib/${TEC_UNAME}/libftc*.so"] = "libpath/${TEC_UNAME}",
 	  },
 	  dev_files = {
-	  	["../include/ftc.h"] = "incpath/ftc/",
+	  	["*.h"] = "incpath/ftc/",
 	  	["../lib/${TEC_UNAME}/libftc.*"] = "libpath/${TEC_UNAME}",
 	  },
 	},
@@ -254,10 +254,10 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/scs/src/cpp/orbix",
-	  	mf = { "config genstubs", "config" },
+	  	mf = { "config genstubs USE_NODEPEND=Yes", "config" },
 		-- special compile instructions for solaris8
 		SunOS58 = {
-			mf = { "config genstubs", "config sunos58" },
+			mf = { "config genstubs USE_NODEPEND=Yes", "config", "config sunos58" },
 		},
 	  },
 	  install_files = {
@@ -274,10 +274,10 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/core/utilities/orbix",
-	  	mf = { "config genstubs", "config" },
+	  	mf = { "config genstubs USE_NODEPEND=Yes", "config" },
 		-- special compile instructions for solaris8
 		SunOS58 = {
-			mf = { "config genstubs", "config sunos58" },
+			mf = { "config genstubs USE_NODEPEND=Yes", "config", "config sunos58" },
 		}
 	  },
 	  dev_files = {
@@ -310,11 +310,11 @@ packages = {
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/demo/hello/orbix63",
-	  	mf = { "server genstubs", "client", "server" },
+	  	mf = { "server genstubs USE_NODEPEND=Yes", "client", "server" },
 	  },
 	  dev_files = {
 			["bin/${TEC_UNAME}/*"] = "demo/hello/orbix63/bin/${TEC_UNAME}",
-			["hello.idl"] = "demo/hello/orbix63",
+			["../idl/hello.idl"] = "demo/hello/orbix63",
 			["client.cpp"] = "demo/hello/orbix63",
 			["server.cpp"] = "demo/hello/orbix63",
 			["run*"] = "demo/hello/orbix63",
