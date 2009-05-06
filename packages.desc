@@ -155,11 +155,11 @@ packages = {
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsall.so"] = "libpath/${TEC_UNAME}",
-			["../../../idl/*"] = "idlpath/",
+			["../../../idl/scs.idl"] = "idlpath/",
 	  },
 	  dev_files = {
 			["../lib/${TEC_UNAME}/libscsall.*"] = "libpath/${TEC_UNAME}",
-			["../../../idl/*"] = "idlpath/",
+			["../../../idl/scs.idl"] = "idlpath/",
 			["../obj/${TEC_UNAME}/scsall.h"] = "incpath/scs",
 	  },
 	},
@@ -171,11 +171,11 @@ packages = {
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsoil.so"] = "libpath/${TEC_UNAME}",
-			["../../../idl/*"] = "idlpath",
+			["../../../idl/scs.idl"] = "idlpath/",
 	  },
 	  dev_files = {
 			["../lib/${TEC_UNAME}/libscsoil.*"] = "libpath/${TEC_UNAME}",
-			["../../../idl/*"] = "idlpath",
+			["../../../idl/scs.idl"] = "idlpath/",
 			["*.h"] = "incpath/scs/cppoil/",
 			["luaidl/*.h"] = "incpath/scs/cppoil/luaidl/",
 	  },
@@ -261,11 +261,11 @@ packages = {
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsorbix.so"] = "libpath/${TEC_UNAME}",
-			["../../../idl/*"] = "idlpath",
+			["../../../idl/scs.idl"] = "idlpath/",
 	  },
 	  dev_files = {
 			["../lib/${TEC_UNAME}/libscsorbix.*"] = "libpath/${TEC_UNAME}",
-			["../../../idl/*"] = "idlpath",
+			["../../../idl/scs.idl"] = "idlpath/",
 			["*.h"] = "incpath/scs/orbix/",
 	  },
 	},
@@ -370,7 +370,7 @@ packages = {
 	  },
 	  install_files = {
 			["../lib/${TEC_UNAME}/libscsmico.so"] = "libpath/${TEC_UNAME}",
-			["../../../idl/*"] = "idlpath",
+			["../../../idl/scs.idl"] = "idlpath/",
 	  },
 	  dev_files = {
 			["../lib/${TEC_UNAME}/libscsmico.*"] = "libpath/${TEC_UNAME}",
