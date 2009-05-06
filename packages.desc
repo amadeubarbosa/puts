@@ -181,9 +181,10 @@ packages = {
 	  },
 	},
 	{ name = "ftc",
+	  source = "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/ftc/trunk",
 	  build = {
 	  	type = "tecmake",
-	  	src = SVNDIR .."/lib/ftc/src",
+	  	src = SVNDIR .."/lib/ftc/cpp/src",
 	  	mf = { "config LUA51="..PRODAPP.."/lua5.1", "without_oil LUA51="..PRODAPP.."/lua5.1", },
 	  },
 	  install_files = {
