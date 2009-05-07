@@ -76,7 +76,7 @@ packages = {
 	  },
 	  dev_files = {
 	  	["../lib/${TEC_UNAME}/libluasocket.*"] = "libpath/${TEC_UNAME}",
-	  	["../include/*"] = "incpath/luasocket2",
+	  	["luasocket.h"] = "incpath/luasocket2",
 	  },
 	},
 	{ name = "oilall",

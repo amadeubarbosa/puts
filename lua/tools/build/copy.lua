@@ -8,12 +8,8 @@ local myplat = platforms[TEC_SYSNAME]
 
 module("tools.build.copy", package.seeall)
 
-function run(t,arguments,build_dir,is_downloaded)
+function run(t,arguments,build_dir)
 	assert(type(t) == "table")
-	-- fetching and unpacking
-	if t.source and not is_downloaded then
-		util.fetch_and_unpack(t.name, t.source)
-	end
 	-- we assume a default build_dir pointing to PRODAPP
 	if not build_dir then
 		build_dir = PRODAPP .."/".. t.name .."/"

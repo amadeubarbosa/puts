@@ -15,11 +15,6 @@ function run(t, arguments)
 	local build_dir = t.build.src
 	if not build_dir:match("/$") then build_dir = build_dir.."/" end
 
-	-- fetching and unpacking
-	if t.source then
-		util.fetch_and_unpack(t.name, t.source)
-	end
-	
 	-- using per-platform tables to take the specific build actions
 	local build = t.build[TEC_UNAME] or t.build[TEC_SYSNAME] or t.build
 	for _, mf in ipairs(build.mf) do
@@ -47,5 +42,5 @@ function run(t, arguments)
 	end
 
 	-- re-using copy method to parse install_files, conf_files, dev_files
-	copy.run(t,arguments,build_dir,true)
+	copy.run(t,arguments,build_dir)
 end

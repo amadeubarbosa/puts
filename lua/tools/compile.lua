@@ -20,6 +20,11 @@ function parseDescriptions(desc, arguments)
 			t.build = { type = "copy" }
 		end
 
+		-- fetching and unpacking
+		if t.source and (not arguments["noupdate"]) then
+			util.fetch_and_unpack(t.name, t.source)
+		end
+	
 		assert(t.build.type, "ERROR: build.type is missing for package: "..t.name)
 		-- loading specific build methods
 		ok, build_type = pcall(require, "tools.build." .. t.build.type)
@@ -55,7 +60,7 @@ local arguments = util.parse_args(arg,[[
 	--list                   : list all package names from description files. When
 	                           '--select' is used, it'll confirm the selection.
 	--select="pkg1 pkg2 ..." : choose which packages to compile and install
-	--nosvn			 : don't try to checkout from svn
+	--noupdate		 : don't try to update the sources from repositories
 
  NOTES:
  	The prefix '--' is optional in all options.
@@ -148,8 +153,8 @@ os.execute(myplat.cmd.mkdir .. TMPDIR)
 os.execute(myplat.cmd.mkdir .. PRODAPP)
 os.execute(myplat.cmd.mkdir .. DOWNLOADDIR)
 os.execute(myplat.cmd.mkdir .. PKGDIR)
-if not arguments["nosvn"]  then
-	assert(util.download("openbus-source", SVNURL, SVNDIR), "ERROR: Unable to update the OpenBUS sources automatically from TecGraf repository. Try use the '--nosvn' option to bypass this check.")
+if not arguments["noupdate"]  then
+	assert(util.download("openbus-source", SVNURL, SVNDIR), "ERROR: Unable to update the OpenBUS sources automatically from TecGraf subversion repository. Try use the '--noupdate' option to bypass this check.")
 end
 
 -- Cleaning the temp dir to execute install rules of autotools softwares

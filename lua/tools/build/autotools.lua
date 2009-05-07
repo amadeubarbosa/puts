@@ -53,10 +53,6 @@ function run(t,arguments)
 			-- verifying if all build dependencies are ok, if don't we'll abort
 			check_external_deps(t)
 
-			-- fetching and unpacking
-			if t.source then
-				util.fetch_and_unpack(t.name, t.source)
-			end
 			local build_dir = PRODAPP .."/".. t.name .."/"
 
 			-- running the build and install command
@@ -76,7 +72,7 @@ function run(t,arguments)
 			assert(ret == 0,"ERROR compiling the software ".. t.name .."")
 
 			-- re-using copy method to parse install_files, conf_files, dev_files
-			copy.run(t,arguments,build_dir,true)
+			copy.run(t,arguments,build_dir)
 			break
 		end
 	end
