@@ -30,6 +30,8 @@ PID_RGS=$OPENBUS_HOME/data/rgs.pid
 #PID_SS=
 SCRIPTNAME=/etc/init.d/$NAME
 
+export OPENBUS_HOME
+
 # Exit if the package is not installed
 if [ -z "$OPENBUS_HOME" ]; then 
 	echo "ERROR: OPENBUS_HOME variable not defined! Aborting."
