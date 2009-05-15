@@ -1,6 +1,6 @@
 openssl-0.9.9
 lua5.1
-lposix
+lfs
 luasocket2
 oilall
 luuid

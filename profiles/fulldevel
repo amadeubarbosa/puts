@@ -4,7 +4,7 @@ cyrus-sasl2-2.1.22.dfsg1-dev
 openldap-2.4.11-dev
 openssl-0.9.9-dev
 lua5.1-dev
-lposix-dev
+lfs-dev
 luasocket2-dev
 luuid-dev
 lualdap-1.0.1-dev

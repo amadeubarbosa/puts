@@ -1,7 +1,7 @@
 --- Default configuration used by package assistants.
 -- Using the following directories structure.
 -- <ul>
--- <li> openbus/lib/{a,b,c} = lua libs like lposix,luasocket,oil04,latt </li>
+-- <li> openbus/lib/{a,b,c} = lua libs like lfs,luasocket,oil04,latt </li>
 -- <li> openbus/lib/{d,e,f}     = base softwares like openldap,openssl </li>
 -- <li> openbus/trunk          = svn export or checkout </li>
 -- <li> openbus/install        = install dir to use install_files table to copy here like: <br />

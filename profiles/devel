@@ -1,7 +1,7 @@
 e2fsprogs-1.40.8-dev
 openssl-0.9.9-dev
 lua5.1-dev
-lposix-dev
+lfs-dev
 luasocket2-dev
 luuid-dev
 lualdap-1.0.1-dev
