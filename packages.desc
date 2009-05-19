@@ -49,8 +49,8 @@ packages = {
 	  	["../include/tolua.h"] = "incpath/tolua5.1",
 	  },
 	},
-	{ name = "lfs",
-	  source = "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/openbus/libs/trunk/lposix",
+	{ name = "luafilesystem",
+	  source = "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/openbus/libs/trunk/luafilesystem-1.4.2/",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/luafilesystem/src",
