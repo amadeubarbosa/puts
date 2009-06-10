@@ -4,7 +4,7 @@ cyrus-sasl2-2.1.22.dfsg1
 openldap-2.4.11
 openssl-0.9.9
 lua5.1
-lfs
+luafilesystem
 luasocket2
 oilall
 luuid
