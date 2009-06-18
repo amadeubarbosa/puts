@@ -1,0 +1,31 @@
+#!/bin/ksh
+
+OPENBUS_HOME=/local/openbus/openbus-testes
+ACS_PID=$OPENBUS_HOME/data/acs.pid
+RGS_PID=$OPENBUS_HOME/data/rgs.pid
+
+if [ ! -f $ACS_PID ] || [ ! -f $RGS_PID ]; then
+	# probably the services has crashed!
+	# it will try stop any other openbus services
+	/etc/init.d/openbus stop
+
+	CRASH_DIR=$OPENBUS_HOME/data/crashes
+	TAG=`date +%Y%m%d-%H:%M:%S`
+	mkdir -p $CRASH_DIR
+
+	cp $OPENBUS_HOME/data/acs.log $CRASH_DIR/acs-$TAG.log
+	cp $OPENBUS_HOME/data/rgs.log $CRASH_DIR/rgs-$TAG.log
+	/etc/init.d/openbus restart
+	echo "Olá,
+Sou um notificador automático, que acabou de ver que os serviços do OpenBus na
+máquina Ubu/TecGraf falharam!
+Acabo de reiniciar os serviços, talvez seja importante você olhar os logs que
+foram salvos em:
+  $CRASH_DIR/acs-$TAG.log
+  $CRASH_DIR/rgs-$TAG.log
+
+Atenciosamente,
+Crontab da Máquina Ubu/TecGraf
+Autor: Amadeu Barbosa (amadeu@tecgraf.puc-rio.br)" |\
+	 mail -s "Falha e reinício do barramento na Ubu/TecGraf" amadeu@tecgraf.puc-rio.br
+fi
