@@ -249,6 +249,7 @@ packages = {
 			["../idl"] = "demo/hello",
 	  },
 	},
+--[[
 	-- Orbix related packages
 	{ name = "scsorbix",
 	  build = {
@@ -325,6 +326,7 @@ packages = {
 			["server"] = "demo/hello/orbix63",
 	  },
 	},
+--]]
 --[[
 	-- CPPOiL related packages, it needs of loop to work (precompiler.lua dependency)
 	{ name = "openbus-cppoil",
@@ -361,8 +363,9 @@ packages = {
 			["../idl"] = "demo/hello",
 	  },
 	},
---]]	-- Mico related packages 
+--]]
 --[[
+	-- MICO related packages
 	{ name = "scsmico",
 	  build = {
 	  	type = "tecmake",
