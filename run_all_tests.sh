@@ -38,7 +38,7 @@ is_dir "$OPENBUS_HOME_DEVEL/core/test/lua" &&
 is_dir "${OPENBUS_HOME_DEVEL}/libpath/lua/5.1/latt" || exit 1
 
 ## loading basic variable definitions
-. $OPENBUS_HOME/core/conf/config
+. $OPENBUS_HOME/data/conf/config
 
 ## first starting services
 cd $OPENBUS_HOME/core/bin
@@ -70,9 +70,9 @@ cd $OPENBUS_HOME_DEVEL/core/test/lua
 TESTS_TORUN="
 testAccessControlService.lua
 testRegistryService.lua
-testSessionService.lua
-reinitRegistry.lua
-reinitSession.lua"
+testSessionService.lua"
+#reinitRegistry.lua
+#reinitSession.lua
 #testCSBaseDataService.lua
 #testCSBaseProjectService.lua
 #testEvents.lua
@@ -87,7 +87,7 @@ for test in $TESTS_TORUN;
 do 
 	echo " >>>>>>>>>>>> Running the test named $test <<<<<<<<<<<<<< "
 	./run_unit_test.sh $test
-	sleep 2
+	sleep 4
 done
 
 echo " >>>>>>>>>>>> Waiting 10s for kill basic services... <<<<<<<<<<<<<< "
