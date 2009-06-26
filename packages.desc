@@ -243,8 +243,8 @@ packages = {
 	  	mf = { },
 	  },
 	  dev_files = {
-			["consumer.lua"] = "demo/hello/lua",
-			["publisher.lua"] = "demo/hello/lua",
+			["client.lua"] = "demo/hello/lua",
+			["server.lua"] = "demo/hello/lua",
 			["run"] = "demo/hello/lua",
 			["../idl"] = "demo/hello",
 	  },
