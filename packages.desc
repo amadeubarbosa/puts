@@ -405,7 +405,7 @@ packages = {
 	  	src = SVNDIR .."/core/utilities",	  	
 	  },
 	  install_files = {
-			["target/*.jar"] = "/core/utilities/java",
+			["target/*.jar"] = "core/utilities/java",
 	  },
 	},
 	{ name = "openbusidl-java",
@@ -414,7 +414,7 @@ packages = {
 	  	src = SVNDIR .."/core/idl",
 	  },
 	  install_files = {
-			["target/*.jar"] = "/core/utilities/java",
+			["target/*.jar"] = "core/utilities/java",
 	  },
 	},
 	{ name = "openbus-demo-java",
@@ -423,7 +423,7 @@ packages = {
 	  	src = SVNDIR .."/demo/hello",
 	  },
 	  install_files = {
-			["target/*.jar"] = "/demo/hello/java",
+			["target/*.jar"] = "demo/hello/java",
 	  },
 	},
 --	{ name = "ldap-Linux26g4",

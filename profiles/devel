@@ -19,5 +19,8 @@ openbus-cppoil-dev
 openbus-demo-cppoil-dev
 openbus-orbix-dev
 openbus-demo-orbix-dev
+openbus-java
+openbusidl-java
+openbus-demo-java
 tolua5.1-dev
 latt-dev
