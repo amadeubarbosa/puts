@@ -18,6 +18,7 @@ TOOLS_LUA= $(addprefix ../lua/,\
 	tools/build/tecmake.lua \
 	tools/build/copy.lua \
 	tools/build/autotools.lua \
+	tools/build/maven.lua \
 	tools/fetch/http.lua \
 	tools/fetch/svn.lua \
 	tools/checklibdeps.lua \

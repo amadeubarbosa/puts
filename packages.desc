@@ -398,6 +398,34 @@ packages = {
 			["../templates"] = "tools",
 	  },
 	},
+	-- Java related packages	
+	{ name = "openbus-java",
+	  build = {
+	  	type = "maven",
+	  	src = SVNDIR .."/core/utilities",	  	
+	  },
+	  install_files = {
+			["target/*.jar"] = "/core/utilities/java",
+	  },
+	},
+	{ name = "openbusidl-java",
+	  build = {
+	  	type = "maven",
+	  	src = SVNDIR .."/core/idl",
+	  },
+	  install_files = {
+			["target/*.jar"] = "/core/utilities/java",
+	  },
+	},
+	{ name = "openbus-demo-java",
+	  build = {
+	  	type = "maven",
+	  	src = SVNDIR .."/demo/hello",
+	  },
+	  install_files = {
+			["target/*.jar"] = "/demo/hello/java",
+	  },
+	},
 --	{ name = "ldap-Linux26g4",
 --		src = "/",
 --		mf = { },
