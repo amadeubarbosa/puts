@@ -220,7 +220,7 @@ packages = {
 			["../bin/${TEC_UNAME}/*"] = "core/bin/${TEC_UNAME}",
 			["../bin/*.sh"] = "core/bin",
 			["../bin/servicelauncher"] = "core/bin",
-			["../idl/*"] = "idlpath",
+			["../idl/*.idl"] = "idlpath",
 			["../services/accesscontrol"] = "core/services",
 			["../services/registry"] = "core/services",
 			["../services/session"] = "core/services",
@@ -378,7 +378,7 @@ packages = {
 	  },
 	  dev_files = {
 			["../lib/${TEC_UNAME}/libscsmico.*"] = "libpath/${TEC_UNAME}",
-			["../../../idl/*"] = "idlpath",
+			["../../../idl/*.idl"] = "idlpath",
 			["*.h"] = "incpath/scs/mico",
 	  },
 	},
