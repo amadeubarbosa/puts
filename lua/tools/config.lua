@@ -32,7 +32,7 @@ assert(BASEDIR or os.getenv("HOME"), "ERROR: HOME env var not defined")
 
 PRODAPP = PRODAPP or BASEDIR .."/lib"
 
-SVNURL = SVNURL or "svn+https://subversion.tecgraf.puc-rio.br/engsoftware/openbus/trunk"
+SVNURL = SVNURL or "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/trunk"
 SVNDIR = SVNDIR or BASEDIR .."/trunk"
 DEPLOYDIR = DEPLOYDIR or SVNDIR .."/tools"
 DOWNLOADDIR = DOWNLOADDIR or BASEDIR .."/packs"
