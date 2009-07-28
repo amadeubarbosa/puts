@@ -236,7 +236,7 @@ packages = {
 			["../test/lua"] = "core/test",
 		},
 	},
-	{ name = "openbus-demo-lua",
+	{ name = "openbus-demo-hello-lua",
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/demo/hello/lua",
@@ -307,7 +307,7 @@ packages = {
 			["runtests"] = "core/test/orbix/",
 	  },
 	},
-	{ name = "openbus-demo-orbix",
+	{ name = "openbus-demo-hello-orbix",
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/demo/hello/orbix63",
@@ -345,7 +345,7 @@ packages = {
 			["../../test/cppoil"] = "core/test",
 	  },
 	},
-	{ name = "openbus-demo-cppoil",
+	{ name = "openbus-demo-hello-cppoil",
 	  build = {
 	  	type = "tecmake",
 	  	src = SVNDIR .."/demo/hello/cppoil",
@@ -417,13 +417,22 @@ packages = {
 			["target/*.jar"] = "core/utilities/java",
 	  },
 	},
-	{ name = "openbus-demo-java",
+	{ name = "openbus-demo-hello-java",
 	  build = {
 	  	type = "maven",
 	  	src = SVNDIR .."/demo/hello",
 	  },
 	  install_files = {
 			["target/*.jar"] = "demo/hello/java",
+	  },
+	},
+	{ name = "openbus-demo-data_service-java",
+	  build = {
+	  	type = "maven",
+	  	src = SVNDIR .."/demo/data_service",
+	  },
+	  install_files = {
+			["target/*.jar"] = "demo/data_service/java",
 	  },
 	},
 --	{ name = "ldap-Linux26g4",
