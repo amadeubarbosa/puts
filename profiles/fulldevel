@@ -17,10 +17,10 @@ ftc-dev
 openbus-core
 openbus-core-conf
 openbus-core-dev
-openbus-demo-lua-dev
+openbus-demo-hello-lua-dev
 openbus-cppoil-dev
-openbus-demo-cppoil-dev
+openbus-demo-hello-cppoil-dev
 openbus-orbix-dev
-openbus-demo-orbix-dev
+openbus-demo-hello-orbix-dev
 tolua5.1-dev
 latt-dev

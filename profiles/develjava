@@ -1,3 +1,4 @@
 openbus-java
 openbusidl-java
-openbus-demo-java
+openbus-demo-hello-java
+openbus-demo-data_service-java
