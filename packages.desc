@@ -246,6 +246,7 @@ packages = {
 			["client.lua"] = "demo/hello/lua",
 			["server.lua"] = "demo/hello/lua",
 			["run"] = "demo/hello/lua",
+			["Hello.properties"] = "demo/hello/lua",
 			["../idl"] = "demo/hello",
 	  },
 	},
