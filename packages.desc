@@ -195,6 +195,43 @@ packages = {
 	  	["../lib/${TEC_UNAME}/libftc.*"] = "libpath/${TEC_UNAME}",
 	  },
 	},
+	{ name = "luatrace",
+	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/libs/trunk/luatrace",
+	  build = {
+	  	type = "autotools",
+		test_libs = {"luatrace_*"},
+		external_dependencies = {},
+	  	src = PRODAPP .."/luatrace",
+		Darwin = "make clean &&  make PLAT=macosx reader static-writer dynamic-writer " ..
+         "&& make PLAT=macosx INSTALL_TOP=" .. TMPDIR  ..  
+         " install-reader install-static-writer install-dynamic-writer",
+		Linux = "make clean &&  make PLAT=linux reader static-writer dynamic-writer "..
+         "&& make PLAT=linux INSTALL_TOP=" .. TMPDIR  .. 
+         " install-reader install-static-writer install-dynamic-writer", 
+		SunOS =  "make clean &&  make PLAT=solaris reader static-writer dynamic-writer " ..
+         "&& make PLAT=solaris INSTALL_TOP=" .. TMPDIR  ..  
+         " install-reader install-static-writer install-dynamic-writer",
+		SunOS510 = "make clean &&  make PLAT=solaris reader static-writer dynamic-writer " ..
+         "&& make PLAT=solaris INSTALL_TOP=" .. TMPDIR  ..  
+         " install-reader install-static-writer install-dynamic-writer",
+		SunOS510x86 = "make clean &&  make PLAT=solaris reader static-writer dynamic-writer " ..
+         "&& make PLAT=solaris INSTALL_TOP=" .. TMPDIR  .. 
+         " install-reader install-static-writer install-dynamic-writer",
+		IRIX =  "make clean &&  make PLAT=posix reader static-writer dynamic-writer " .. 
+         "&& make PLAT=posix INSTALL_TOP=" .. TMPDIR  .. 
+         " install-reader install-static-writer install-dynamic-writer",
+	  },
+	  install_files = {
+        [TMPDIR .. "/bin/luatrace"]                       = "bin/${TEC_UNAME}", 
+        [TMPDIR .. "/lib/libluatrace_*.so"]               = "libpath/${TEC_UNAME}", 
+        [TMPDIR .. "/lib/lua/5.1/trace/*.so"]             = "libpath/${TEC_UNAME}/trace",
+        [TMPDIR .. "/lib/lua/5.1/trace/inputstream/*.so"] = "libpath/${TEC_UNAME}/trace/inputstream", 
+        [TMPDIR .. "/lib/lua/5.1/trace/msgdecoder/*.so"]  = "libpath/${TEC_UNAME}/trace/msgdecoder", 
+        [TMPDIR .. "/lib/lua/5.1/trace/msgreader/*.so"]   = "libpath/${TEC_UNAME}/trace/msgreader", 
+        [TMPDIR .. "/share/lua/5.1/trace/manager.lua"]    = "libpath/lua/5.1/trace", 
+	  },
+	  dev_files = {}
+	},
 	{ name = "lce",
 	  build = {
 	  	type = "tecmake",
