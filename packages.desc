@@ -464,15 +464,6 @@ packages = {
 			["target/*.jar"] = "demo/hello/java",
 	  },
 	},
-	{ name = "openbus-demo-data_service-java",
-	  build = {
-	  	type = "maven",
-	  	src = SVNDIR .."/demo/data_service",
-	  },
-	  install_files = {
-			["target/*.jar"] = "demo/data_service/java",
-	  },
-	},
 --	{ name = "ldap-Linux26g4",
 --		src = "/",
 --		mf = { },
