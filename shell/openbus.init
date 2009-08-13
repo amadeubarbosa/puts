@@ -120,10 +120,16 @@ do_stop()
 	#   other if a failure occurred
 	
 	echo "Stopping $DESC : RegistryServer "
-	kill -15 `cat $PID_RGS 2>/dev/null` 2>/dev/null || kill -9 `cat $PID_RGS 2>dev/null` 2>/dev/null
+	pid=$(cat $PID_RGS 2>/dev/null)
+	if [ -n "$pid" ]; then
+		kill -15 $pid || kill -9 $pid
+	fi
 	echo "[ OK ]"
 	echo "Stopping $DESC : AccessControlServer "
-	kill -15 `cat $PID_ACS 2>/dev/null` 2>/dev/null || kill -9 `cat $PID_ACS 2>/dev/null` 2>/dev/null
+	pid=$(cat $PID_ACS 2>/dev/null)
+	if [ -n "$pid" ]; then
+		kill -15 $pid || kill -9 $pid
+	fi
 	echo "[ OK ]"
 
 	rm -f $PID_ACS $PID_RGS
