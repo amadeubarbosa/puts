@@ -14,6 +14,8 @@ scsoil-dev
 scsorbix-dev
 lce-dev
 ftc-dev
+tolua5.1-dev
+latt-dev
 openbus-core
 openbus-core-conf
 openbus-core-dev
@@ -22,5 +24,6 @@ openbus-cppoil-dev
 openbus-demo-hello-cppoil-dev
 openbus-orbix-dev
 openbus-demo-hello-orbix-dev
-tolua5.1-dev
-latt-dev
+openbus-java
+openbusidl-java
+openbus-demo-hello-java
