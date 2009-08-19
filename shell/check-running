@@ -1,8 +1,23 @@
 #!/bin/ksh
 
+TECTOOLS_HOME=/home/t/tecgraf/lib
+TECMAKE_HOME=$TECTOOLS_HOME/tecmake
+export TECMAKE_HOME
+
 OPENBUS_HOME=/local/openbus/openbus-testes
 ACS_PID=$OPENBUS_HOME/data/acs.pid
 RGS_PID=$OPENBUS_HOME/data/rgs.pid
+
+# loading the tecmake variables
+if [ -f $TECMAKE_HOME/tec_uname.bsh ]; then
+	# workaround to bad assigns in that tec_uname file
+	ORIG_TECMAKEHOME=$TECMAKE_HOME
+	ORIG_TECTOOLSHOME=$TECTOOLS_HOME
+	. $TECMAKE_HOME/tec_uname.bsh
+	# restoring the variables to the correct values
+	TECMAKE_HOME=$ORIG_TECMAKEHOME
+	TECTOOLS_HOME=$ORIG_TECTOOLSHOME
+fi
 
 # function to check if is running actually
 is_running() {
