@@ -21,13 +21,13 @@ NAME=openbus
 SCRIPT_DIR=$OPENBUS_HOME/core/bin
 SCRIPT_ACS=./run_access_control_server.sh
 SCRIPT_RGS=./run_registry_server.sh
-#SCRIPT_SS=run_session_server.sh
+SCRIPT_SS=./run_session_server.sh
 LOG_ACS=$OPENBUS_HOME/data/acs.log
 LOG_RGS=$OPENBUS_HOME/data/rgs.log
-#LOG_SS=$OPENBUS_HOME/data/ss.log
+LOG_SS=$OPENBUS_HOME/data/ss.log
 PID_ACS=$OPENBUS_HOME/data/acs.pid
 PID_RGS=$OPENBUS_HOME/data/rgs.pid
-#PID_SS=
+PID_SS=$OPENBUS_HOME/data/ss.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
 export OPENBUS_HOME
@@ -43,6 +43,10 @@ if [ ! -x "$SCRIPT_DIR/$SCRIPT_ACS" ]; then
 fi
 if [ ! -x "$SCRIPT_DIR/$SCRIPT_RGS" ]; then
 	echo "ERROR: $SCRIPT_DIR/$SCRIPT_RGS is not executable! Aborting."
+	exit 2
+fi
+if [ ! -x "$SCRIPT_DIR/$SCRIPT_SS" ]; then
+	echo "ERROR: $SCRIPT_DIR/$SCRIPT_SS is not executable! Aborting."
 	exit 2
 fi
 
@@ -104,6 +108,26 @@ do_start()
 		cd - >/dev/null
 		return 2
 	fi
+	# Wait a bit while AccessControl starts correctly
+	sleep 1
+	
+	# Launchs SessionServer
+	echo "Starting $DESC : SessionServer"
+	echo "============= Sessionserver starting: `date` at: `pwd` ===============" >> $LOG_SS
+	$SCRIPT_SS >> $LOG_SS 2>&1 &
+	pid=$!
+	sleep 1
+	# Checks if any signal can be sent (process exists)
+	kill -0 $pid 2>/dev/null
+	ret=$?
+	if [ "$ret" == 0 ]; then
+		echo "[ OK ]"
+		echo "$pid" > $PID_SS
+	else
+		echo "[ FAILED ]"
+		cd - >/dev/null
+		return 2
+	fi
 	cd - >/dev/null
 	return 0
 }
@@ -118,7 +142,13 @@ do_stop()
 	#   1 if daemon was already stopped
 	#   2 if daemon could not be stopped
 	#   other if a failure occurred
-	
+
+	echo "Stopping $DESC : SessionServer"
+	pid=$(cat $PID_SS 2>/dev/null)
+	if [ -n "$pid" ]; then
+		kill -15 $pid || kill -9 $pid
+	fi
+	echo "[ OK ]"
 	echo "Stopping $DESC : RegistryServer "
 	pid=$(cat $PID_RGS 2>/dev/null)
 	if [ -n "$pid" ]; then
@@ -132,7 +162,7 @@ do_stop()
 	fi
 	echo "[ OK ]"
 
-	rm -f $PID_ACS $PID_RGS
+	rm -f $PID_ACS $PID_RGS $PID_SS
 	return 0
 }
 
