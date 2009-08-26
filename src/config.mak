@@ -8,33 +8,33 @@ OPENBUSLIB= ${OPENBUS_HOME}/libpath/${TEC_UNAME}
 
 PRECMP_DIR= ../obj/${TEC_UNAME}
 PRECMP_LUA= ../lua/precompiler.lua
-PRECMP_FLAGS= -p TOOLS_API -o tools -d ${PRECMP_DIR}
+PRECMP_FLAGS= -p TOOLS_API -o tools -d ${PRECMP_DIR} -n
 
 PRELOAD_LUA= ../lua/preloader.lua
 PRELOAD_FLAGS= -p TOOLS_API -o toolsall -d ${PRECMP_DIR}
 
-TOOLS_LUA= $(addprefix ../lua/,\
-	tools/config.lua \
-	tools/build/tecmake.lua \
-	tools/build/copy.lua \
-	tools/build/autotools.lua \
-	tools/build/maven.lua \
-	tools/fetch/http.lua \
-	tools/fetch/svn.lua \
-	tools/checklibdeps.lua \
-	tools/platforms.lua \
-	tools/split.lua \
-	tools/util.lua \
-	tools/compile.lua \
-	tools/installer.lua \
-	tools/makepack.lua \
-	tools/console.lua )
+TOOLS_LUA= $(addprefix tools.,\
+	config \
+	build.tecmake \
+	build.copy \
+	build.autotools \
+	build.maven \
+	fetch.http \
+	fetch.svn \
+	checklibdeps \
+	platforms \
+	split \
+	util \
+	compile \
+	installer \
+	makepack \
+	console )
 
 ${PRECMP_DIR}/tools.c: $(TOOLS_LUA)
 	$(LUABIN) $(LUA_FLAGS) $(PRECMP_LUA)   $(PRECMP_FLAGS) $(TOOLS_LUA) 
 
 ${PRECMP_DIR}/toolsall.c: ${PRECMP_DIR}/tools.c
-	$(LUABIN) $(LUA_FLAGS) $(PRELOAD_LUA)  $(PRELOAD_FLAGS) ${PRECMP_DIR}/tools.h
+	$(LUABIN) $(LUA_FLAGS) $(PRELOAD_LUA)  $(PRELOAD_FLAGS) -i ${PRECMP_DIR} tools.h
 
 #Descomente a linha abaixo caso deseje ativar o VERBOSE
 #DEFINES=VERBOSE
