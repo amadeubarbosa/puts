@@ -11,6 +11,12 @@ packages = {
 	{ name = "scs",
 	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/scs/trunk",
 	},
+	{ name = "licenses",
+	  install_files = {
+		[SVNDIR.."/LICENSE"] = ".",
+		[SVNDIR.."/README"]  = ".",
+	  },
+	},
 	{ name = "lua5.1",
 	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/libs/trunk/lua5.1.2",
 	  build = {
