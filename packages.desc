@@ -6,10 +6,10 @@
 packages = {
 	-- fake package to easy the download of the oil04 and scs sources
 	{ name = "oil04",
-	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/libs/trunk/oil04",
+	  source = SVNREPURL .. "/openbus/libs/trunk/oil04",
 	},
 	{ name = "scs",
-	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/scs/trunk",
+	  source = SVNREPURL .. "/scs/trunk",
 	},
 	{ name = "licenses",
 	  install_files = {
@@ -18,7 +18,7 @@ packages = {
 	  },
 	},
 	{ name = "lua5.1",
-	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/libs/trunk/lua5.1.2",
+	  source = SVNREPURL .. "/openbus/libs/trunk/lua5.1.2",
 	  build = {
 		type = "tecmake",
 		src = PRODAPP .."/lua5.1/src",
@@ -56,7 +56,7 @@ packages = {
 	  },
 	},
 	{ name = "luafilesystem",
-	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/libs/trunk/luafilesystem-1.4.2/",
+	  source = SVNREPURL .. "/openbus/libs/trunk/luafilesystem-1.4.2/",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/luafilesystem/src",
@@ -71,7 +71,7 @@ packages = {
 	  },
 	},
 	{ name = "luasocket2",
-	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/libs/trunk/luasocket2",
+	  source = SVNREPURL .. "/openbus/libs/trunk/luasocket2",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/luasocket2/src",
@@ -100,7 +100,7 @@ packages = {
 	  },
 	},
 	{ name = "luuid",
-	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/libs/trunk/luuid",
+	  source = SVNREPURL .. "/openbus/libs/trunk/luuid",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/luuid/src",
@@ -115,7 +115,7 @@ packages = {
 	  },
 	},
 	{ name = "lualdap-1.0.1",
-	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/libs/trunk/lualdap-1.0.1",
+	  source = SVNREPURL .. "/openbus/libs/trunk/lualdap-1.0.1",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/lualdap-1.0.1/src",
@@ -187,7 +187,7 @@ packages = {
 	  },
 	},
 	{ name = "ftc",
-	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/ftc/trunk",
+	  source = SVNREPURL .. "/ftc/trunk",
 	  build = {
 	  	type = "tecmake",
 	  	src = PRODAPP .."/ftc/cpp/src",
@@ -202,7 +202,7 @@ packages = {
 	  },
 	},
 	{ name = "luatrace",
-	  source = "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/libs/trunk/luatrace",
+	  source = SVNREPURL .. "/openbus/libs/trunk/luatrace",
 	  build = {
 	  	type = "autotools",
 		test_libs = {"luatrace_*"},
