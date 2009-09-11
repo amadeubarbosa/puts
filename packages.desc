@@ -208,22 +208,22 @@ packages = {
 		test_libs = {"luatrace_*"},
 		external_dependencies = {},
 	  	src = PRODAPP .."/luatrace",
-		Darwin = "make clean &&  make PLAT=macosx reader static-writer dynamic-writer " ..
+		Darwin = "make PLAT=macosx reader static-writer dynamic-writer " ..
          "&& make PLAT=macosx INSTALL_TOP=" .. TMPDIR  ..  
          " install-reader install-static-writer install-dynamic-writer",
-		Linux = "make clean &&  make PLAT=linux reader static-writer dynamic-writer "..
+		Linux = "make PLAT=linux reader static-writer dynamic-writer "..
          "&& make PLAT=linux INSTALL_TOP=" .. TMPDIR  .. 
          " install-reader install-static-writer install-dynamic-writer", 
-		SunOS =  "make clean &&  make PLAT=solaris reader static-writer dynamic-writer " ..
+		SunOS =  "make PLAT=solaris reader static-writer dynamic-writer " ..
          "&& make PLAT=solaris INSTALL_TOP=" .. TMPDIR  ..  
          " install-reader install-static-writer install-dynamic-writer",
-		SunOS510 = "make clean &&  make PLAT=solaris reader static-writer dynamic-writer " ..
+		SunOS510 = "make PLAT=solaris reader static-writer dynamic-writer " ..
          "&& make PLAT=solaris INSTALL_TOP=" .. TMPDIR  ..  
          " install-reader install-static-writer install-dynamic-writer",
-		SunOS510x86 = "make clean &&  make PLAT=solaris reader static-writer dynamic-writer " ..
+		SunOS510x86 = "make PLAT=solaris reader static-writer dynamic-writer " ..
          "&& make PLAT=solaris INSTALL_TOP=" .. TMPDIR  .. 
          " install-reader install-static-writer install-dynamic-writer",
-		IRIX =  "make clean &&  make PLAT=posix reader static-writer dynamic-writer " .. 
+		IRIX =  "make PLAT=posix reader static-writer dynamic-writer " .. 
          "&& make PLAT=posix INSTALL_TOP=" .. TMPDIR  .. 
          " install-reader install-static-writer install-dynamic-writer",
 	  },
