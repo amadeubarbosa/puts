@@ -7,6 +7,7 @@ export TECMAKE_HOME
 OPENBUS_HOME=/local/openbus/openbus-testes
 ACS_PID=$OPENBUS_HOME/data/acs.pid
 RGS_PID=$OPENBUS_HOME/data/rgs.pid
+SS_PID=$OPENBUS_HOME/data/ss.pid
 
 # loading the tecmake variables
 if [ -f $TECMAKE_HOME/tec_uname.bsh ]; then
@@ -22,7 +23,7 @@ fi
 # function to check if is running actually
 is_running() {
 	# if not exist the PID files
-	if [ ! -f $ACS_PID ] || [ ! -f $RGS_PID ]; then
+	if [ ! -f $ACS_PID ] || [ ! -f $RGS_PID ] || [ ! -f $SS_PID ]; then
 		return 1
 	else
 		# the PID file can be outdated, asking for them
@@ -30,6 +31,8 @@ is_running() {
 		acs_ret=$?
 		ps -e |grep $(cat $RGS_PID 2>/dev/null) 1>/dev/null 2>/dev/null
 		rgs_ret=$?
+		ps -e |grep $(cat $SS_PID 2>/dev/null) 1>/dev/null 2>/dev/null
+		ss_ret=$?
 		# if some PID is outdated then remove that file and return false
 		running=0
 		if [ $acs_ret -gt 0 ]; then
@@ -40,6 +43,11 @@ is_running() {
 		if [ $rgs_ret -gt 0 ]; then
 			echo "apaguei"
 			rm -f $RGS_PID
+			running=1
+		fi
+		if [ $ss_ret -gt 0 ]; then
+			echo "apaguei"
+			rm -f $SS_PID
 			running=1
 		fi
 		return $running
@@ -62,18 +70,24 @@ if [ $ret -gt 0 ] ; then
 	mkdir -p $CRASH_DIR
 
 	cp $OPENBUS_HOME/data/acs.log $CRASH_DIR/acs-$TAG.log
+	gzip $CRASH_DIR/acs-$TAG.log
 	cp $OPENBUS_HOME/data/rgs.log $CRASH_DIR/rgs-$TAG.log
+	gzip $CRASH_DIR/rgs-$TAG.log
+	cp $OPENBUS_HOME/data/ss.log $CRASH_DIR/ss-$TAG.log
+	gzip $CRASH_DIR/ss-$TAG.log
+	
 	/etc/init.d/openbus start
-	echo "Olá,
-Sou um notificador automático, que acabou de ver que os serviços do OpenBus na
-máquina Ubu/TecGraf falharam!
-Acabo de reiniciar os serviços, talvez seja importante você olhar os logs que
+	echo "OlÃ¡,
+Sou um notificador automÃtico, que acabou de ver que os servicos do OpenBus na
+mÃ¡quina Ubu/TecGraf falharam!
+Acabo de reiniciar os servicos, talvez seja importante vocÃª olhar os logs que
 foram salvos em:
   $CRASH_DIR/acs-$TAG.log
   $CRASH_DIR/rgs-$TAG.log
+  $CRASH_DIR/ss-$TAG.log
 
 Atenciosamente,
-Crontab da Máquina Ubu/TecGraf
+Crontab da MÃ¡quina Ubu/TecGraf
 Autor: Amadeu Barbosa (amadeu@tecgraf.puc-rio.br)" |\
-	 mail -s "Falha e reinício do barramento na Ubu/TecGraf" amadeu@tecgraf.puc-rio.br
+	 mail -s "Falha e reinÃ­cio do barramento na Ubu/TecGraf" amadeu@tecgraf.puc-rio.br
 fi
