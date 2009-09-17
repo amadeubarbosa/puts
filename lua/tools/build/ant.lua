@@ -25,7 +25,7 @@ function run(t, arguments)
 	-- Adding arguments
 	local ant_args = "" 
 	if not arguments["verbose"] and not arguments["v"] then 
-		ant_args = ant_args .. "-q " 
+		ant_args = ant_args .. " -q " 
 	end
 
 	build_cmd = "cd " .. build_dir .. " && " .. ant_cmd .. ant_args
