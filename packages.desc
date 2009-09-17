@@ -359,7 +359,7 @@ packages = {
 	  },
 	  dev_files = {
 			["bin/${TEC_UNAME}/*"] = "demo/hello/orbix63/bin/${TEC_UNAME}",
-			["../idl/hello.idl"] = "demo/hello/orbix63",
+			["../idl/hello.idl"] = "demo/hello/idl/",
 			["client.cpp"] = "demo/hello/orbix63",
 			["server.cpp"] = "demo/hello/orbix63",
 			["run*"] = "demo/hello/orbix63",
@@ -368,6 +368,8 @@ packages = {
 			["run*"] = "demo/hello/orbix63",
 			["client"] = "demo/hello/orbix63",
 			["server"] = "demo/hello/orbix63",
+			["../../../tools/shell/*rc"] = "tools/shell/", -- shell variables
+			["../../../tools/shell/sample-domain_env.*"] = "tools/shell/",
 	  },
 	},
 --]]
