@@ -4,11 +4,6 @@ TECTOOLS_HOME=/home/t/tecgraf/lib
 TECMAKE_HOME=$TECTOOLS_HOME/tecmake
 export TECMAKE_HOME
 
-OPENBUS_HOME=/local/openbus/openbus-testes
-ACS_PID=$OPENBUS_HOME/data/acs.pid
-RGS_PID=$OPENBUS_HOME/data/rgs.pid
-SS_PID=$OPENBUS_HOME/data/ss.pid
-
 # loading the tecmake variables
 if [ -f $TECMAKE_HOME/tec_uname.bsh ]; then
 	# workaround to bad assigns in that tec_uname file
@@ -19,6 +14,27 @@ if [ -f $TECMAKE_HOME/tec_uname.bsh ]; then
 	TECMAKE_HOME=$ORIG_TECMAKEHOME
 	TECTOOLS_HOME=$ORIG_TECTOOLSHOME
 fi
+
+function die {
+        echo -e $@
+        exit 1
+}
+
+if [ -z "$OPENBUS_HOME" ] && [ -z "$1" ]; then
+	die "Usage: $0 OPENBUS_HOME"
+fi
+
+ARGUMENT=$1
+OPENBUS_HOME=${ARGUMENT:=/local/openbus/running}
+CRASH_DIR=$OPENBUS_HOME/data/crashes
+export OPENBUS_HOME
+
+OPENBUS_INIT=/etc/init.d/openbus
+[ -x "$OPENBUS_INIT" ] || die "ERROR: $OPENBUS_INIT not found or execute permission missing."
+HOSTNAME=$(hostname)
+ACS_PID=$OPENBUS_HOME/data/acs.pid
+RGS_PID=$OPENBUS_HOME/data/rgs.pid
+SS_PID=$OPENBUS_HOME/data/ss.pid
 
 # function to check if is running actually
 is_running() {
@@ -63,9 +79,8 @@ ret=$?
 if [ $ret -gt 0 ] ; then
 	# probably the services has crashed!
 	# it will try stop any other openbus services
-	/etc/init.d/openbus stop
+	$OPENBUS_INIT stop 
 
-	CRASH_DIR=$OPENBUS_HOME/data/crashes
 	TAG=`date +%Y%m%d-%H:%M:%S`
 	mkdir -p $CRASH_DIR
 
@@ -76,18 +91,19 @@ if [ $ret -gt 0 ] ; then
 	cp $OPENBUS_HOME/data/ss.log $CRASH_DIR/ss-$TAG.log
 	gzip $CRASH_DIR/ss-$TAG.log
 	
-	/etc/init.d/openbus start
-	echo "Olá,
-Sou um notificador autom�tico, que acabou de ver que os servicos do OpenBus na
-máquina Ubu/TecGraf falharam!
-Acabo de reiniciar os servicos, talvez seja importante você olhar os logs que
+	$OPENBUS_INIT start
+	echo "OlÃ¡,
+Sou um notificador automÃtico e identifiquei que os servicos do OpenBus na
+mÃ¡quina $HOSTNAME falharam!
+Acabo de reiniciar os servicos, talvez seja importante vocÃª olhar os logs que
 foram salvos em:
   $CRASH_DIR/acs-$TAG.log
   $CRASH_DIR/rgs-$TAG.log
   $CRASH_DIR/ss-$TAG.log
 
 Atenciosamente,
-Crontab da Máquina Ubu/TecGraf
+Crontab da MÃ¡quina $HOSTNAME
 Autor: Amadeu Barbosa (amadeu@tecgraf.puc-rio.br)" |\
-	 mail -s "Falha e reinício do barramento na Ubu/TecGraf" amadeu@tecgraf.puc-rio.br
+	 mail -s "Falha e reinÃ­cio do barramento na $HOSTNAME" amadeu@tecgraf.puc-rio.br
 fi
+
