@@ -266,6 +266,7 @@ packages = {
 			["../idl/*.idl"] = "idlpath",
 			["../services/accesscontrol"] = "core/services",
 			["../services/registry"] = "core/services",
+                        ["../services/faulttolerance"] = "core/services",
 			["../services/session"] = "core/services",
 			["../utilities/lua/openbus"] = "core/utilities/lua",
 	  },
