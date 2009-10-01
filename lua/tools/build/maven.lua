@@ -45,7 +45,7 @@ function copyDependence(t,arguments,build_dir)
 
         -- Adding arguments
         if not arguments["verbose"] and not arguments["v"] then
-                maven_cmd = "-Dsilent "
+                maven_cmd = maven_cmd .. "-Dsilent=true "
         end
 	
 	build_cmd = "cd " .. build_dir .. " && " .. maven_cmd
