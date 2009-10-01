@@ -453,48 +453,9 @@ packages = {
 			target = "jar-core",
 	  },
 	  install_files = {
-			["../../libs/jacorb/*"] = "libpath/java/jacorb", -- all jacorb and its dependencies
 			["../../libs/scsidl.jar"] = "libpath/java/scs", -- the scs-idl
 			["../../libs/scs.jar"] = "libpath/java/scs",    -- the scs-core
 			["../../idl/scs.idl"]  = "idlpath",
-	  },
-	},
-	-- Maven installation in back-compatibility mode. 
-	-- Advanced maven integration to compile the openbus code easier.
-	{ name = "scs-java2maven",
-	  build = {
-			type = "maven",
-			src = PRODAPP .."/scs",
-			legacymode = true,
-	  },
-	  maven_post_compile = { -- needed to compile the next 'openbusidl-java' package
-			["libs/jacorb/jacorb.jar"] = { 
-				groupId = "org.jacorb", artifactId = "jacorb", version = "2.3.0" 
-			},
-			["libs/jacorb/idl.jar"]    = { 
-				groupId = "org.jacorb", artifactId = "jacorb-idl-compiler", version = "2.3.0" 
-			},
-			["libs/scsidl.jar"] = { 
-				groupId = "tecgraf.scs", artifactId = "scs-idl-jacorb", version = "1.0.1" 
-			},
-			["libs/scs.jar"]    = { 
-				groupId = "tecgraf.scs", artifactId = "scs-core", version = "1.0.1" 
-			},
-			["libs/jacorb/logkit-1.2.jar"] = { 
-				groupId = "org.apache", artifactId = "logkit", version = "1.2" 
-			},
-			["libs/jacorb/avalon-framework-4.1.5.jar"] = { 
-				groupId = "org.apache", artifactId = "avalon-framework", version = "4.1.5" 
-			},
-			["libs/jacorb/picocontainer-1.2.jar"] = { 
-				groupId = "org.picocontainer", artifactId = "picocontainer", version = "1.2" 
-			},
-			["libs/jacorb/wrapper-3.1.0.jar"]     = { 
-				groupId = "org.tanukisoftware", artifactId = "wrapper", version = "3.1.0" 
-			},
-			["libs/jacorb/backport-util-concurrent.jar"] = { 
-				groupId = "edu.emory", artifactId = "backport-util-concurrent", version = "CURRENT" 
-			},
 	  },
 	},
 	{ name = "openbusidl-java",
@@ -506,9 +467,6 @@ packages = {
 			["*.idl"] = "idlpath",
 			["target/openbus-idl-jacorb-*.jar"] = "core/utilities/java",
 	  },
-	  maven_post_compile = { -- needed to compile the next 'openbus-java' package
-			["target/openbus-idl-jacorb-1.4-SNAPSHOT.jar"] = { groupId = "tecgraf.openbus", artifactId = "openbus-idl-jacorb", version = "1.4-SNAPSHOT" },
-	  },
 	},
 	{ name = "openbus-java",
 	  build = {
@@ -518,9 +476,6 @@ packages = {
 	  install_files = {
 			["target/openbus-api-*.jar"] = "core/utilities/java",
 	  },
-	  maven_post_compile = { -- needed to compile the other packages that will use this
-			["target/openbus-api-1.4-SNAPSHOT.jar"] = { groupId = "tecgraf.openbus", artifactId = "openbus-api", version = "1.4-SNAPSHOT" },
-	  },
 	},
 	{ name = "openbus-demo-hello-java",
 	  build = {
@@ -529,9 +484,6 @@ packages = {
 	  },
 	  install_files = {
 			["target/openbus-demo-hello-*.jar"] = "demo/hello/java",
-	  },
-	  maven_post_compile = { -- needed to compile the other packages that will use this
-			["target/openbus-demo-hello-1.4-SNAPSHOT.jar"] = { groupId = "tecgraf.openbus", artifactId = "openbus-demo-hello", version = "1.4-SNAPSHOT" },
 	  },
 	},
 --	{ name = "ldap-Linux26g4",

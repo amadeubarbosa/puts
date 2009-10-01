@@ -19,7 +19,8 @@ TOOLS_LUA= $(addprefix tools.,\
 	build.copy \
 	build.autotools \
 	build.maven \
-        build.ant \
+	build.mavenimport \
+    build.ant \
 	fetch.http \
 	fetch.svn \
 	checklibdeps \

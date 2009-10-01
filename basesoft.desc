@@ -194,4 +194,20 @@ basesoft = {
 			[TMPDIR .."/include/lber*"] = "incpath/openldap-2.4.11",
 		},
 	},
+	{ name = "jacorb-2.3.0",
+		source = "http://www.tecgraf.puc-rio.br/~openbus/repository/jacorb-2.3.0.tar.gz",
+		build = {
+			type = "mavenimport",
+			src = PRODAPP .. "/jacorb-2.3.0"
+		},
+		parameters = { 
+                        ["lib/jacorb.jar"] = { groupId="org.jacorb", artifactId="jacorb",
+			 version="2.3.0", pomFile="jacorb-pom.xml" },
+                	["lib/idl.jar"] = { groupId="org.jacorb", artifactId="jacorb-idl-compiler",
+			 version="2.3.0", pomFile="jacorb-idl-compiler-pom.xml" },
+		},
+		install_file = {
+			["target/dependency/*.jar"] = "libpath/temp",
+		},
+	},
 }
