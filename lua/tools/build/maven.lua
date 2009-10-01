@@ -43,10 +43,10 @@ function copyDependence(t,arguments,build_dir)
 	local maven_cmd = "mvn "
         maven_cmd = maven_cmd .. "dependency:copy-dependencies "
 
-		maven_args = "-DincludeScope=" .. "runtime"
+		maven_args = "-DincludeScope=runtime"
         -- Adding arguments
         if not arguments["verbose"] and not arguments["v"] then
-                maven_args = maven_args .. "-Dsilent=true "
+                maven_args = maven_args .. " -Dsilent=true "
         end
 	
 	build_cmd = "cd " .. build_dir .. " && " .. maven_cmd .. maven_args
