@@ -206,8 +206,5 @@ basesoft = {
                 	["lib/idl.jar"] = { groupId="org.jacorb", artifactId="jacorb-idl-compiler",
 			 version="2.3.0", pomFile="jacorb-idl-compiler-pom.xml" },
 		},
-		install_file = {
-			["target/dependency/*.jar"] = "libpath/temp",
-		},
 	},
 }

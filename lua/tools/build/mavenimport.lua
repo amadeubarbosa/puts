@@ -32,9 +32,12 @@ function run(t, arguments)
 				" -DgroupId="    .. props.groupId ..
 				" -DartifactId=" .. props.artifactId ..
 				" -Dversion="    .. props.version .. 
-				" -DpomFile="    .. props.pomFile ..
 				" -Dpackaging="  .. "jar" ..
-				" -Dfile="       .. file
+				" -Dfile="       .. file				
+				
+		if props.pomFile then
+			repoinstall = repoinstall .. " -DpomFile=" .. props.pomFile
+		end
 
 		build_cmd = "cd " .. build_dir .. " && " .. maven_cmd .. maven_args .. repoinstall
 		local ret = os.execute(build_cmd)

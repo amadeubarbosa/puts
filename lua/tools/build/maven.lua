@@ -43,12 +43,13 @@ function copyDependence(t,arguments,build_dir)
 	local maven_cmd = "mvn "
         maven_cmd = maven_cmd .. "dependency:copy-dependencies "
 
+		maven_args = "-DincludeScope=" .. "runtime"
         -- Adding arguments
         if not arguments["verbose"] and not arguments["v"] then
-                maven_cmd = maven_cmd .. "-Dsilent=true "
+                maven_args = maven_args .. "-Dsilent=true "
         end
 	
-	build_cmd = "cd " .. build_dir .. " && " .. maven_cmd
+	build_cmd = "cd " .. build_dir .. " && " .. maven_cmd .. maven_args
 
 	local ret = os.execute(build_cmd)
 	assert(ret == 0, "ERRO copyng-dependencies" .. t.name)

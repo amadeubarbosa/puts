@@ -453,11 +453,22 @@ packages = {
 			target = "jar-core",
 	  },
 	  install_files = {
-			["../../libs/scsidl.jar"] = "libpath/java/scs", -- the scs-idl
-			["../../libs/scs.jar"] = "libpath/java/scs",    -- the scs-core
 			["../../idl/scs.idl"]  = "idlpath",
 	  },
 	},
+	{ name = "scs-java-import",
+	  build = {
+			type = "mavenimport",
+			src = PRODAPP .. "/scs",
+	  },
+	  parameters = { 
+			["libs/scs.jar"] = { groupId="tecgraf.scs", artifactId="scs-core",
+			 version="1.0.1" },
+			["libs/scsidl.jar"] = { groupId="tecgraf.scs", artifactId="scs-idl-jacorb",
+			 version="1.0.1" },
+	  },
+	},
+	  
 	{ name = "openbusidl-java",
 	  build = {
 	  	type = "maven",
@@ -465,7 +476,8 @@ packages = {
 	  },
 	  install_files = {
 			["*.idl"] = "idlpath",
-			["target/openbus-idl-jacorb-*.jar"] = "core/utilities/java",
+			["target/openbus-idl-jacorb-*.jar"] = "libpath/java",
+			["target/dependency/*.jar"] = "libpath/java",
 	  },
 	},
 	{ name = "openbus-java",
@@ -474,7 +486,8 @@ packages = {
 	  	src = SVNDIR .."/core/utilities",	  	
 	  },
 	  install_files = {
-			["target/openbus-api-*.jar"] = "core/utilities/java",
+			["target/openbus-api-*.jar"] = "libpath/java",
+			["target/dependency/*.jar"] = "libpath/java",
 	  },
 	},
 	{ name = "openbus-demo-hello-java",
@@ -483,7 +496,8 @@ packages = {
 	  	src = SVNDIR .."/demo/hello",
 	  },
 	  install_files = {
-			["target/openbus-demo-hello-*.jar"] = "demo/hello/java",
+			["target/openbus-demo-hello-*.jar"] = "libpath/java",
+			["target/dependency/*.jar"] = "libpath/java",
 	  },
 	},
 --	{ name = "ldap-Linux26g4",
