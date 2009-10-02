@@ -60,7 +60,11 @@ local arguments = util.parse_args(arg,[[
 	--list                   : list all package names from description files. When
 	                           '--select' is used, it'll confirm the selection.
 	--select="pkg1 pkg2 ..." : choose which packages to compile and install
-	--noupdate		 : don't try to update the sources from repositories
+    --profile="file1 file2..." : use a list of 'filenames' representing the profiles
+                                 which have a list of packages inside (it will append 
+                                 to the select list)
+	--exclude="pkg1 pkg2 ..."  : list of package to exclude of the compile process
+	--noupdate		         : don't try to update the sources from repositories
 
  NOTES:
  	The prefix '--' is optional in all options.
@@ -70,6 +74,16 @@ if arguments.select then
 	local value = arguments.select
 	-- selecting packages to build with multiple '--select' support
 	arguments.select = {value:split("[^%s]+")}
+end
+if arguments.exclude then
+	local value = arguments.exclude
+	-- selecting packages to build with multiple '--exclude' support
+	arguments.exclude = {value:split("[^%s]+")}
+end
+if arguments.profile then
+	local value = arguments.profile
+	-- selecting packages to build with multiple '--profile' support
+	arguments.profile = {value:split("[^%s]+")}
 end
 
 print("[ INFO ] We are going to install full openbus dependencies on \
@@ -103,6 +117,32 @@ end
 rehashByName(basesoft)
 rehashByName(packages)
 
+-- Including package names (using select semantics) from a profile
+if arguments["profile"] then
+  for _,profile in ipairs(arguments["profile"]) do 
+	local _,name = profile:match("(.*)/(.*)") --extracts name "dir/name.profile"
+	name = name or profile                    --could nil only if "name.profile"
+	name = name:gsub(".profile","")           --deletes the suffix ".profile"
+    local file = assert(io.open(profile,"r") or 
+    		io.open(name..".profile","r") or 
+    		io.open(DEPLOYDIR .."/profiles/".. name,"r") or 
+    		io.open(DEPLOYDIR .."/profiles/".. name ..".profile","r"))
+    
+    -- Listing packages from profile description
+    local l = file:lines()
+    repeat
+      packagename = l()
+      if packagename then
+        if not arguments.select then
+           arguments.select = {}
+        end
+        -- Using the package to fill the arguments.select vector
+        table.insert(arguments.select,packagename)
+      end
+    until (packagename == nil)
+  end
+end
+
 -- real filtering
 local newbasesoft = {}
 local newpackages = {}
@@ -124,6 +164,33 @@ if arguments["select"] then
 	-- always updates the references
 	basesoft = newbasesoft
 	packages = newpackages
+end
+
+-- Filtering the packages and basesoft list to remove some packages from the
+-- selection
+if arguments["exclude"] then
+  local excludes = arguments.exclude
+  for i,pkgname in ipairs(excludes) do
+    excludes[pkgname] = i
+  end
+  local newbasesoft = {}
+  local newpackages = {}
+  for i,pkgdesc in ipairs(basesoft) do
+   if not arguments.exclude[pkgdesc.name] then
+     table.insert(newbasesoft,pkgdesc)
+   else
+     print("[ INFO ] Excluding the package named: ", pkgdesc.name)
+   end
+  end
+  for i,pkgdesc in ipairs(packages) do
+   if not arguments.exclude[pkgdesc.name] then
+     table.insert(newpackages,pkgdesc)
+   else
+     print("[ INFO ] Excluding the package named: ", pkgdesc.name)
+   end
+  end
+  basesoft = newbasesoft
+  packages = newpackages
 end
 
 -- Listing packages when '--list' arguments
