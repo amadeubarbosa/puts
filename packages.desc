@@ -488,17 +488,14 @@ packages = {
 	  },
 	},
 	-- Java related packages	
-	{ name = "scs-java",
+	{ name = "scs-java-ant",
 	  build = {
 			type = "ant",
 			src = PRODAPP .."/scs/src/java",
 			target = "jar-core",
 	  },
-	  install_files = {
-			["../../idl/scs.idl"]  = "idlpath",
-	  },
 	},
-	{ name = "scs-java-import",
+	{ name = "scs-java",
 	  build = {
 			type = "mavenimport",
 			src = PRODAPP .. "/scs",
@@ -509,8 +506,10 @@ packages = {
 			["libs/scsidl.jar"] = { groupId="tecgraf.scs", artifactId="scs-idl-jacorb",
 			 version="1.0.1" },
 	  },
+	  install_files = {
+			["idl/scs.idl"]  = "idlpath",
+	  },
 	},
-	  
 	{ name = "openbusidl-java",
 	  build = {
 	  	type = "maven",

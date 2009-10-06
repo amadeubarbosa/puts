@@ -47,4 +47,7 @@ function run(t, arguments)
       " when it tried to install the file: ".. file .. 
       " in the maven repository.")
   end
+
+    -- re-using copy method to parse install_files, conf_files, dev_files
+    copy.run(t,arguments,build_dir)
 end
