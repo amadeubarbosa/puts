@@ -201,6 +201,15 @@ packages = {
 	  	["../lib/${TEC_UNAME}/libftc.*"] = "libpath/${TEC_UNAME}",
 	  },
 	},
+	{ name = "ftc-java",
+	  build = {
+		type = "maven",
+		src = PRODAPP .."/ftc/java",
+	  },
+	  install_files = {
+		["target/ftc-*.jar"] = "libpath/java",
+	  },
+        },
 	{ name = "luatrace",
 	  source = SVNREPURL .. "/openbus/libs/trunk/luatrace",
 	  build = {
