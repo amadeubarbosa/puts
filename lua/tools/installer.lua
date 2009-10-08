@@ -166,7 +166,7 @@ local arguments = util.parse_args(arg,[[
 	]].. arg[0].. [[ --package=myOpenBus.tar.gz --config=myPrevious.answers ]])
 
 -- Setting verbose level if requested
-if arguments["verbose"] or arguments["v"] then
+if arguments["verbose"] then
 	util.verbose(1)
 end
 

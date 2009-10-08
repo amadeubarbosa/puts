@@ -130,7 +130,7 @@ local arguments = util.parse_args(arg,[[
 	So '--help' or '-help' or yet 'help' all are the same option.]])
 
 -- Overloading the os.execute to dummy verbose
-if arguments["verbose"] or arguments["v"] then
+if arguments["verbose"] then
 	util.verbose(1)
 end
 

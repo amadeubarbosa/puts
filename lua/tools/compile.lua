@@ -86,6 +86,10 @@ if arguments.profile then
 	arguments.profile = {value:split("[^%s]+")}
 end
 
+if arguments["v"] then
+	arguments["verbose"] = true
+end
+
 print("[ INFO ] We are going to install full openbus dependencies on \
 ".. INSTALL.TOP .." and temporary install directories \
 (for autotools based packages) on ".. TMPDIR .." .\n")
@@ -207,7 +211,7 @@ if arguments["list"] then
 end
 
 -- Setting verbose level if requested
-if arguments["verbose"] or arguments["v"] then
+if arguments["verbose"] then
 	util.verbose(1)
 end
 

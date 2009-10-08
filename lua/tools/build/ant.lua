@@ -24,7 +24,7 @@ function run(t, arguments)
 
 	-- Adding arguments
 	local ant_args = "" 
-	if not arguments["verbose"] and not arguments["v"] then 
+	if not arguments["verbose"] then 
 		ant_args = ant_args .. " -q " 
 	end
 

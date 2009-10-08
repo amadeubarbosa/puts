@@ -22,7 +22,7 @@ function run(t, arguments)
 
   -- Adding arguments
   local maven_args = "-DskipTests " 
-  if not arguments["verbose"] and not arguments["v"] then 
+  if not arguments["verbose"] then 
     maven_args = maven_args .. "-q " 
   end
 
