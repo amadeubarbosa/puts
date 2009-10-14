@@ -261,6 +261,16 @@ packages = {
 	  	["../lib/${TEC_UNAME}/liblce.*"] = "libpath/${TEC_UNAME}",
 	  },
 	},
+	{ name = "lpw",
+	  build = {
+	  	type = "tecmake",
+	  	src = SVNDIR .."/lib/lpw/src",
+	  	mf = { "config LUA51="..PRODAPP.."/lua5.1", },
+	  },
+	  install_files = {
+	  	["../lib/${TEC_UNAME}/liblpw.so"] = "libpath/${TEC_UNAME}",
+	  },
+	},
 	{ name = "openbus-core",
 	  build = {
 	  	type = "tecmake",
