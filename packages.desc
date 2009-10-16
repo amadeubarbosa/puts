@@ -285,9 +285,11 @@ packages = {
 			["../idl/*.idl"] = "idlpath",
 			["../services/accesscontrol"] = "core/services",
 			["../services/registry"] = "core/services",
-                        ["../services/faulttolerance"] = "core/services",
+			["../services/faulttolerance"] = "core/services",
 			["../services/session"] = "core/services",
 			["../utilities/lua/openbus"] = "core/utilities/lua",
+			["../test/lua/run_check_install.sh"] = "core/test",
+			["../test/lua/checkInstall.lua"] = "core/test",
 	  },
 	  conf_files = {
 			["../../data/conf"] = "data",
@@ -295,7 +297,7 @@ packages = {
 	  },
 	  -- TODO: include here all templates/openbus.lua messages table!!
 	  conf_template = DEPLOYDIR .. "/templates/openbus.lua",
-		dev_files = {
+	  dev_files = {
 			["../test/lua"] = "core/test",
 		},
 	},
