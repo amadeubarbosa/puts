@@ -281,6 +281,7 @@ packages = {
 	  install_files = {
 			["../bin/${TEC_UNAME}/*"] = "core/bin/${TEC_UNAME}",
 			["../bin/*.sh"] = "core/bin",
+			["../bin/management.lua"] = "core/bin",
 			["../bin/servicelauncher"] = "core/bin",
 			["../idl/*.idl"] = "idlpath",
 			["../services/accesscontrol"] = "core/services",
@@ -294,6 +295,7 @@ packages = {
 	  conf_files = {
 			["../../data/conf"] = "data",
 			["../../data/certificates"] = "data",
+			["../../data/*.db"] = "data",
 	  },
 	  -- TODO: include here all templates/openbus.lua messages table!!
 	  conf_template = DEPLOYDIR .. "/templates/openbus.lua",
