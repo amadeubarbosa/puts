@@ -534,6 +534,12 @@ packages = {
 			["idl/scs.idl"]  = "idlpath",
 	  },
 	},
+	{ name = "openbus-java",
+	  build = {
+	  	type = "maven",
+	  	src = SVNDIR, 
+	  },
+	},
 	{ name = "openbusidl-java",
 	  build = {
 	  	type = "maven",
@@ -545,7 +551,7 @@ packages = {
 			["target/dependency/*.jar"] = "libpath/java",
 	  },
 	},
-	{ name = "openbus-java",
+	{ name = "openbusapi-java",
 	  build = {
 	  	type = "maven",
 	  	src = SVNDIR .."/core/utilities",	  	
