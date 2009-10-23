@@ -24,9 +24,9 @@ setenv IT_LICENSE_FILE "${ORBIX_HOME}/../../etc/licenses.txt"
 
 #: ${LD_LIBRARY_PATH:=""}
 
-setenv LD_LIBRARY_PATH "${ORBIX_HOME}/../../shlib:${ORBIX_HOME}/../../shlib/default:${ORBIX_HOME}/../../shlib/lib64:${ORBIX_HOME}/../../shlib/default/lib64:/usr/java/jre/lib/sparc:/usr/java/jre/lib/sparc/server:$LD_LIBRARY_PATH"
+setenv LD_LIBRARY_PATH "${ORBIX_HOME}/../../shlib:${ORBIX_HOME}/../../shlib/default:${ORBIX_HOME}/../../shlib/lib64:${ORBIX_HOME}/../../shlib/default/lib64:$LD_LIBRARY_PATH"
 
 #: ${LD_LIBRARY_PATH_64:=""}
 
-#setenv LD_LIBRARY_PATH_64 "${ORBIX_HOME}/../../shlib/lib64:${ORBIX_HOME}/../../shlib/default/lib64:${ORBIX_HOME}/../../shlib:${ORBIX_HOME}/../../shlib/default:$LD_LIBRARY_PATH_64"
+setenv LD_LIBRARY_PATH_64 "${ORBIX_HOME}/../../shlib/lib64:${ORBIX_HOME}/../../shlib/default/lib64:${ORBIX_HOME}/../../shlib:${ORBIX_HOME}/../../shlib/default:$LD_LIBRARY_PATH_64"
 

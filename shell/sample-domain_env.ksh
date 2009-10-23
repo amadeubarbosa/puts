@@ -24,9 +24,9 @@ export IT_LICENSE_FILE="$ORBIX_HOME/../../etc/licenses.txt"
 
 #: ${LD_LIBRARY_PATH:=""}
 
-export LD_LIBRARY_PATH="$ORBIX_HOME/../../shlib:$ORBIX_HOME/../../shlib/default:$ORBIX_HOME/../../shlib/lib64:$ORBIX_HOME/../../shlib/default/lib64:/usr/java/jdk1.6.0_07/jre/lib/sparc:/usr/java/jdk1.6.0_07/jre/lib/sparc/server:$LD_LIBRARY_PATH"
+LD_LIBRARY_PATH="$ORBIX_HOME/../../shlib:$ORBIX_HOME/../../shlib/default:$ORBIX_HOME/../../shlib/lib64:$ORBIX_HOME/../../shlib/default/lib64:$LD_LIBRARY_PATH"; export LD_LIBRARY_PATH
 
 #: ${LD_LIBRARY_PATH_64:=""}
 
-#LD_LIBRARY_PATH_64=$ORBIX_HOME/../../shlib/lib64:$ORBIX_HOME/../../shlib/default/lib64:$ORBIX_HOME/../../shlib:$ORBIX_HOME/shlib/default:$LD_LIBRARY_PATH_64; export LD_LIBRARY_PATH_64
+LD_LIBRARY_PATH_64="$ORBIX_HOME/../../shlib/lib64:$ORBIX_HOME/../../shlib/default/lib64:$ORBIX_HOME/../../shlib:$ORBIX_HOME/shlib/default:$LD_LIBRARY_PATH_64"; export LD_LIBRARY_PATH_64
 
