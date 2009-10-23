@@ -107,11 +107,11 @@ function unpack_archive(path,archive)
 	
 	local unpack_cmd
 	if archive:match("%.tar%.gz$") or archive:match("%.tgz$") then
-		unpack_cmd = "gunzip -c "..archive.."|tar -xf -"
+		unpack_cmd = myplat.cmd.gunzip ..archive.."|".. myplat.cmd.tar .."-xf -"
 	elseif archive:match("%.tar%.bz2$") then
-		unpack_cmd = "bunzip2 -c "..archive.."|tar -xf -"
+		unpack_cmd = myplat.cmd.bunzip2 ..archive.."|".. myplat.cmd.tar .."-xf -"
 	elseif archive:match("%.zip$") then
-		unpack_cmd = "unzip "..archive
+		unpack_cmd = myplat.cmd.unzip ..archive
 	else
 		local ext = archive:match(".*(%..*)")
 		return false, "Unrecognized filename extension "..(ext or "")

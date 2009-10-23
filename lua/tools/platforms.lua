@@ -2,6 +2,7 @@ local table  = table
 local os     = os
 local ipairs = ipairs
 local print,io  = print,io
+local setmetatable = setmetatable 
 
 module("platforms")
 
@@ -15,7 +16,9 @@ module("platforms")
 platforms = {
 	pipe_stderr = " 2>/dev/null",
 	dylibext = "so",
-	cmd = { install = "cp -rf ", make = "make ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls " },
+	cmd = { install = "cp -rf ", make = "make ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls ",
+		gunzip = "gunzip -c ", tar = "tar ", bunzip2 = "bunzip2 -c ", unzip = "unzip ",
+	 },
 	exec = function(cmd)
 		local pipe = io.popen(cmd,"r")
 		local stdout = pipe:read("*a")
@@ -88,11 +91,12 @@ platforms.Linux = {
 		end
 	end,
 }
+setmetatable(platforms.Linux.cmd, { __index = platforms.cmd })
 platforms.SunOS = {
 	pipe_stderr = platforms.pipe_stderr,
 	dylibext = platforms.dylibext,
 	exec = platforms.exec,
-	cmd = platforms.cmd,
+	cmd = { tar = "gtar " },
 	unknown_symbols = function(self,file) 
 		return self.exec("nm -f sysv -u ".. file .. " |awk -F'|' '/UNDEF/ {print $8}'"):gsub("^%d*$","") 
 	end,
@@ -111,6 +115,7 @@ platforms.SunOS = {
 	--	libc.so.1 =>     /lib/libc.so.1
 	missing_libraries = platforms.Linux.missing_libraries
 }
+setmetatable(platforms.SunOS.cmd, { __index = platforms.cmd })
 platforms.IRIX = {
 	pipe_stderr = platforms.pipe_stderr,
 	dylibext = platforms.dylibext,
@@ -144,6 +149,7 @@ platforms.IRIX = {
 		end
 	end,
 }
+setmetatable(platforms.IRIX.cmd, { __index = platforms.cmd })
 platforms.Darwin = {
 	pipe_stderr = platforms.pipe_stderr,
 	dylibext = "dylib",
