@@ -93,7 +93,7 @@ function pack(arch,profile)
 	local metadata_dirname = "metadata-"..release.."-"..name
 	assert(os.execute(myplat.cmd.mkdir .. TMPDIR .."/"..metadata_dirname) == 0)
 	assert(os.execute(myplat.cmd.install .. metadata_files .." "..TMPDIR.."/"..metadata_dirname) == 0)
-	assert(os.execute("cd ".. TMPDIR .." && tar -cf - ".. metadata_dirname .." |gzip > ".. metadata_dirname ..".tar.gz") == 0)
+	assert(os.execute("cd ".. TMPDIR .." && ".. myplat.cmd.tar .."-cf - ".. metadata_dirname .." |gzip > ".. metadata_dirname ..".tar.gz") == 0)
 	assert(os.execute("mv ".. TMPDIR .."/".. metadata_dirname ..".tar.gz ".. INSTALL.TOP) == 0)
 	assert(os.execute(myplat.cmd.rm .. TMPDIR) == 0)
 	tarball_files = tarball_files .." ".. metadata_dirname..".tar.gz "
@@ -101,7 +101,7 @@ function pack(arch,profile)
 	-- Call the 'tar' command
 	local excludefile = os.tmpname()
 	local tar_cmd = "cd ".. INSTALL.TOP .." && "
-	tar_cmd = tar_cmd .. "find . -name .svn -type d |sed \"s#^./##\" >"..excludefile.." && tar cfX - "..excludefile.." "
+	tar_cmd = tar_cmd .. "find . -name .svn -type d |sed \"s#^./##\" >"..excludefile.." && ".. myplat.cmd.tar .."cfX - "..excludefile.." "
 	tar_cmd = tar_cmd .. tarball_files
 	tar_cmd = tar_cmd .. "|gzip > "..DOWNLOADDIR.."/openbus-".. release .."-"..name.."-".. arch .. ".tar.gz "
 	assert(os.execute(tar_cmd) == 0, "Cannot execute the command \n"..tar_cmd..
