@@ -1,210 +1,210 @@
 -- Description of basic software, tipical external programs that needs to be
 -- compiled and installed with specific methods (like autotools)
 basesoft = {
-	{ name = "cxxtest",
-		source = "http://www.tecgraf.puc-rio.br/~openbus/repository/cxxtest.tar.gz",
-		dev_files = {
-		  ["cxxtestgen.pl"] = "bin",
-		  ["cxxtestgen.py"] = "bin",
-		  ["include/cxxtest"] = "incpath/cxxtest/",
-	  },
-	},
-	{ name = "e2fsprogs-1.40.8",
-		source = "http://www.tecgraf.puc-rio.br/~openbus/repository/e2fsprogs-1.40.8.tar.gz",
-		build = {
-			type = "autotools",
-			test_libs = {"libuuid.*"},
-			-- TIP: o configure dessa versão tem algum problema que dá um erro
-			-- ao tentar fazer make sem antes fazer um clean
-			Darwin = "make clean; ./configure --prefix=".. TMPDIR ..
-			         " --enable-bsd-shlibs && cd lib/uuid && make && make install",
-			Linux =  "gmake clean; ./configure --prefix=".. TMPDIR ..
-			         " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
-			SunOS =  "gmake clean; env CC=gcc ./configure --prefix=".. TMPDIR ..
-			         " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
-			SunOS510 =  "make clean; env CC=gcc CFLAGS=-UTLS ./configure --prefix=".. TMPDIR ..
-			         " --enable-elf-shlibs && cd lib/uuid && make && make install",
-			IRIX =   "gmake clean; ./configure --prefix=".. TMPDIR ..
-			         " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
-		},
-		install_files = {
---			["lib/libuuid*.dll*"] = "libpath/${TEC_UNAME}",  --dynamic windows
-			["lib/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-			["lib/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-		},
-		dev_files = {
-			["lib/libuuid*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
---			["lib/libuuid*.lib*"] = "libpath/${TEC_UNAME}",  --static windows
---			["lib/libuuid*.dll*"] = "libpath/${TEC_UNAME}",  --dynamic windows
-			["lib/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-			["lib/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-			["lib/uuid/uuid.h"] = "incpath/e2fsprogs-1.40.8/uuid",
-		},
-	},
-	{ name = "openssl-0.9.9",
-		source = "http://www.tecgraf.puc-rio.br/~openbus/repository/openssl-0.9.9.tar.gz",
-		build = {
-			type = "autotools",
-			test_libs = {"libcrypto*0.9.9*"},
-			Darwin = "./config no-asm shared --prefix=".. TMPDIR ..
-			         " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
-			Linux =  "./config shared --prefix=".. TMPDIR ..
-			         " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
-			IRIX =   "./config shared --prefix=".. TMPDIR ..
-			         " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
-			SunOS =  "./config shared --prefix=".. TMPDIR ..
-			         " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
-			SunOS510x86 = "./config no-asm shared --prefix=".. TMPDIR ..
-			         " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
-		},
-		install_files = {
---			["libssl*.dll*"] = "libpath/${TEC_UNAME}",      --dynamic windows
---			["libcrypto*.dll*"] = "libpath/${TEC_UNAME}",
-			[TMPDIR .."/lib/libssl*.so*"] = "libpath/${TEC_UNAME}",       --dynamic linux,aix,sunos
-			[TMPDIR .."/lib/libcrypto*.so*"] = "libpath/${TEC_UNAME}",
-			[TMPDIR .."/lib/libssl*.dylib*"] = "libpath/${TEC_UNAME}",    --dynamic macos
-			[TMPDIR .."/lib/libcrypto*.dylib*"] = "libpath/${TEC_UNAME}",
-			[TMPDIR .."/bin/openssl"] = "bin/${TEC_UNAME}",
-			[TMPDIR .."/bin/c_rehash"] = "bin/${TEC_UNAME}",
-			[TMPDIR .."/openssl/*"] = "openssl",
-		},
-		dev_files = {
-			[TMPDIR .."/include/openssl"] = "incpath/openssl-0.9.9",
-			[TMPDIR .."/lib/libssl*.a*"] = "libpath/${TEC_UNAME}",        --static linux,aix,sunos
-			[TMPDIR .."/lib/libcrypto*.a*"] = "libpath/${TEC_UNAME}",     
---			["libssl*.lib*"] = "libpath/${TEC_UNAME}",      --static windows
---			["libcrypto*.lib*"] = "libpath/${TEC_UNAME}",
---			["libssl*.dll*"] = "libpath/${TEC_UNAME}",      --dynamic windows
---			["libcrypto*.dll*"] = "libpath/${TEC_UNAME}",
-			[TMPDIR .."/lib/libssl*.so*"] = "libpath/${TEC_UNAME}",       --dynamic linux,aix,sunos
-			[TMPDIR .."/lib/libcrypto*.so*"] = "libpath/${TEC_UNAME}",
-			[TMPDIR .."/lib/libssl*.dylib*"] = "libpath/${TEC_UNAME}",    --dynamic macos
-			[TMPDIR .."/lib/libcrypto*.dylib*"] = "libpath/${TEC_UNAME}",
-			[TMPDIR .."/bin/openssl"] = "bin/${TEC_UNAME}",
-			[TMPDIR .."/bin/c_rehash"] = "bin/${TEC_UNAME}",
-			[TMPDIR .."/openssl/*"] = "openssl",
-		},
-	},
-	{ name = "db-4.6.21",
-		source = "http://www.tecgraf.puc-rio.br/~openbus/repository/db-4.6.21.tar.gz",
-		build = {
-			type = "autotools",
-			test_libs = {"libdb.*"},
-			Darwin = "cd build_unix; make clean; ../dist/configure --prefix=".. TMPDIR ..
-			         " && make && make install",
-			Linux =  "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
-			         " && gmake && gmake install",
-			SunOS =  "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
-			         " && gmake && gmake install",
-			SunOS510 = "cd build_unix; make clean; ../dist/configure CC=gcc --prefix=".. TMPDIR ..
-			         " && make && make install",
-			SunOS510x86 = "cd build_unix; gmake clean; ../dist/configure CC=gcc --prefix=".. TMPDIR ..
-			         " && gmake && gmake install",
-			IRIX =   "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
-			         " && gmake && gmake install",
-		},
-		install_files = {
-			[TMPDIR .."/lib/libdb*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-			[TMPDIR .."/lib/libdb*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-		},
-		dev_files = {
-			[TMPDIR .."/lib/libdb*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
-			[TMPDIR .."/lib/libdb*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-			[TMPDIR .."/lib/libdb*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-			[TMPDIR .."/include/db.h"] = "incpath/db-4.6.21",
-			[TMPDIR .."/include/db_cxx.h"] = "incpath/db-4.6.21",
-		},
-	},
-	{ name = "cyrus-sasl2-2.1.22.dfsg1",
-		source = "http://www.tecgraf.puc-rio.br/~openbus/repository/cyrus-sasl2-2.1.22.dfsg1.tar.gz",
-		build = {
-			type = "autotools",
-			test_libs = {"libsasl2*.*"},
-			external_dependencies = {
-				includes = "db.h", 
-				libs = "libdb.so",
-			},
-			Darwin = "./configure --prefix=".. TMPDIR .." --disable-macos-framework --disable-ldap --enable-static=yes"..
-			         " && cd include/ && make && make install "..
-			         " && cd ../lib/ && make && make install ",
-			Linux =  "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
-			         " && cd include/ && make && make install "..
-			         " && cd ../lib/ && make && make install ",
-			SunOS =  "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
-			         " && cd include/ && make && make install "..
-			         " && cd ../lib/ && make && make install ",
-			SunOS510 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
-			         " && cd include/ && make && make install "..
-			         " && cd ../lib/ && make && make install ",
-			SunOS510x86 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
-			         " && cd include/ && make && make install "..
-			         " && cd ../lib/ && make && make install ",
-			IRIX =   "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
-			         " && cd include/ && make && make install "..
-			         " && cd ../lib/ && make && make install ",
-		},
-		install_files = {
-			[TMPDIR .."/lib/libsasl2*.*so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-			[TMPDIR .."/lib/libsasl2*.*dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-		},
-		dev_files = {
-			[TMPDIR .."/lib/libsasl2*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
-			[TMPDIR .."/lib/libsasl2*.*so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-			[TMPDIR .."/lib/libsasl2*.*dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-			[TMPDIR .."/include/sasl"] = "incpath/cyrus-sasl2-2.1.22.dfsg1",
-		},
-	},
-	{ name = "openldap-2.4.11",
-		source = "http://www.tecgraf.puc-rio.br/~openbus/repository/openldap-2.4.11.tar.gz",
-		build = {
-			type = "autotools",
-			test_libs = {"libldap*.*"},
-			external_dependencies = {
-				includes = "db.h", 
-				libs = "libdb.so",
-			},
-			Darwin = "env LIBS=-lresolv ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
-			         " && make depend && make && make install",
-			Linux =  "env CC=gcc CPPFLAGS='-D_GNU_SOURCE' ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
-			         " && make depend && make && make install",
-			SunOS =  "./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
-			         " && make depend && make && make install",
-			-- problem on sunos510 openldap compile: http://www.openldap.org/its/index.cgi/Build?id=4607
-			SunOS510 = "env CC=gcc CFLAGS='-D_AVL_H' ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
-			         " && make depend && make && make install",
-			SunOS510x86 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
-			         " && make depend && make && make install",
-			IRIX =   "./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
-			         " && make depend && make && make install",
-		},
-		install_files = {
-			[TMPDIR .."/lib/libldap*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-			[TMPDIR .."/lib/libldap*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-			[TMPDIR .."/lib/liblber*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-			[TMPDIR .."/lib/liblber*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-		},
-		dev_files = {
-			[TMPDIR .."/lib/libldap*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
-			[TMPDIR .."/lib/libldap*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-			[TMPDIR .."/lib/libldap*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-			[TMPDIR .."/lib/liblber*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
-			[TMPDIR .."/lib/liblber*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-			[TMPDIR .."/lib/liblber*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-			[TMPDIR .."/include/ldap*"] = "incpath/openldap-2.4.11",
-			[TMPDIR .."/include/lber*"] = "incpath/openldap-2.4.11",
-		},
-	},
-	{ name = "jacorb-2.3.0",
-		source = "http://www.tecgraf.puc-rio.br/~openbus/repository/jacorb-2.3.0.tar.gz",
-		build = {
-			type = "mavenimport",
-			src = PRODAPP .. "/jacorb-2.3.0"
-		},
-		parameters = { 
+  { name = "cxxtest",
+    source = "http://www.tecgraf.puc-rio.br/~openbus/repository/cxxtest.tar.gz",
+    dev_files = {
+      ["cxxtestgen.pl"] = "bin",
+      ["cxxtestgen.py"] = "bin",
+      ["include/cxxtest"] = "incpath/cxxtest/",
+    },
+  },
+  { name = "e2fsprogs-1.40.8",
+    source = "http://www.tecgraf.puc-rio.br/~openbus/repository/e2fsprogs-1.40.8.tar.gz",
+    build = {
+      type = "autotools",
+      test_libs = {"libuuid.*"},
+      -- TIP: o configure dessa versão tem algum problema que dá um erro
+      -- ao tentar fazer make sem antes fazer um clean
+      Darwin = "make clean; ./configure --prefix=".. TMPDIR ..
+               " --enable-bsd-shlibs && cd lib/uuid && make && make install",
+      Linux =  "gmake clean; ./configure --prefix=".. TMPDIR ..
+               " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
+      SunOS =  "gmake clean; env CC=gcc ./configure --prefix=".. TMPDIR ..
+               " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
+      SunOS510 =  "make clean; env CC=gcc CFLAGS=-UTLS ./configure --prefix=".. TMPDIR ..
+               " --enable-elf-shlibs && cd lib/uuid && make && make install",
+      IRIX =   "gmake clean; ./configure --prefix=".. TMPDIR ..
+               " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
+    },
+    install_files = {
+--      ["lib/libuuid*.dll*"] = "libpath/${TEC_UNAME}",  --dynamic windows
+      ["lib/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      ["lib/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+    },
+    dev_files = {
+      ["lib/libuuid*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
+--      ["lib/libuuid*.lib*"] = "libpath/${TEC_UNAME}",  --static windows
+--      ["lib/libuuid*.dll*"] = "libpath/${TEC_UNAME}",  --dynamic windows
+      ["lib/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      ["lib/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+      ["lib/uuid/uuid.h"] = "incpath/e2fsprogs-1.40.8/uuid",
+    },
+  },
+  { name = "openssl-0.9.9",
+    source = "http://www.tecgraf.puc-rio.br/~openbus/repository/openssl-0.9.9.tar.gz",
+    build = {
+      type = "autotools",
+      test_libs = {"libcrypto*0.9.9*"},
+      Darwin = "./config no-asm shared --prefix=".. TMPDIR ..
+               " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
+      Linux =  "./config shared --prefix=".. TMPDIR ..
+               " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
+      IRIX =   "./config shared --prefix=".. TMPDIR ..
+               " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
+      SunOS =  "./config shared --prefix=".. TMPDIR ..
+               " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
+      SunOS510x86 = "./config no-asm shared --prefix=".. TMPDIR ..
+               " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
+    },
+    install_files = {
+--      ["libssl*.dll*"] = "libpath/${TEC_UNAME}",      --dynamic windows
+--      ["libcrypto*.dll*"] = "libpath/${TEC_UNAME}",
+      [TMPDIR .."/lib/libssl*.so*"] = "libpath/${TEC_UNAME}",       --dynamic linux,aix,sunos
+      [TMPDIR .."/lib/libcrypto*.so*"] = "libpath/${TEC_UNAME}",
+      [TMPDIR .."/lib/libssl*.dylib*"] = "libpath/${TEC_UNAME}",    --dynamic macos
+      [TMPDIR .."/lib/libcrypto*.dylib*"] = "libpath/${TEC_UNAME}",
+      [TMPDIR .."/bin/openssl"] = "bin/${TEC_UNAME}",
+      [TMPDIR .."/bin/c_rehash"] = "bin/${TEC_UNAME}",
+      [TMPDIR .."/openssl/*"] = "openssl",
+    },
+    dev_files = {
+      [TMPDIR .."/include/openssl"] = "incpath/openssl-0.9.9",
+      [TMPDIR .."/lib/libssl*.a*"] = "libpath/${TEC_UNAME}",        --static linux,aix,sunos
+      [TMPDIR .."/lib/libcrypto*.a*"] = "libpath/${TEC_UNAME}",     
+--      ["libssl*.lib*"] = "libpath/${TEC_UNAME}",      --static windows
+--      ["libcrypto*.lib*"] = "libpath/${TEC_UNAME}",
+--      ["libssl*.dll*"] = "libpath/${TEC_UNAME}",      --dynamic windows
+--      ["libcrypto*.dll*"] = "libpath/${TEC_UNAME}",
+      [TMPDIR .."/lib/libssl*.so*"] = "libpath/${TEC_UNAME}",       --dynamic linux,aix,sunos
+      [TMPDIR .."/lib/libcrypto*.so*"] = "libpath/${TEC_UNAME}",
+      [TMPDIR .."/lib/libssl*.dylib*"] = "libpath/${TEC_UNAME}",    --dynamic macos
+      [TMPDIR .."/lib/libcrypto*.dylib*"] = "libpath/${TEC_UNAME}",
+      [TMPDIR .."/bin/openssl"] = "bin/${TEC_UNAME}",
+      [TMPDIR .."/bin/c_rehash"] = "bin/${TEC_UNAME}",
+      [TMPDIR .."/openssl/*"] = "openssl",
+    },
+  },
+  { name = "db-4.6.21",
+    source = "http://www.tecgraf.puc-rio.br/~openbus/repository/db-4.6.21.tar.gz",
+    build = {
+      type = "autotools",
+      test_libs = {"libdb.*"},
+      Darwin = "cd build_unix; make clean; ../dist/configure --prefix=".. TMPDIR ..
+               " && make && make install",
+      Linux =  "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
+               " && gmake && gmake install",
+      SunOS =  "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
+               " && gmake && gmake install",
+      SunOS510 = "cd build_unix; make clean; ../dist/configure CC=gcc --prefix=".. TMPDIR ..
+               " && make && make install",
+      SunOS510x86 = "cd build_unix; gmake clean; ../dist/configure CC=gcc --prefix=".. TMPDIR ..
+               " && gmake && gmake install",
+      IRIX =   "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
+               " && gmake && gmake install",
+    },
+    install_files = {
+      [TMPDIR .."/lib/libdb*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      [TMPDIR .."/lib/libdb*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+    },
+    dev_files = {
+      [TMPDIR .."/lib/libdb*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
+      [TMPDIR .."/lib/libdb*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      [TMPDIR .."/lib/libdb*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+      [TMPDIR .."/include/db.h"] = "incpath/db-4.6.21",
+      [TMPDIR .."/include/db_cxx.h"] = "incpath/db-4.6.21",
+    },
+  },
+  { name = "cyrus-sasl2-2.1.22.dfsg1",
+    source = "http://www.tecgraf.puc-rio.br/~openbus/repository/cyrus-sasl2-2.1.22.dfsg1.tar.gz",
+    build = {
+      type = "autotools",
+      test_libs = {"libsasl2*.*"},
+      external_dependencies = {
+        includes = "db.h", 
+        libs = "libdb.so",
+      },
+      Darwin = "./configure --prefix=".. TMPDIR .." --disable-macos-framework --disable-ldap --enable-static=yes"..
+               " && cd include/ && make && make install "..
+               " && cd ../lib/ && make && make install ",
+      Linux =  "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
+               " && cd include/ && make && make install "..
+               " && cd ../lib/ && make && make install ",
+      SunOS =  "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
+               " && cd include/ && make && make install "..
+               " && cd ../lib/ && make && make install ",
+      SunOS510 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
+               " && cd include/ && make && make install "..
+               " && cd ../lib/ && make && make install ",
+      SunOS510x86 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
+               " && cd include/ && make && make install "..
+               " && cd ../lib/ && make && make install ",
+      IRIX =   "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
+               " && cd include/ && make && make install "..
+               " && cd ../lib/ && make && make install ",
+    },
+    install_files = {
+      [TMPDIR .."/lib/libsasl2*.*so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      [TMPDIR .."/lib/libsasl2*.*dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+    },
+    dev_files = {
+      [TMPDIR .."/lib/libsasl2*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
+      [TMPDIR .."/lib/libsasl2*.*so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      [TMPDIR .."/lib/libsasl2*.*dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+      [TMPDIR .."/include/sasl"] = "incpath/cyrus-sasl2-2.1.22.dfsg1",
+    },
+  },
+  { name = "openldap-2.4.11",
+    source = "http://www.tecgraf.puc-rio.br/~openbus/repository/openldap-2.4.11.tar.gz",
+    build = {
+      type = "autotools",
+      test_libs = {"libldap*.*"},
+      external_dependencies = {
+        includes = "db.h", 
+        libs = "libdb.so",
+      },
+      Darwin = "env LIBS=-lresolv ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+               " && make depend && make && make install",
+      Linux =  "env CC=gcc CPPFLAGS='-D_GNU_SOURCE' ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+               " && make depend && make && make install",
+      SunOS =  "./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+               " && make depend && make && make install",
+      -- problem on sunos510 openldap compile: http://www.openldap.org/its/index.cgi/Build?id=4607
+      SunOS510 = "env CC=gcc CFLAGS='-D_AVL_H' ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+               " && make depend && make && make install",
+      SunOS510x86 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+               " && make depend && make && make install",
+      IRIX =   "./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+               " && make depend && make && make install",
+    },
+    install_files = {
+      [TMPDIR .."/lib/libldap*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      [TMPDIR .."/lib/libldap*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+      [TMPDIR .."/lib/liblber*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      [TMPDIR .."/lib/liblber*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+    },
+    dev_files = {
+      [TMPDIR .."/lib/libldap*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
+      [TMPDIR .."/lib/libldap*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      [TMPDIR .."/lib/libldap*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+      [TMPDIR .."/lib/liblber*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
+      [TMPDIR .."/lib/liblber*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      [TMPDIR .."/lib/liblber*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+      [TMPDIR .."/include/ldap*"] = "incpath/openldap-2.4.11",
+      [TMPDIR .."/include/lber*"] = "incpath/openldap-2.4.11",
+    },
+  },
+  { name = "jacorb-2.3.0",
+    source = "http://www.tecgraf.puc-rio.br/~openbus/repository/jacorb-2.3.0.tar.gz",
+    build = {
+      type = "mavenimport",
+      src = PRODAPP .. "/jacorb-2.3.0"
+    },
+    parameters = { 
                         ["lib/jacorb.jar"] = { groupId="org.jacorb", artifactId="jacorb",
-			 version="2.3.0", pomFile="jacorb-pom.xml" },
-                	["lib/idl.jar"] = { groupId="org.jacorb", artifactId="jacorb-idl-compiler",
-			 version="2.3.0", pomFile="jacorb-idl-compiler-pom.xml" },
-		},
-	},
+       version="2.3.0", pomFile="jacorb-pom.xml" },
+                  ["lib/idl.jar"] = { groupId="org.jacorb", artifactId="jacorb-idl-compiler",
+       version="2.3.0", pomFile="jacorb-idl-compiler-pom.xml" },
+    },
+  },
 }
