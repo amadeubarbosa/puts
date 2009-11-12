@@ -131,9 +131,14 @@ function download(pkgname, from, targetdir)
 	local handler
 	if proto == "http" or proto == "https" or proto == "ftp" then
 		-- location where put the downloaded file
-		targetdir = targetdir or DOWNLOADDIR
+		-- ATTENTION: ignoring the targetdir to use a common directory to put the
+		-- downloaded files
+		targetdir = DOWNLOADDIR
+		assert(os.execute(myplat.cmd.mkdir .. targetdir) == 0, "ERROR: Cannot create the directory '".. targetdir .."' to download the package into it.")
 		if exists_pkgfile(targetdir, pkgname) then
-			return true
+			filepath = targetdir.."/"..base_name(url)
+			print("[ INFO ] Skipping the download of the "..pkgname.." because is already downloaded. If you need update it so you must to remove the file '"..filepath.."'")
+			return true, filepath
 		end
 		handler = require "tools.fetch.http"
 	elseif proto:match("^svn") then
@@ -151,7 +156,7 @@ function download(pkgname, from, targetdir)
 		error("ERROR: Unknown protocol '"..proto.."'. The URL was '"..from.."'.")
 	end
 	print("[ INFO ] Downloading "..pkgname.." via the protocol "..proto)
-	return assert(handler.run(targetdir,from))
+	return handler.run(targetdir,from)
 end
 
 -- Testing the archive existance
@@ -169,20 +174,19 @@ function exists_pkgfile(path,pkgname)
 end
 
 -- Downloading tarballs
-function fetch_and_unpack(package,from,to)
+function fetch_and_unpack(package,from,targetdir)
 	assert(type(package) == "string" and
 	       type(from) == "string")
-	-- assume default destination if nil
-	if not to then
-		to = PRODAPP .."/".. package
+	local ok, filepath = download(package,from,targetdir)
+	if not targetdir then
+		targetdir = PRODAPP .."/".. package
 	end
-	assert(os.execute(myplat.cmd.mkdir .. DOWNLOADDIR) == 0, "ERROR: Cannot create the directory '".. DOWNLOADDIR .."' to download the package into it.")
-	assert(download(package,from), "ERROR: Unable to download the package. You must download this package manually from '"..from.."' and extract it in the '"..PRODAPP.."' directory.")
+	assert(ok, "ERROR: Unable to download the package. You must download this package manually from '"..from.."' and extract it in the '"..targetdir.."' directory.")
 	-- it only extracts the source once
-	local exists = os.execute("test -d ".. to)
+	local exists = os.execute("test -d ".. targetdir)
 	if exists ~= 0 then
-		local filename = base_name(from)
-		assert(unpack_archive(PRODAPP,DOWNLOADDIR.."/"..filename), "ERROR: Unable to extract the package '".. package.."' in the directory '"..PRODAPP.."'.")
+		-- it will extract inside the PRODAPP directory using the filename
+		assert(unpack_archive(PRODAPP,filepath), "ERROR: Unable to extract the package '".. filepath.."' in the directory '"..PRODAPP.."'.")
 	end
 	return true
 end

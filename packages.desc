@@ -4,12 +4,18 @@
 -- ATTENTION: place the fundamental packages first!
 -- If A depends on B then you should place B's description before than A's.
 packages = {
-  -- fake package to easy the download of the oil04 and scs sources
-  { name = "oil04",
-    source = SVNREPURL .. "/openbus/libs/trunk/oil04",
+  -- fake package to easy the download of the oil04 and scs urls
+  { name = "oil-source",
+    url = SVNREPURL .. "/openbus/libs/trunk/oil04",
+    directory = PRODAPP .."/oil04",
   },
-  { name = "scs",
-    source = SVNREPURL .. "/scs/trunk",
+  { name = "scs-source",
+    url = SVNREPURL .. "/scs/trunk",
+    directory = PRODAPP .."/scs",
+  },
+  { name = "openbus-source",
+    url = SVNREPURL .. "/openbus/trunk",
+    directory = SVNDIR,
   },
   { name = "licenses",
     install_files = {
@@ -18,7 +24,7 @@ packages = {
     },
   },
   { name = "lua5.1",
-    source = SVNREPURL .. "/openbus/libs/trunk/lua5.1.2",
+    url = SVNREPURL .. "/openbus/libs/trunk/lua5.1.2",
     build = {
     type = "tecmake",
     src = PRODAPP .."/lua5.1/src",
@@ -45,7 +51,7 @@ packages = {
     },
   },
   { name = "tolua5.1",
-    source = "http://www.tecgraf.puc-rio.br/~openbus/repository/tolua5.1.tar.gz",
+    url = "http://www.tecgraf.puc-rio.br/~openbus/repository/tolua5.1.tar.gz",
     build = {
       type = "tecmake",
       src = PRODAPP .."/tolua5.1/src",
@@ -59,7 +65,7 @@ packages = {
     },
   },
   { name = "luafilesystem",
-    source = SVNREPURL .. "/openbus/libs/trunk/luafilesystem-1.4.2/",
+    url = SVNREPURL .. "/openbus/libs/trunk/luafilesystem-1.4.2/",
     build = {
       type = "tecmake",
       src = PRODAPP .."/luafilesystem/src",
@@ -76,7 +82,7 @@ packages = {
     },
   },
   { name = "luasocket2",
-    source = SVNREPURL .. "/openbus/libs/trunk/luasocket2",
+    url = SVNREPURL .. "/openbus/libs/trunk/luasocket2",
     build = {
       type = "tecmake",
       src = PRODAPP .."/luasocket2/src",
@@ -109,7 +115,7 @@ packages = {
     },
   },
   { name = "luuid",
-    source = SVNREPURL .. "/openbus/libs/trunk/luuid",
+    url = SVNREPURL .. "/openbus/libs/trunk/luuid",
     build = {
       type = "tecmake",
       src = PRODAPP .."/luuid/src",
@@ -126,7 +132,7 @@ packages = {
     },
   },
   { name = "lualdap-1.0.1",
-    source = SVNREPURL .. "/openbus/libs/trunk/lualdap-1.0.1",
+    url = SVNREPURL .. "/openbus/libs/trunk/lualdap-1.0.1",
     build = {
       type = "tecmake",
       src = PRODAPP .."/lualdap-1.0.1/src",
@@ -143,7 +149,7 @@ packages = {
     },
   },
   { name = "latt",
-    source = "http://www.tecgraf.puc-rio.br/~openbus/repository/latt.tar.gz",
+    url = "http://www.tecgraf.puc-rio.br/~openbus/repository/latt.tar.gz",
     build = {
       type = "tecmake",
       src = PRODAPP .."/latt",
@@ -202,7 +208,7 @@ packages = {
     },
   },
   { name = "ftc",
-    source = SVNREPURL .. "/ftc/trunk",
+    url = SVNREPURL .. "/ftc/trunk",
     build = {
       type = "tecmake",
       src = PRODAPP .."/ftc/cpp/src",
@@ -226,7 +232,7 @@ packages = {
     },
         },
   { name = "luatrace",
-    source = SVNREPURL .. "/openbus/libs/trunk/luatrace",
+    url = SVNREPURL .. "/openbus/libs/trunk/luatrace",
     build = {
       type = "autotools",
     test_libs = {"luatrace_*"},

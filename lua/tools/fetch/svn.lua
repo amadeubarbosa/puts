@@ -22,6 +22,6 @@ function run(path, url)
 		end
 	end
 	assert(download_cmd, "ERROR: SVN client unavailable (tried svn).")
-	return (os.execute(download_cmd) == 0)
+	return (os.execute(download_cmd) == 0), path
 end
 

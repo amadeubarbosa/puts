@@ -21,8 +21,8 @@ function parseDescriptions(desc, arguments)
 		end
 
 		-- fetching and unpacking
-		if t.source and (not arguments["noupdate"]) then
-			util.fetch_and_unpack(t.name, t.source)
+		if t.url and (not arguments["noupdate"]) then
+			util.fetch_and_unpack(t.name, t.url, t.directory)
 		end
 	
 		assert(t.build.type, "ERROR: build.type is missing for package: "..t.name)
@@ -224,9 +224,6 @@ os.execute(myplat.cmd.mkdir .. TMPDIR)
 os.execute(myplat.cmd.mkdir .. PRODAPP)
 os.execute(myplat.cmd.mkdir .. DOWNLOADDIR)
 os.execute(myplat.cmd.mkdir .. PKGDIR)
-if not arguments["noupdate"]  then
-	assert(util.download("openbus-source", SVNURL, SVNDIR), "ERROR: Unable to update the OpenBUS sources automatically from TecGraf subversion repository. Try use the '--noupdate' option to bypass this check.")
-end
 
 -- Cleaning the temp dir to execute install rules of autotools softwares
 os.execute(myplat.cmd.rm .. TMPDIR .."/*")
