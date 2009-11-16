@@ -1,5 +1,6 @@
 licenses
 openssl-0.9.9
+auxiliar-files
 lua5.1
 luafilesystem
 luasocket2

@@ -25,7 +25,7 @@ packages = {
   },
   { name = "auxiliar-files",
     install_files = {
-      [SVNDIR.."/tools/shell/openssl-generate.ksh"] = "/bin",
+      [SVNDIR.."/tools/shell/openssl-generate.ksh"] = "./bin",
     },
   },
   { name = "lua5.1",

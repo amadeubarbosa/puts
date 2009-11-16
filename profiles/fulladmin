@@ -4,6 +4,7 @@ db-4.6.21
 cyrus-sasl2-2.1.22.dfsg1
 openldap-2.4.11
 openssl-0.9.9
+auxiliar-files
 lua5.1
 luafilesystem
 luasocket2
