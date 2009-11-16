@@ -23,6 +23,11 @@ packages = {
     [SVNDIR.."/README"]  = ".",
     },
   },
+  { name = "auxiliar-files",
+    install_files = {
+      [SVNDIR.."/tools/shell/openssl-generate.ksh"] = "/bin",
+    },
+  },
   { name = "lua5.1",
     url = SVNREPURL .. "/openbus/libs/trunk/lua5.1.2",
     build = {
