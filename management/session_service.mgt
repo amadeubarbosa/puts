@@ -1,0 +1,24 @@
+-- $id$
+
+System {
+  id = "SessionService",
+  description = "Serviço de Sessão do OpenBus",
+}
+
+SystemDeployment {
+  id = "SessionService",
+  system = "SessionService",
+  description = "Serviço de Sessão do OpenBus",
+  certificate = "../../data/certificates/SessionService.crt",
+}
+
+Interface {
+  id = "IDL:openbusidl/ss/ISessionService:1.0"
+}
+
+Grant {
+  id = "SessionService",
+  interfaces = {
+    "IDL:openbusidl/ss/ISessionService:1.0",
+  }
+}

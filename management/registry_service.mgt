@@ -1,0 +1,13 @@
+-- $id$
+
+System {
+  id = "RegistryService",
+  description = "Serviço de Registro do OpenBus",
+}
+
+SystemDeployment {
+  id = "RegistryService",
+  system = "RegistryService",
+  description = "Serviço de Registro do OpenBus",
+  certificate = "../../data/certificates/RegistryService.crt",
+}
