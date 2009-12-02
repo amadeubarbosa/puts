@@ -21,7 +21,7 @@ function parseDescriptions(desc, arguments)
 		end
 
 		-- fetching and unpacking
-		if t.url and (not arguments["noupdate"]) then
+		if t.url and arguments["update"] then
 			util.fetch_and_unpack(t.name, t.url, t.directory)
 		end
 	
@@ -60,11 +60,11 @@ local arguments = util.parse_args(arg,[[
 	--list                   : list all package names from description files. When
 	                           '--select' is used, it'll confirm the selection.
 	--select="pkg1 pkg2 ..." : choose which packages to compile and install
-    --profile="file1 file2..." : use a list of 'filenames' representing the profiles
+	--profile="file1 file2..." : use a list of 'filenames' representing the profiles
                                  which have a list of packages inside (it will append 
                                  to the select list)
 	--exclude="pkg1 pkg2 ..."  : list of package to exclude of the compile process
-	--noupdate		         : don't try to update the sources from repositories
+	--update	         : updates the source codes from the repositories
 
  NOTES:
  	The prefix '--' is optional in all options.
