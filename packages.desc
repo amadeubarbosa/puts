@@ -297,6 +297,12 @@ packages = {
     },
     install_files = {
       ["../lib/${TEC_UNAME}/liblpw.so"] = "libpath/${TEC_UNAME}",
+      ["../lib/${TEC_UNAME}/liblpw.dylib"] = "libpath/${TEC_UNAME}",
+    },
+    dev_files = {
+      ["lpw.h"] = "incpath/lpw/",
+      ["../lib/${TEC_UNAME}/liblpw.so"] = "libpath/${TEC_UNAME}",
+      ["../lib/${TEC_UNAME}/liblpw.dylib"] = "libpath/${TEC_UNAME}",
     },
   },
   { name = "openbus-core",
