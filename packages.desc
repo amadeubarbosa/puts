@@ -294,6 +294,7 @@ packages = {
       type = "tecmake",
       src = SVNDIR .."/lib/lpw/src",
       mf = { "config LUA51="..PRODAPP.."/lua5.1", },
+    Darwin = { mf = {"config LUA51="..PRODAPP.."/lua5.1", "config BUILD_DYLIB=Yes LUA51="..PRODAPP.."/lua5.1"} },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/liblpw.so"] = "libpath/${TEC_UNAME}",
@@ -301,8 +302,7 @@ packages = {
     },
     dev_files = {
       ["lpw.h"] = "incpath/lpw/",
-      ["../lib/${TEC_UNAME}/liblpw.so"] = "libpath/${TEC_UNAME}",
-      ["../lib/${TEC_UNAME}/liblpw.dylib"] = "libpath/${TEC_UNAME}",
+      ["../lib/${TEC_UNAME}/liblpw.*"] = "libpath/${TEC_UNAME}",
     },
   },
   { name = "openbus-core",
