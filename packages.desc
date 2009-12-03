@@ -56,7 +56,7 @@ packages = {
     },
   },
   { name = "tolua5.1",
-    url = "http://www.tecgraf.puc-rio.br/~openbus/repository/tolua5.1.tar.gz",
+    url = SVNREPURL .. "/openbus/libs/trunk/tolua5.1",
     build = {
       type = "tecmake",
       src = PRODAPP .."/tolua5.1/src",
