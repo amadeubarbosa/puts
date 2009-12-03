@@ -20,6 +20,10 @@ function parseDescriptions(desc, arguments)
 			t.build = { type = "copy" }
 		end
 
+		-- Back-compatibility to support the old Openbus (=< 1.4.2) package descriptions
+		if arguments["compat"] and t.source then
+			t.url = t.source
+		end
 		-- fetching and unpacking
 		if t.url and arguments["update"] then
 			util.fetch_and_unpack(t.name, t.url, t.directory)
@@ -33,7 +37,7 @@ function parseDescriptions(desc, arguments)
 		                    "' for package: ".. t.name)
 
 		-- starting specific build methods
-		build_type.run(t,arguments)
+		build_type.run(t,arguments,t.directory)
 
 		print "[ INFO ] Done!"
 		print "----------------------------------------------------------------------"
@@ -52,19 +56,23 @@ local arguments = util.parse_args(arg,[[
 	                           softwares with autotools semantic (i.e: openssl)
 	--packages=filename      : use the 'filename' as input for packages
 	                           with tecmake semantic (i.e: lua5.1, openbus-core)
-	--rebuild                : changes the default rule for tecmake rebuild if
-	                           already compiled
+	--rebuild                : changes the default rule to rebuild the packages if
+	                           they're already compiled
 	--force                  : forces the compile and install (i.e: you want
 	                           re-generate some library even it's installed
-	                           already = to debug or devel purpose)
+	                           already, very common for debug and devel purposes)
 	--list                   : list all package names from description files. When
-	                           '--select' is used, it'll confirm the selection.
+	                           '--select' is used, it'll help you to validate your choose.
 	--select="pkg1 pkg2 ..." : choose which packages to compile and install
 	--profile="file1 file2..." : use a list of 'filenames' representing the profiles
                                  which have a list of packages inside (it will append 
                                  to the select list)
 	--exclude="pkg1 pkg2 ..."  : list of package to exclude of the compile process
 	--update	         : updates the source codes from the repositories
+
+ BACK-COMPATIBILITY OPTIONS:
+	--compat                 : changes the parsing of the package descriptions to
+                                   support the old format used until the Openbus 1.4.2
 
  NOTES:
  	The prefix '--' is optional in all options.
@@ -137,6 +145,11 @@ if arguments["profile"] then
     repeat
       packagename = l()
       if packagename then
+	-- Removing the suffix -dev or -conf to recognize the correct package
+        -- name (that will produce the sub-packages with suffixes -dev and -conf)
+        packagename = packagename:match("(.*)-dev") or 
+                      packagename:match("(.*)-conf") or 
+                      packagename
         if not arguments.select then
            arguments.select = {}
         end
@@ -153,11 +166,13 @@ local newpackages = {}
 if arguments["select"] then
 	for _,pkg in ipairs(arguments["select"]) do
 		-- cloning the references in new tables
-		if basesoft[pkg] then
+		if basesoft[pkg] and not newbasesoft[pkg] then
 			table.insert(newbasesoft,basesoft[pkg])
+			newbasesoft[pkg] = basesoft[pkg]
 		end
-		if packages[pkg] then
+		if packages[pkg] and not newpackages[pkg] then
 			table.insert(newpackages,packages[pkg])
+			newpackages[pkg] = packages[pkg]
 		end
 	end
 	-- replace the main references to cloned tables
@@ -197,13 +212,38 @@ if arguments["exclude"] then
   packages = newpackages
 end
 
+-- Back-compatibility option to understand the old package description format
+-- See the implementation of the parseDescriptions() function also.
+if arguments["compat"] then
+	print("[ INFO ] Assuming the package description format used by the "..
+	      "Openbus 1.4.2 or earlier.")
+	print("[ INFO ] Inserting a built-in source package to download (and "..
+	      "update) the sources of the Openbus branch ("..SVNURL..") ("..SVNDIR..").")
+	-- Problem: Old versions of the 'compile' assistant downloaded the
+	-- openbus-source as default.
+	-- Solution: We have to insert a new description by default.
+	table.insert(basesoft,{
+	  name = "openbus-source",
+	  url = SVNURL,
+	  directory = SVNDIR,
+	})
+	-- Problem: By default any package is placed under PRODAPP/pkg.name but
+	-- some packages don't use tecmake backend (or other compile backend,
+	-- what could fill the build_src third argument on build.copy) so they
+	-- won't be placed correctly for the build.copy backend executes on.
+	-- Solution: We have to insert the 'directory' field in that descriptions.
+	if packages["licenses"] then
+	  packages["licenses"].directory = SVNDIR
+	end
+end
+
 -- Listing packages when '--list' arguments
 if arguments["list"] then
-	print "INFO: Available basesoft to compile and install:"
+	print "[ INFO ] Available basesoft to compile and install:"
 	for _, t in ipairs(basesoft) do
 		print("\t"..t.name)
 	end
-	print "\nINFO: Available packages to compile and install:"
+	print "\n[ INFO ] Available packages to compile and install:"
 	for _, t in ipairs(packages) do
 		print("\t"..t.name)
 	end

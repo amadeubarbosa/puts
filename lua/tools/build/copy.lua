@@ -13,8 +13,9 @@ function run(t,arguments,build_dir)
 	-- we assume a default build_dir pointing to PRODAPP
 	if not build_dir then
 		build_dir = PRODAPP .."/".. t.name .."/"
-		print("[ INFO ] Using source directory '"..build_dir.."' for the package: ".. t.name)
 	end
+	print("[ INFO ] Using source directory '"..build_dir.."' for the package: ".. t.name)
+
 	-- copying files described on packages table
 	if t.install_files then
 		for orig, dest in pairs(t.install_files) do
