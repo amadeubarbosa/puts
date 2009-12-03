@@ -1,0 +1,178 @@
+#!/bin/bash
+
+##helpers
+function is_dir {
+        dir=$1
+        if [ ! -d "$dir" ]; then
+                echo "ERROR: Missing directory $dir"
+                return 1
+        fi
+        return 0
+}                                                   
+function die {
+        echo -e $@
+        exit 1
+}                                                   
+function fetch_tecmake {
+	FILE="tecmake.tar.gz"
+	URL="http://www.tecgraf.puc-rio.br/tecmake/download/${FILE}"
+	#see SOURCES definition in the ##variables section of this script
+	export TECMAKE_HOME="${SOURCES}/tecmake" 
+	if [ ! -d "${TECMAKE_HOME}" ]; then
+		pushd /tmp >/dev/null
+		wget ${URL} || die "ERROR: Failed to download the Tecmake from ${URL}"
+		mkdir -p tecmake
+
+		pushd tecmake >/dev/null
+        	gzip -d ../${FILE}
+		TARFILE=`echo ${FILE}|sed 's/.gz//'`
+		tar -xf ../${TARFILE}
+		popd >/dev/null
+
+		mkdir -p ${TECMAKE_HOME}
+		mv tecmake/* ${TECMAKE_HOME}/
+		chmod +x ${TECMAKE_HOME}/tecmake
+		sed -e "s#TECMAKE_HOME.*#TECMAKE_HOME=${TECMAKE_HOME}#" ${TECMAKE_HOME}/tec_uname.bsh > ${TEMPFILE}
+		mv ${TEMPFILE} ${TECMAKE_HOME}/tec_uname.bsh
+		sed -e "s#TECMAKE_HOME.*#TECMAKE_HOME ${TECMAKE_HOME}#" ${TECMAKE_HOME}/tec_uname.csh > ${TEMPFILE}
+		mv ${TEMPFILE} ${TECMAKE_HOME}/tec_uname.csh
+		rm -f ${FILE} ${TARFILE} ${TEMPFILE}
+		rm -rf tecmake
+
+		popd >/dev/null
+	fi
+}
+
+##variables
+TEMPFILE=/tmp/bak
+SVN_PROJECTURL=${SVN_PROJECTURL:-"https://subversion.tecgraf.puc-rio.br/engdist/openbus"}
+VERSION="trunk"
+VERSION_ID="OB_HEAD"
+
+####sanity checks
+if [ -n "$1" ]; then
+	is_tag_or_branch=$( echo $1 |egrep -e "tags|branches" )
+	[ "$?" != "0" ] && die "ERROR: I just know to handle tags and branches.\
+ Do you want to use the trunk? Use no arguments!"
+	VERSION="$1"
+	VERSION_ID=$( echo $VERSION|cut -d/ -f2 )
+	echo "INFO: Using the following subversion path: $SVN_PROJECTURL"
+fi
+
+ROOT=${ROOT:-"/local/openbus"}
+BASEDIR="$ROOT/tmpBuild"
+export SOURCES="$ROOT/source"
+PACKAGES="$ROOT/packages"
+RUNDIR="$ROOT/running"
+
+SVNURL="$SVN_PROJECTURL/$VERSION"
+SVNDIR="$SOURCES/$VERSION_ID"
+
+is_dir $ROOT || die "Aborting because the ROOT directory [$ROOT] doesn't exist.\
+ You must to create it or to define a ROOT environment variable to force other!"
+is_dir $SVNDIR || mkdir -p $SVNDIR
+is_dir $BASEDIR || mkdir -p $BASEDIR
+
+##user questions
+echo "INFO: Verifying the internal variables:"
+echo "    SVNURL=$SVNURL"
+echo "    SVNDIR=$SVNDIR"
+echo "    ROOT=$ROOT"
+echo "INFO: Press ENTER to continue or CTRL+C to stop now!"
+read ok
+
+echo "INFO: Obtaining the compile utilities, first."
+DEPLOYDIR="$SOURCES/tools-trunk"
+svn co $SVN_PROJECTURL/trunk/tools $DEPLOYDIR || die "Aborting because the \
+checkout of the compile utilities has failed!"
+
+echo ""
+echo "INFO: Entering in the source directory [$SVNDIR]"
+pushd $SVNDIR > /dev/null
+
+mkdir -p "${BASEDIR}/${VERSION_ID}"
+OPENBUS_HOME="${BASEDIR}/install-${VERSION_ID}"
+mkdir -p $OPENBUS_HOME
+mkdir -p "${ROOT}/packages"
+mkdir -p "${ROOT}/running"
+
+DEFAULT_ORBIX="/home/msv/openbus/third-party/orbix63sp3gcc34/"
+echo ""
+echo "QUESTION: Where is your ORBIX installation?"
+echo "  INFO: default orbix path = $DEFAULT_ORBIX"
+echo "  INFO: Press ENTER to keep the default."
+read USERINPUT_ORBIX
+
+[ -n "${USERINPUT_ORBIX}" ] && DEFAULT_ORBIX=${USERINPUT_ORBIX}
+if [ ! -d "${DEFAULT_ORBIX}" ]; then
+	echo "ERROR: No such directory for the ORBIX installation (${DEFAULT_ORBIX})"
+	echo "QUESTION: Are you sure? Do you want continue?" 
+	echo "    INFO: Press ENTER to continue or CTRL+C to abort."
+	read waiting_enter
+fi
+
+##fetching the tecmake
+[ -z "${TEC_UNAME}" ] && fetch_tecmake ;
+
+##finishing
+echo "INFO: Generating the '`pwd`/cfg_generated.lua' as the configuration for the 'tools'"
+echo '-- Customized variables
+BASEDIR = "'$BASEDIR'"
+SVNURL = "svn+'$SVNURL'"
+SVNDIR = "'$SVNDIR'"
+INSTALL = { TOP = "'${OPENBUS_HOME}'" }
+DEPLOYDIR = "'$DEPLOYDIR'"
+' > cfg_generated.lua
+
+SCRIPT_WRAPPER=${SOURCES}/console-${VERSION_ID}.ksh
+echo "#!/bin/bash
+# including tecmake system identification
+# using TECMAKE_HOME as ${TECMAKE_HOME}
+source ${TECMAKE_HOME}/tec_uname.bsh
+export TECMAKE_HOME=${TECMAKE_HOME}
+export PATH="\${PATH}:\${TECMAKE_HOME}"
+
+# reseting the environment
+export OPENSSL_HOME=\"\"
+export LD_LIBRARY_PATH=\"\"
+export LIBRARY_PATH=\"\"
+export CPATH=\"\"
+export LUA_PATH=\"\"
+export LUA_CPATH=\"\"
+
+export SVNDIR=$SVNDIR
+export OPENBUS_HOME=$OPENBUS_HOME
+export DEPLOYDIR=$DEPLOYDIR
+export BASEDIR=$BASEDIR
+export DEFAULT_ORBIX=$DEFAULT_ORBIX
+
+sed -e 's#ORBIX_HOME=.*#ORBIX_HOME=\$DEFAULT_ORBIX/asp/6.3#' \$DEPLOYDIR/shell/sample-domain_env.ksh > ${TEMPFILE}
+mv ${TEMPFILE} \$DEPLOYDIR/shell/sample-domain_env.ksh
+sed -e 's#setenv ORBIX_HOME.*#setenv ORBIX_HOME \"\$DEFAULT_ORBIX/asp/6.3\"#' \$DEPLOYDIR/shell/sample-domain_env.csh > ${TEMPFILE}
+mv ${TEMPFILE} \$DEPLOYDIR/shell/sample-domain_env.csh
+
+rm -f ${TEMPFILE}
+
+. \$DEPLOYDIR/shell/kshrc
+. \$DEPLOYDIR/shell/sample-domain_env.ksh
+
+export LUA_PATH=\"\$DEPLOYDIR/lua/?.lua;\${LUA_PATH}\"
+# uncomment this line if you're using other ORBIX License, for example:
+#export IT_LICENSE_FILE="\$ROOT/source/Orbix_licenses.txt"
+
+echo \"INFO: Trying compile using OPENBUS_HOME as \$OPENBUS_HOME\"
+\${DEPLOYDIR}/lua/tools/console.lua config=\${SVNDIR}/cfg_generated.lua \"\$@\"
+
+echo \"INFO: Cleaning the temporary directories\"
+rm -rf /tmp/openbus-building*
+" > $SCRIPT_WRAPPER
+
+chmod +x $SCRIPT_WRAPPER
+
+echo "Exiting the source directory [$SVNDIR]"
+popd > /dev/null
+
+echo ""
+echo "INFO: It was generated a kourn shell script to help you in the packaging activities."
+echo "INFO: All parameters will be forwarded as 'tools' parameters. Try --help first!."
+echo "      See there: $SCRIPT_WRAPPER"
