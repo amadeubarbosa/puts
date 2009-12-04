@@ -508,25 +508,23 @@ packages = {
     },
   },
 --]]
---[[
   -- MICO related packages
   { name = "scsmico",
     build = {
       type = "tecmake",
-      src = PRODAPP .."/scs/src/cpp/mico",
-      mf = { "config" },
+      src = PRODAPP .."/scs/src/cpp",
+      mf = { "mico" },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/libscsmico.so"] = "libpath/${TEC_UNAME}",
-      ["../../../idl/scs.idl"] = "idlpath/",
+      ["../../idl/scs.idl"] = "idlpath/",
     },
     dev_files = {
       ["../lib/${TEC_UNAME}/libscsmico.*"] = "libpath/${TEC_UNAME}",
-      ["../../../idl/*.idl"] = "idlpath",
-      ["*.h"] = "incpath/scs/mico",
+      ["../../idl/*.idl"] = "idlpath",
+      ["*.h"] = "incpath/scs",
     },
   },
---]]
   -- self-packaging the tools as an important bootstrap strategy to deployment!
   { name = "tools",
     build = {
