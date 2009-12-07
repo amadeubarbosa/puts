@@ -513,7 +513,7 @@ packages = {
     build = {
       type = "tecmake",
       src = PRODAPP .."/scs/src/cpp",
-      mf = { "mico" },
+      mf = { "mico genstubs USE_NODEPEND=Yes", "mico" },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/libscsmico.so"] = "libpath/${TEC_UNAME}",
