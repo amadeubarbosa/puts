@@ -53,6 +53,10 @@ USE_NODEPEND=YES
 
 LIBS += dl
 
+ifeq "$(TEC_SYSNAME)" "Linux"
+	LFLAGS = -Wl,-E
+endif
+
 .PHONY: clean-custom
 clean-custom-obj:
 	rm -f ${PRECMP_DIR}/*.c
