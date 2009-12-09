@@ -425,7 +425,7 @@ packages = {
     }
     },
     dev_files = {
-      ["lib/${TEC_UNAME}/libopenbus*.*"] = "core/utilities/cpp/lib/${TEC_UNAME}",
+      ["lib/${TEC_UNAME}/libopenbusorbix.*"] = "core/utilities/cpp/lib/${TEC_UNAME}",
       ["*.h"] = "core/utilities/cpp", --include
       ["openbus/util/*.h"] = "core/utilities/cpp/openbus/util/",    --include
       ["openbus/interceptors/*.h"] = "core/utilities/cpp/openbus/interceptors/",    --include
@@ -436,6 +436,30 @@ packages = {
       ["../../test/orbix/rgs/config.mak"] = "core/test/orbix/rgs/",
       ["../../test/orbix/config*"] = "core/test/orbix/",
       ["../../test/orbix/runtests"] = "core/test/orbix/",
+    },
+  },
+  { name = "openbus-mico",
+    build = {
+      type = "tecmake",
+      src = SVNDIR .."/core/utilities/cpp",
+      mf = { "mico genstubs USE_NODEPEND=Yes", "mico" },
+    -- special compile instructions for solaris8
+    SunOS58 = {
+      mf = { "mico genstubs USE_NODEPEND=Yes", "mico", "mico sunos58" },
+    }
+    },
+    dev_files = {
+      ["lib/${TEC_UNAME}/libopenbusmico.*"] = "core/utilities/cpp/lib/${TEC_UNAME}",
+      ["*.h"] = "core/utilities/cpp", --include
+      ["openbus/util/*.h"] = "core/utilities/cpp/openbus/util/",    --include
+      ["openbus/interceptors/*.h"] = "core/utilities/cpp/openbus/interceptors/",    --include
+      ["stubs"] = "core/utilities/cpp",     --include
+      ["../../test/mico/acs/*.cpp"] = "core/test/mico/acs/",
+      ["../../test/mico/acs/config.mak"] = "core/test/mico/acs/",
+      ["../../test/mico/rgs/*.cpp"] = "core/test/mico/rgs/",
+      ["../../test/mico/rgs/config.mak"] = "core/test/mico/rgs/",
+      ["../../test/mico/config*"] = "core/test/mico/",
+      ["../../test/mico/runtests"] = "core/test/mico/",
     },
   },
   { name = "openbus-orbix-test",
@@ -467,6 +491,27 @@ packages = {
       ["run*"] = "demo/hello/orbix63",
       ["client"] = "demo/hello/orbix63",
       ["server"] = "demo/hello/orbix63",
+      ["../../../tools/shell/*rc"] = "tools/shell/", -- shell variables
+      ["../../../tools/shell/sample-domain_env.*"] = "tools/shell/",
+    },
+  },
+  { name = "openbus-demo-hello-mico",
+    build = {
+      type = "tecmake",
+      src = SVNDIR .."/demo/hello/mico",
+      mf = { "server genstubs USE_NODEPEND=Yes", "client", "server" },
+    },
+    dev_files = {
+      ["bin/${TEC_UNAME}/*"] = "demo/hello/mico/bin/${TEC_UNAME}",
+      ["../idl/hello.idl"] = "demo/hello/idl/",
+      ["client.cpp"] = "demo/hello/mico",
+      ["server.cpp"] = "demo/hello/mico",
+      ["run*"] = "demo/hello/mico",
+      ["*.mak"] = "demo/hello/mico",
+      ["*config"] = "demo/hello/mico",
+      ["run*"] = "demo/hello/mico",
+      ["client"] = "demo/hello/mico",
+      ["server"] = "demo/hello/mico",
       ["../../../tools/shell/*rc"] = "tools/shell/", -- shell variables
       ["../../../tools/shell/sample-domain_env.*"] = "tools/shell/",
     },
