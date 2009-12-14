@@ -329,7 +329,6 @@ packages = {
     conf_files = {
       ["../../data/conf"] = "data",
       ["../../data/certificates"] = "data",
-      ["../../data/*.db"] = "data",
     },
     -- TODO: include here all templates/openbus.lua messages table!!
     conf_template = DEPLOYDIR .. "/templates/openbus.lua",
