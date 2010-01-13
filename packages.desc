@@ -667,16 +667,6 @@ packages = {
       ["target/dependency/*.jar"] = "libpath/java",
     },
   },
-  { name = "openbus-demo-delegate-java",
-    build = {
-      type = "maven",
-      src = SVNDIR .."/demo/delegate",
-    },
-    install_files = {
-      ["target/openbus-demo-delegate-*.jar"] = "libpath/java",
-      ["target/dependency/*.jar"] = "libpath/java",
-    },
-  },
 --  { name = "ldap-Linux26g4",
 --    src = "/",
 --    mf = { },
