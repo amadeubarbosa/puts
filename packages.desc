@@ -595,6 +595,7 @@ packages = {
       ["../profiles"] = "tools",
       ["../shell"] = "tools",
       ["../templates"] = "tools",
+      ["../management"] = "tools",
     },
   },
   -- Java related packages  
