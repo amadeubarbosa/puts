@@ -16,6 +16,7 @@ openbus-core
 openbus-core-conf
 openbus-core-dev
 openbus-demo-hello-lua-dev
+openbus-demo-delegate-lua
 openbus-cppoil-dev
 openbus-demo-hello-cppoil-dev
 openbus-orbix-dev
@@ -23,5 +24,6 @@ openbus-demo-hello-orbix-dev
 openbus-java
 openbusidl-java
 openbus-demo-hello-java
+openbus-demo-delegate-java
 tolua5.1-dev
 latt-dev

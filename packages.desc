@@ -653,7 +653,7 @@ packages = {
       src = SVNDIR .."/demo/hello",
     },
     install_files = {
-      ["target/openbus-demo-hello-*.jar"] = "libpath/java",
+      ["target/openbus-demo-hello-*.jar"] = "demo/hello/java",
       ["target/dependency/*.jar"] = "libpath/java",
     },
   },
@@ -663,7 +663,7 @@ packages = {
       src = SVNDIR .."/demo/delegate",
     },
     install_files = {
-      ["target/openbus-demo-delegate-*.jar"] = "libpath/java",
+      ["target/openbus-demo-delegate-*.jar"] = "demo/delegate/java",
       ["target/dependency/*.jar"] = "libpath/java",
     },
   },
