@@ -48,7 +48,7 @@ function copyDependence(t,arguments,build_dir)
   if not arguments["verbose"] then
     maven_args = maven_args .. " -Dsilent=true "
   end
-	
+
   build_cmd = "cd " .. build_dir .. " && " .. maven_cmd .. maven_args
 
   local ret = os.execute(build_cmd)

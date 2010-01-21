@@ -50,30 +50,30 @@ TMPDIR = TMPDIR or "/tmp/openbus-building_".. math.random(os.time()%100000)
 
 -- Supported arch to makepack
 SUPPORTED_ARCH = SUPPORTED_ARCH or {
-	"Linux24g3", 
-	"Linux24g3_64", 
-	"Linux26", 
-	"Linux26_64", 
-	"Linux26g4", 
-	"Linux26g4_64", 
-	"Linux26_ia64", 
-	--"SunOS58",
-	"SunOS510",
-	"SunOS510x86", 
-	"Darwin811x86",
-	"Darwin96x86",
+  "Linux24g3", 
+  "Linux24g3_64", 
+  "Linux26", 
+  "Linux26_64", 
+  "Linux26g4", 
+  "Linux26g4_64", 
+  "Linux26_ia64", 
+  --"SunOS58",
+  "SunOS510",
+  "SunOS510x86", 
+  "Darwin811x86",
+  "Darwin96x86",
 }
 
 -- Given a way to change platform specific variables.
 -- Useful for the makepack script that needs create packages for many platforms
 -- from a different TEC_UNAME machine.
 function changePlatform(arch)
-	assert(PKGDIR:find(TEC_UNAME), "Variable PKGDIR isn't platform specific and you are trying changePlaform!")
-	assert(INSTALL.BIN:find(TEC_UNAME), "Variable INSTALL.BIN isn't platform specific and you are trying changePlaform!")
-	assert(INSTALL.LIB:find(TEC_UNAME), "Variable INSTALL.LIB isn't platform specific and you are trying changePlaform!")
-	return PKGDIR:gsub(TEC_UNAME,arch),
-		INSTALL.BIN:gsub(TEC_UNAME,arch),
-		INSTALL.LIB:gsub(TEC_UNAME,arch)
+  assert(PKGDIR:find(TEC_UNAME), "Variable PKGDIR isn't platform specific and you are trying changePlaform!")
+  assert(INSTALL.BIN:find(TEC_UNAME), "Variable INSTALL.BIN isn't platform specific and you are trying changePlaform!")
+  assert(INSTALL.LIB:find(TEC_UNAME), "Variable INSTALL.LIB isn't platform specific and you are trying changePlaform!")
+  return PKGDIR:gsub(TEC_UNAME,arch),
+    INSTALL.BIN:gsub(TEC_UNAME,arch),
+    INSTALL.LIB:gsub(TEC_UNAME,arch)
 end
 
 -- print("[ INFO ] Default configuration loaded.")

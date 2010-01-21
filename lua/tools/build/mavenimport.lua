@@ -34,7 +34,7 @@ function run(t, arguments)
       " -Dversion="    .. props.version .. 
       " -Dpackaging="  .. "jar" ..
       " -Dfile="       .. file				
-				
+
     if props.pomFile then
       repoinstall = repoinstall .. " -DpomFile=" .. props.pomFile
     end

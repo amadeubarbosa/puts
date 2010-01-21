@@ -7,16 +7,16 @@ local unpack = unpack
 module("string.split")
 
 string.split = function(str,sep,non_white)
-	non_white = non_white or false
-	local it  = string.gmatch(str,sep)
-	local ret = {}
-	local elem = it()
-	while (elem) do
-		if non_white then elem = elem:gsub("%s","") end
-		table.insert(ret,elem)
-		elem = it()
-	end
-	return unpack(ret)
+  non_white = non_white or false
+  local it  = string.gmatch(str,sep)
+  local ret = {}
+  local elem = it()
+  while (elem) do
+    if non_white then elem = elem:gsub("%s","") end
+    table.insert(ret,elem)
+    elem = it()
+  end
+  return unpack(ret)
 end
 return string
 --VERBOSE test = "!@#$%*()^~;/.,<][{}\\|a=>:b=>h\t\t\t\t\t\t=>x"

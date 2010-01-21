@@ -12,42 +12,42 @@ local reconfigure = false
 local opt,_,value
 -- Poor quality manipulation, but works for now. TODO: code better
 if arg[1] then
-	opt,_,value = arg[1]:match(patt)
-	if opt == "config" then
-		if type(value) == "string" then
-			reconfigure = value
-		else
-			print("[ ERROR ] The '--config' option must some value.")
-		end
-		-- removing '--config' from command line arguments table
-		table.remove(arg,1)
-		-- we need check again the next argument, it can be '--help'
-		if arg[1] then
-			opt,_,value = arg[1]:match(patt)
-		else
-			opt = nil
-			value = nil
-		end
-	end
-	-- If the actual argument is not '--help', it should be one of:
-	-- 'compile', 'makepack', or 'installer' subcommands
-	if opt ~= "h" and opt ~= "help" then
-		if opt == "compile" or opt == "makepack" or opt == "installer" then
-			valid_options = true
-		else
-			print("[ ERROR ] Requesting the load of an unknown assistant:",opt)
-		end
-	end
+  opt,_,value = arg[1]:match(patt)
+  if opt == "config" then
+    if type(value) == "string" then
+      reconfigure = value
+    else
+      print("[ ERROR ] The '--config' option must some value.")
+    end
+    -- removing '--config' from command line arguments table
+    table.remove(arg,1)
+    -- we need check again the next argument, it can be '--help'
+    if arg[1] then
+      opt,_,value = arg[1]:match(patt)
+    else
+      opt = nil
+      value = nil
+    end
+  end
+  -- If the actual argument is not '--help', it should be one of:
+  -- 'compile', 'makepack', or 'installer' subcommands
+  if opt ~= "h" and opt ~= "help" then
+    if opt == "compile" or opt == "makepack" or opt == "installer" then
+      valid_options = true
+    else
+      print("[ ERROR ] Requesting the load of an unknown assistant:",opt)
+    end
+  end
 end
 -- When '--config' is used, the reconfigure will contain the filename
 if reconfigure then
-	print("[ CONSOLE ] Overriding the default configuration with: ",reconfigure)
-	local f,err = loadfile(reconfigure)
-	if not f then
-		print("[ WARNING ] The file '"..reconfigure.."' cannot be opened! Continuing with default configuration.")
-	else
-		f()
-	end
+  print("[ CONSOLE ] Overriding the default configuration with: ",reconfigure)
+  local f,err = loadfile(reconfigure)
+  if not f then
+    print("[ WARNING ] The file '"..reconfigure.."' cannot be opened! Continuing with default configuration.")
+  else
+    f()
+  end
 end
 
 -- Loading default configuration after.
@@ -55,37 +55,37 @@ end
 require "tools.config"
 
 if valid_options then
-	print("[ CONSOLE ] Loading the assistant: ",opt)
-	table.remove(arg,1)
-	-- fixing the self-name of the script to be loaded
-	arg[0] = opt
-	assert(require ("tools."..opt))
-	print("[ CONSOLE ] Assistant ",opt,"has finished sucessfuly.")
-	os.exit(0)
+  print("[ CONSOLE ] Loading the assistant: ",opt)
+  table.remove(arg,1)
+  -- fixing the self-name of the script to be loaded
+  arg[0] = opt
+  assert(require ("tools."..opt))
+  print("[ CONSOLE ] Assistant ",opt,"has finished sucessfuly.")
+  os.exit(0)
 else
-	print([[
+  print([[
  Usage: ]]..arg[0]..[[ OPTIONS SUBCOMMANDS
  Valid OPTIONS:
-	--help			: show this help
-	--config=filename	: override the default configuration
+  --help      : show this help
+  --config=filename : override the default configuration
 
  Valid SUBCOMMANDS:
-	--compile		: execute the compile assistant
-	--makepack		: execute the makepack assistant
-	--installer		: execute the installer assistant
+  --compile   : execute the compile assistant
+  --makepack    : execute the makepack assistant
+  --installer   : execute the installer assistant
 
  NOTES:
- 	The prefix '--' is optional in all options and subcommands.
-	So '--help' or '-help' or yet 'help' all are the same option.
+  The prefix '--' is optional in all options and subcommands.
+  So '--help' or '-help' or yet 'help' all are the same option.
 
  EXAMPLES:
-	1) How to use the compile?
-	]]..arg[0]..[[ --compile --help
+  1) How to use the compile?
+  ]]..arg[0]..[[ --compile --help
 
-	2) How to use the makepack?
-	]]..arg[0]..[[ --makepack --help
+  2) How to use the makepack?
+  ]]..arg[0]..[[ --makepack --help
 
-	3) How to use the installer?
-	]]..arg[0]..[[ --installer --help ]])
-	os.exit(1)
+  3) How to use the installer?
+  ]]..arg[0]..[[ --installer --help ]])
+  os.exit(1)
 end
