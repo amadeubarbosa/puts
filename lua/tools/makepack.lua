@@ -55,8 +55,18 @@ function pack(arch,profile)
       f:close()
     end
   end
-  local function addmetadata(filename)
-    if io.open(filename,"r") then
+  
+  local function addmetadata(filename)  
+    local name = filename:match("(.*).template")
+    if name ~= nil then
+      local i = 1
+      local filename = name .. i .. ".template"
+      while io.open(filename,"r") do
+        metadata_files = metadata_files .." ".. filename
+        i = i + 1
+        filename = name .. i .. ".template"
+      end
+    elseif io.open(filename,"r") then
       metadata_files = metadata_files .." ".. filename
     end
   end

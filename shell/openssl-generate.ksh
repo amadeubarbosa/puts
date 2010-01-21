@@ -6,13 +6,16 @@ echo
 
 which openssl 2> /dev/null 1> /dev/null
 if [ $? == "1" ]; then
-	echo Não foi encontrado o openssl
-	return 1
+  echo Não foi encontrado o openssl
+  return 1
 fi
 
-
-echo -n "digite o nome da chave:"
-read NAME
+if [ -n "$1" ]; then
+  NAME=$1
+else
+  echo -n "digite o nome da chave:"
+  read NAME
+fi
 
 openssl genrsa -out ${NAME}_openssl.key 2048
 openssl pkcs8 -topk8 -in ${NAME}_openssl.key -nocrypt > ${NAME}.key

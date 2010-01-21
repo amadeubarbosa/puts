@@ -325,12 +325,16 @@ packages = {
       ["../utilities/lua/openbus"] = "core/utilities/lua",
       ["../test/lua/run_check_install.sh"] = "core/test",
       ["../test/lua/checkInstall.lua"] = "core/test",
+      ["../../tools/management"] = "tools",
+      ["../../tools/shell"] = "tools",
     },
     conf_files = {
       ["../../data/conf"] = "data",
     },
     -- TODO: include here all templates/openbus.lua messages table!!
-    conf_template = DEPLOYDIR .. "/templates/openbus.lua",
+    conf_template = {
+      DEPLOYDIR .. "/templates/openbus.lua",
+    },
     dev_files = {
       ["../test/lua"] = "core/test",
     },
