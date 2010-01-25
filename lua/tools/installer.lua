@@ -28,13 +28,23 @@ function wizard(template, save)
     else
       print(CONFIG,"Property name: ".. t.name)
       print(CONFIG,t.msg)
-      io.write("> ")
+
+      if t.value == nil then
+        t.value = ""
+      end      
+      io.write("[" .. t.value .. "]> ")      
       local var = io.read("*l")
+      
       if t.type == "number" then
         var = tonumber(var)
       end
-      assert(type(var) == t.type, "ERROR: Invalid configuration value, should be '".. t.type.."'")
-      save[t.name] = var
+      
+      if var == nil or var == "" then
+        save[t.name] = t.value
+      else
+        assert(type(var) == t.type, "ERROR: Invalid configuration value, should be '".. t.type.."'")
+        save[t.name] = var
+      end
     end
   end
   -- call the parse for all fields in template table
@@ -83,7 +93,6 @@ function launchWizard(template, cfg, reconfig_flag)
     local ok, errmsg, missing = checker(template.messages,cfg)
     if not ok then
       print(CONFIG,errmsg.. ", please complete the following properties:")
-  --~ print("Sua configuração está incompleta, por favor complete os items:")
       local missing_msg = {}
       table.foreach(missing, function(i,v)
         print("  ",v)
@@ -198,7 +207,7 @@ if arguments.package then
     -- Starting the extraction of the package
     print(INSTALL, "Unpacking in a temporary dir '"..TMPDIR.."'...")
     assert(os.execute(myplat.cmd.mkdir .. TMPDIR) == 0)
-    
+
     -- Trying extract the metadata.tar.gz from package
     print(INSTALL, "Extracting metadata.")
     local _,release,profile,arch = arguments.package:match("(.*)openbus%-(.+)%-(.+)%-(.+).tar.gz$")
@@ -260,7 +269,6 @@ else
 end
 
 print(CONFIG, "Configure DONE.")
-
 print(INSTALL,"You MUST set in your profile the sytem variable OPENBUS_HOME as:")
 print("\t csh shell      : setenv OPENBUS_HOME \""..config.installPath.."\"")
 print("\t ksh/bash shell : export OPENBUS_HOME=\""..config.installPath.."\"")

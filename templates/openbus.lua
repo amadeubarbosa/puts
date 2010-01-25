@@ -17,7 +17,7 @@ __call = function(self,t,save)
     
     print(CONFIG,"Deseja informar outro elemento para o vetor '"..t.name.."'? sim ou nao?")
     io.write("> ")
-    if string.upper(io.read("*l")):find("NAO") then break end
+    if string.upper(io.read("*l")):find("NAO") or "" then break end
     count = count + 1
   end
 end
@@ -48,7 +48,7 @@ __call =  function(self,t,save)
     -- Do you wish continue or not?
     print(CONFIG,"Deseja informar outro elemento para a lista '"..t.name.."'? sim ou nao?")
     io.write("> ")
-    if string.upper(io.read("*l")):find("NAO") then break end
+    if string.upper(io.read("*l")):find("NAO") or "" then break end
     count = count + 1
   end
 end
@@ -58,29 +58,41 @@ messages = {
   { name = "hostName", 
     msg = "FQDN da máquina onde o Serviço de Acesso executará",
     type = "string",
+    value = "localhost",
   },
   { name = "hostPort",
     msg = "Porta para o Serviço de Acesso",
     type = "number",
+    value = "2089",
   },
   { name = "oilVerboseLevel",
     msg = "Nível de verbosidade do ORB OiL [de 0 a 5]",
     type = "number",
+    value = "1",
   },
   { name = "logLevel",
     msg = "Nível de verbosidade do log do OpenBus [de 0 a 3]",
     type = "number",
+    value = "3",
   },
   { name = "ldapHosts",
     msg = "Lista dos servidores LDAP com portas",
     type = "list",
     check = Types.ldapHosts,
+    value = {name = "segall.tecgraf.puc-rio.br", port = 389,},
   },
   { name = "ldapSuffixes",
     msg = "Sufixos de busca no servidor LDAP",
     type = "list",
     check = Types.vector,
+    value = { "" },
   },
+  { name = "administrators",
+    msg = "Administradores do barramento.",
+    type = "list",
+    check = Types.vector,
+    value = { "" },
+  }
 }
 
 configure_action = function(answers, tempdir, util)
@@ -93,12 +105,25 @@ configure_action = function(answers, tempdir, util)
   AccessControlServerConfiguration.ldapSuffixes = answers.ldapSuffixes
   AccessControlServerConfiguration.oilVerboseLevel = answers.oilVerboseLevel
   AccessControlServerConfiguration.logLevel = answers.logLevel
+  AccessControlServerConfiguration.administrators = answers.administrators
+  
+  AccessControlServerConfiguration.lease = 60
+  AccessControlServerConfiguration.validators = {
+      "core.services.accesscontrol.LDAPLoginPasswordValidator",
+      "core.services.accesscontrol.TestLoginPasswordValidator",
+  }
+  AccessControlServerConfiguration.certificatesDirectory = "certificates"
+  AccessControlServerConfiguration.privateKeyFile =
+      "certificates/AccessControlService.key"
+  AccessControlServerConfiguration.databaseDirectory = "credentials"
+
 
   local rgsConfFile = tempdir.."/data/conf/RegistryServerConfiguration.lua"
   assert(loadfile(rgsConfFile))()
   -- this configuration depends of AccessControlServerConfiguration
   RegistryServerConfiguration.accessControlServerHostName = answers.hostName
   RegistryServerConfiguration.accessControlServerHostPort = answers.hostPort
+
 
   local sesConfFile = tempdir.."/data/conf/SessionServerConfiguration.lua"
   assert(loadfile(sesConfFile))()
