@@ -82,13 +82,9 @@ function getFieldByName(tbl, name)
 end
 
 -- Launcher for the wizard that accepts an old configuration table
-function launchWizard(template, cfg, reconfig_flag)
+function launchWizard(template, cfg)
   assert(type(template) == "table")
   if cfg then
-    if reconfig_flag then
-      -- Force the user fill the installPath again (he could have change it)
-      cfg.installPath = nil
-    end
     -- Checks the consistency of the previous configuration
     local ok, errmsg, missing = checker(template.messages,cfg)
     if not ok then
@@ -163,6 +159,7 @@ local arguments = util.parse_args(arg,[[
   --config=filename        : use 'filename' to import a previous configuration
   --package=filename       : package 'filename' to unpack, configure and install
   --template=filename      : use 'filename' as input for answers
+  --path=pathname          : path where the installation will be placed
   
  NOTES:
   If you give '--package' so the '--template' will be discard !
@@ -172,12 +169,15 @@ local arguments = util.parse_args(arg,[[
   So '--help' or '-help' or yet 'help' all are the same option.
 
  EXAMPLES:
-  ]].. arg[0].. [[ --package=myOpenBus.tar.gz --config=myPrevious.answers ]])
+  ]].. arg[0].. "--path=~/local/openbus --package=myOpenBus.tar.gz" ..
+  "--config=myPrevious.answers ]]")
 
 -- Setting verbose level if requested
 if arguments["verbose"] then
   util.verbose(1)
 end
+
+assert(arguments["path"],"Missing argument --path!")
 
 -- Cache variables
 -- ATTENTION: config as 'nil' is important if none previous conf is given
@@ -197,8 +197,6 @@ end
 -- Loading configuration from template file provided or from default
 if arguments.template then
   config = assert(parseTemplate(arguments.template,config), "ERROR: Failed parsing template '"..arguments.template.."'.") 
-else
-  config = assert(parseTemplate(DEFAULT_TEMPLATE,config), "ERROR: Failed parsing template '"..DEFAULT_TEMPLATE.."'.") 
 end
 
 -- When no package is given assumes reconfiguration
@@ -253,9 +251,9 @@ if arguments.package then
     -- Maybe it's important for futher actions like uninstall or pos-install checks
     assert(os.execute(myplat.cmd.rm .. TMPDIR .."/".. metadata_dirname) == 0)
     -- Moving the temporary tree to real tree (given by user)
-    assert(os.execute(myplat.cmd.mkdir .. config.installPath) == 0,
+    assert(os.execute(myplat.cmd.mkdir .. arguments.path) == 0,
            "ERROR: The installation path is invalid or you cannot write there!")
-    assert(os.execute(myplat.cmd.install .. TMPDIR .."/* ".. config.installPath) == 0)
+    assert(os.execute(myplat.cmd.install .. TMPDIR .."/* ".. arguments.path) == 0)
     assert(os.execute(myplat.cmd.rm .. TMPDIR) == 0)
   else
     print(INSTALL,"Do nothing. You MUST provide a valid package filename "..
@@ -270,9 +268,9 @@ end
 
 print(CONFIG, "Configure DONE.")
 print(INSTALL,"You MUST set in your profile the sytem variable OPENBUS_HOME as:")
-print("\t csh shell      : setenv OPENBUS_HOME \""..config.installPath.."\"")
-print("\t ksh/bash shell : export OPENBUS_HOME=\""..config.installPath.."\"")
---~ print("\t windows shell  : set OPENBUS_HOME=\""..config.installPath.."\"")
+print("\t csh shell      : setenv OPENBUS_HOME \""..arguments.path.."\"")
+print("\t ksh/bash shell : export OPENBUS_HOME=\""..arguments.path.."\"")
+--~ print("\t windows shell  : set OPENBUS_HOME=\""..arguments.path.."\"")
 
 -- Persisting the answers to future interactions
 util.serialize_table("/tmp/latest.answers",config)
