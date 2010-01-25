@@ -1,10 +1,6 @@
 
 
 messages = {
-  { name = "toolsPath", 
-    msg = "Localização do tools",
-    type = "string",
-  },
 }
 
 configure_action = function(answers, tempdir, util)
