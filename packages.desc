@@ -658,8 +658,12 @@ packages = {
       src = SVNDIR .."/demo/hello",
     },
     install_files = {
-      ["target/openbus-demo-hello-*.jar"] = "demo/hello/java",
+      ["target/openbus-demo-hello-*.jar"] = "demo/hello",
       ["target/dependency/*.jar"] = "libpath/java",
+    },
+    dev_files = {
+      ["java/resources"] = "demo/hello",
+      ["java/src"] = "demo/hello",
     },
   },
   { name = "openbus-demo-delegate-java",
@@ -668,8 +672,12 @@ packages = {
       src = SVNDIR .."/demo/delegate",
     },
     install_files = {
-      ["target/openbus-demo-delegate-*.jar"] = "demo/delegate/java",
+      ["target/openbus-demo-delegate-*.jar"] = "demo/delegate",
       ["target/dependency/*.jar"] = "libpath/java",
+    },
+    dev_files = {
+      ["java/resources"] = "demo/delegate",
+      ["java/src"] = "demo/delegate",
     },
   },
 --  { name = "ldap-Linux26g4",
