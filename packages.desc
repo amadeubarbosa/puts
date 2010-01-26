@@ -186,7 +186,7 @@ packages = {
     },
     install_files = {
       ["../lib/${TEC_UNAME}/libscsall.so"] = "libpath/${TEC_UNAME}",
---      ["../lib/${TEC_UNAME}/libscsall.dylib"] = "libpath/${TEC_UNAME}",
+      ["../lib/${TEC_UNAME}/libscsall.dylib"] = "libpath/${TEC_UNAME}",
       ["../../../idl/scs.idl"] = "idlpath/",
     },
     dev_files = {
