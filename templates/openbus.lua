@@ -15,7 +15,8 @@ __call = function(self,t,save)
     if not save[t.name] then save[t.name] = {} end
     table.insert(save[t.name],var)
     
-    print(CONFIG,"Deseja informar outro elemento para o vetor '"..t.name.."'? sim ou nao?")
+    print(CONFIG,"Deseja informar outro elemento para o vetor '" .. t.name ..
+        "'? sim ou nao?")
     io.write("> ")
     if string.upper(io.read("*l")):find("NAO") or "" then break end
     count = count + 1
@@ -46,7 +47,8 @@ __call =  function(self,t,save)
     -- Saving the table with the element of the list (ldapHosts)
     table.insert(save[t.name],tmp)
     -- Do you wish continue or not?
-    print(CONFIG,"Deseja informar outro elemento para a lista '"..t.name.."'? sim ou nao?")
+    print(CONFIG,"Deseja informar outro elemento para a lista '" .. t.name .. 
+        "'? sim ou nao?")
     io.write("> ")
     if string.upper(io.read("*l")):find("NAO") or "" then break end
     count = count + 1
@@ -122,7 +124,7 @@ configure_action = function(answers, tempdir, util)
   assert(loadfile(rgsConfFile))()
   RegistryServerConfiguration.accessControlServerHostName = answers.hostName
   RegistryServerConfiguration.accessControlServerHostPort = answers.hostPort
-  
+
   RegistryServerConfiguration.registryServerHostName = answers.hostName
   RegistryServerConfiguration.registryServerHostPort = answers.hostPort - 50
   
@@ -141,7 +143,7 @@ configure_action = function(answers, tempdir, util)
   -- this configuration depends of AccessControlServerConfiguration
   SessionServerConfiguration.accessControlServerHostName = answers.hostName
   SessionServerConfiguration.accessControlServerHostPort = answers.hostPort
-  
+
   SessionServerConfiguration.privateKeyFile = "certificates/SessionService.key"
   SessionServerConfiguration.accessControlServiceCertificateFile =
       "certificates/AccessControlService.crt"
@@ -150,8 +152,11 @@ configure_action = function(answers, tempdir, util)
 
 
   -- Persisting the configurations to temporary tree where the tarball was extracted
-  util.serialize_table(acsConfFile,AccessControlServerConfiguration,"AccessControlServerConfiguration")
-  util.serialize_table(rgsConfFile,RegistryServerConfiguration,"RegistryServerConfiguration")
-  util.serialize_table(sesConfFile,SessionServerConfiguration,"SessionServerConfiguration")
+  util.serialize_table(acsConfFile,AccessControlServerConfiguration,
+      "AccessControlServerConfiguration")
+  util.serialize_table(rgsConfFile,RegistryServerConfiguration,
+      "RegistryServerConfiguration")
+  util.serialize_table(sesConfFile,SessionServerConfiguration,
+      "SessionServerConfiguration")
   return true
 end
