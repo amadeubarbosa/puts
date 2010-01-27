@@ -68,7 +68,7 @@ messages = {
   { name = "oilVerboseLevel",
     msg = "Nível de verbosidade do ORB OiL [de 0 a 5]",
     type = "number",
-    value = "1",
+    value = "5",
   },
   { name = "logLevel",
     msg = "Nível de verbosidade do log do OpenBus [de 0 a 3]",
@@ -103,10 +103,10 @@ configure_action = function(answers, tempdir, util)
   AccessControlServerConfiguration.hostPort = answers.hostPort
   AccessControlServerConfiguration.ldapHosts = answers.ldapHosts
   AccessControlServerConfiguration.ldapSuffixes = answers.ldapSuffixes
+  AccessControlServerConfiguration.administrators = answers.administrators
   AccessControlServerConfiguration.oilVerboseLevel = answers.oilVerboseLevel
   AccessControlServerConfiguration.logLevel = answers.logLevel
-  AccessControlServerConfiguration.administrators = answers.administrators
-  
+
   AccessControlServerConfiguration.lease = 60
   AccessControlServerConfiguration.validators = {
       "core.services.accesscontrol.LDAPLoginPasswordValidator",
@@ -120,9 +120,20 @@ configure_action = function(answers, tempdir, util)
 
   local rgsConfFile = tempdir.."/data/conf/RegistryServerConfiguration.lua"
   assert(loadfile(rgsConfFile))()
-  -- this configuration depends of AccessControlServerConfiguration
   RegistryServerConfiguration.accessControlServerHostName = answers.hostName
   RegistryServerConfiguration.accessControlServerHostPort = answers.hostPort
+  
+  RegistryServerConfiguration.registryServerHostName = answers.hostName
+  RegistryServerConfiguration.registryServerHostPort = answers.hostPort - 50
+  
+  RegistryServerConfiguration.privateKeyFile =
+      "certificates/RegistryService.key"
+  RegistryServerConfiguration.accessControlServiceCertificateFile =
+      "certificates/AccessControlService.crt"
+  RegistryServerConfiguration.databaseDirectory = "offers"
+  RegistryServerConfiguration.administrators = answers.administrators
+  RegistryServerConfiguration.oilVerboseLevel = answers.oilVerboseLevel
+  RegistryServerConfiguration.logLevel = answers.logLevel
 
 
   local sesConfFile = tempdir.."/data/conf/SessionServerConfiguration.lua"
@@ -130,6 +141,13 @@ configure_action = function(answers, tempdir, util)
   -- this configuration depends of AccessControlServerConfiguration
   SessionServerConfiguration.accessControlServerHostName = answers.hostName
   SessionServerConfiguration.accessControlServerHostPort = answers.hostPort
+  
+  SessionServerConfiguration.privateKeyFile = "certificates/SessionService.key"
+  SessionServerConfiguration.accessControlServiceCertificateFile =
+      "certificates/AccessControlService.crt"
+  SessionServerConfiguration.logLevel = answers.logLevel
+  SessionServerConfiguration.oilVerboseLevel = answers.oilVerboseLevel
+
 
   -- Persisting the configurations to temporary tree where the tarball was extracted
   util.serialize_table(acsConfFile,AccessControlServerConfiguration,"AccessControlServerConfiguration")
