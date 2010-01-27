@@ -4,8 +4,6 @@ messages = {
 }
 
 configure_action = function(answers, tempdir, util)
-
-print(answers.installPath)
   local installPath =  tempdir
   local openSSLGenerate = tempdir .. "/tools/shell/openssl-generate.ksh "
   -- Criando chaves dos serviços básicos.
