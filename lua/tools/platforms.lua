@@ -6,11 +6,11 @@ local setmetatable = setmetatable
 
 module("platforms")
 
--- PROBLEMA: como identificar corretamente quais diret√≥rios padr√µes s√£o usados
+-- PROBLEMA: como identificar corretamente quais diretÛrios padrıes s„o usados
 -- pelo link editor em tempo de carga? se a LD_LBIRARY_PATH estiver vazia
--- esses diret√≥rios padr√µes ser√£o usados na busca por s√≠mbolos, mas a√≠ nosso
--- search_ldlibpath n√£o saber√° identificar que n√£o √© uma falta de lib!
--- REFLEXAO: nossa inten√ß√£o com search_ldlibpath √© reproduzir o mecanismo por
+-- esses diretÛrios padrıes ser„o usados na busca por sÌmbolos, mas aÌ nosso
+-- search_ldlibpath n„o saber· identificar que n„o È uma falta de lib!
+-- REFLEXAO: nossa intenÁ„o com search_ldlibpath È reproduzir o mecanismo por
 -- plataforma de busca de bibliotecas dependentes! precisamos mesmo?
 
 platforms = {

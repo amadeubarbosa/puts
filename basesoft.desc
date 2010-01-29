@@ -14,7 +14,7 @@ basesoft = {
     build = {
       type = "autotools",
       test_libs = {"libuuid.*"},
-      -- TIP: o configure dessa vers√£o tem algum problema que d√° um erro
+      -- TIP: o configure dessa vers„o tem algum problema que d· um erro
       -- ao tentar fazer make sem antes fazer um clean
       Darwin = "make clean; ./configure --prefix=".. TMPDIR ..
                " --enable-bsd-shlibs && cd lib/uuid && make && make install",
