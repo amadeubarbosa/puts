@@ -10,6 +10,8 @@ local string = require "tools.split"
 local platforms = require "tools.platforms"
 local myplat = platforms[TEC_SYSNAME]
 
+module("tools.makepack", package.seeall)
+
 --- Retrieves the release information
 function getrelease()
   -- Identifying the release by 2 ways:
@@ -127,32 +129,35 @@ end
 -- Main code -------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
--- Parsing arguments
-local arguments = util.parse_args(arg,[[
-  --help                   : show this help
-  --verbose                : turn ON the VERBOSE mode (show the system commands)
-  --profile=filename       : use the 'filename' as input for profile with the
-                             list of packages to packaging
-  --arch=tecmake_arch      : specifies the arch based on tecmake way. Use 'all'
-                             to pack all supported architectures
- NOTES:
-  The prefix '--' is optional in all options.
-  So '--help' or '-help' or yet 'help' all are the same option.]])
+function run()
+  -- Parsing arguments
+  local arguments = util.parse_args(arg,[[
+    --help                   : show this help
+    --verbose                : turn ON the VERBOSE mode (show the system commands)
+    --profile=filename       : use the 'filename' as input for profile with the
+                               list of packages to packaging
+    --arch=tecmake_arch      : specifies the arch based on tecmake way. Use 'all'
+                               to pack all supported architectures
+   NOTES:
+    The prefix '--' is optional in all options.
+    So '--help' or '-help' or yet 'help' all are the same option.]])
 
--- Overloading the os.execute to dummy verbose
-if arguments["verbose"] then
-  util.verbose(1)
-end
-
-assert(arguments["profile"],"Missing argument --profile!")
-assert(arguments["arch"] or TEC_UNAME,"Missing argument --arch and not found TEC_UNAME env!")
-arguments["arch"] = arguments["arch"] or TEC_UNAME
-
-if arguments["arch"] ~= "all" then
-  pack(arguments["arch"],arguments["profile"])
-else
-  -- making for all
-  for _,arch in ipairs(SUPPORTED_ARCH) do
-    pack(arch,arguments["profile"])
+  -- Overloading the os.execute to dummy verbose
+  if arguments["verbose"] then
+    util.verbose(1)
   end
+
+  assert(arguments["profile"],"Missing argument --profile!")
+  assert(arguments["arch"] or TEC_UNAME,"Missing argument --arch and not found TEC_UNAME env!")
+  arguments["arch"] = arguments["arch"] or TEC_UNAME
+
+  if arguments["arch"] ~= "all" then
+    pack(arguments["arch"],arguments["profile"])
+  else
+    -- making for all
+    for _,arch in ipairs(SUPPORTED_ARCH) do
+      pack(arch,arguments["profile"])
+    end
+  end
+
 end

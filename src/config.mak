@@ -30,6 +30,7 @@ TOOLS_LUA= $(addprefix tools.,\
 	compile \
 	installer \
 	makepack \
+	hook \
 	console )
 
 ${PRECMP_DIR}/tools.c: $(TOOLS_LUA)

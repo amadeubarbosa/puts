@@ -1,6 +1,10 @@
 #!/usr/bin/env lua5.1
 package.path = "?.lua;../?.lua;" .. package.path
 
+local assistant = { "compile" , "makepack" , "installer" , "hook" }
+
+module("tools.console", package.seeall)
+
 --------------------------------------------------------------------------------
 -- Arguments manipulation ------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -30,11 +34,14 @@ if arg[1] then
     end
   end
   -- If the actual argument is not '--help', it should be one of:
-  -- 'compile', 'makepack', or 'installer' subcommands
   if opt ~= "h" and opt ~= "help" then
-    if opt == "compile" or opt == "makepack" or opt == "installer" then
-      valid_options = true
-    else
+    for _,assist in ipairs(assistant) do
+      if opt == assist then
+        valid_options = true
+        break
+      end
+    end
+    if valid_options == false then
       print("[ ERROR ] Requesting the load of an unknown assistant:",opt)
     end
   end
@@ -59,7 +66,12 @@ if valid_options then
   table.remove(arg,1)
   -- fixing the self-name of the script to be loaded
   arg[0] = opt
-  assert(require ("tools."..opt))
+  local tools = require ("tools."..opt)
+  if tools == nil then
+    print("ERRO: module tools." .. opt .. " not found.")
+    os.exit(1)
+  end
+  tools.run()
   print("[ CONSOLE ] Assistant ",opt,"has finished sucessfuly.")
   os.exit(0)
 else
@@ -70,9 +82,10 @@ else
   --config=filename : override the default configuration
 
  Valid SUBCOMMANDS:
-  --compile   : execute the compile assistant
+  --compile     : execute the compile assistant
   --makepack    : execute the makepack assistant
   --installer   : execute the installer assistant
+  --hook        : execute the hook assistant
 
  NOTES:
   The prefix '--' is optional in all options and subcommands.
@@ -86,6 +99,10 @@ else
   ]]..arg[0]..[[ --makepack --help
 
   3) How to use the installer?
-  ]]..arg[0]..[[ --installer --help ]])
+  ]]..arg[0]..[[ --installer --help
+  
+  4) How to use the hook?
+  ]]..arg[0]..[[ --hook --help ]])
+  
   os.exit(1)
 end

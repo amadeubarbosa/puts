@@ -18,7 +18,7 @@ __call = function(self,t,save)
     print(CONFIG,"Deseja informar outro elemento para o vetor '" .. t.name ..
         "'? sim ou nao?")
     io.write("> ")
-    if string.upper(io.read("*l")):find("NAO") or "" then break end
+    if not string.upper(io.read("*l")):find("SIM") then break end
     count = count + 1
   end
 end
@@ -50,7 +50,7 @@ __call =  function(self,t,save)
     print(CONFIG,"Deseja informar outro elemento para a lista '" .. t.name .. 
         "'? sim ou nao?")
     io.write("> ")
-    if string.upper(io.read("*l")):find("NAO") or "" then break end
+    if not string.upper(io.read("*l")):find("SIM") then break end
     count = count + 1
   end
 end
@@ -93,13 +93,13 @@ messages = {
     msg = "Administradores do barramento.",
     type = "list",
     check = Types.vector,
-    value = { "" },
+    value = { },
   }
 }
 
-configure_action = function(answers, tempdir, util)
+configure_action = function(answers, path, util)
   -- Loading original OpenBus file config (its loads for tables)
-  local acsConfFile = tempdir.."/data/conf/AccessControlServerConfiguration.lua"
+  local acsConfFile = path.."/data/conf/AccessControlServerConfiguration.lua"
   assert(loadfile(acsConfFile))()
   AccessControlServerConfiguration.hostName = answers.hostName
   AccessControlServerConfiguration.hostPort = answers.hostPort
@@ -120,7 +120,7 @@ configure_action = function(answers, tempdir, util)
   AccessControlServerConfiguration.databaseDirectory = "credentials"
 
 
-  local rgsConfFile = tempdir.."/data/conf/RegistryServerConfiguration.lua"
+  local rgsConfFile = path.."/data/conf/RegistryServerConfiguration.lua"
   assert(loadfile(rgsConfFile))()
   RegistryServerConfiguration.accessControlServerHostName = answers.hostName
   RegistryServerConfiguration.accessControlServerHostPort = answers.hostPort
@@ -138,7 +138,7 @@ configure_action = function(answers, tempdir, util)
   RegistryServerConfiguration.logLevel = answers.logLevel
 
 
-  local sesConfFile = tempdir.."/data/conf/SessionServerConfiguration.lua"
+  local sesConfFile = path.."/data/conf/SessionServerConfiguration.lua"
   assert(loadfile(sesConfFile))()
   -- this configuration depends of AccessControlServerConfiguration
   SessionServerConfiguration.accessControlServerHostName = answers.hostName
