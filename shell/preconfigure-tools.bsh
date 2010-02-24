@@ -60,7 +60,7 @@ if [ -n "$1" ]; then
 fi
 
 ROOT=${ROOT:-"/local/openbus"}
-BASEDIR="$ROOT/tmpBuild"
+BASEDIR="$ROOT/tmpBuild/$VERSION_ID"
 export SOURCES="$ROOT/source"
 PACKAGES="$ROOT/packages"
 RUNDIR="$ROOT/running"
@@ -86,12 +86,15 @@ DEPLOYDIR="$SOURCES/tools-trunk"
 svn co $SVN_PROJECTURL/trunk/tools $DEPLOYDIR || die "Aborting because the \
 checkout of the compile utilities has failed!"
 
+echo "INFO: Obtaining the sources of the project."
+svn co $SVNURL $SVNDIR || die "Aborting because the checkout of the source \
+codes of the project has failed!"
+
 echo ""
 echo "INFO: Entering in the source directory [$SVNDIR]"
 pushd $SVNDIR > /dev/null
 
-mkdir -p "${BASEDIR}/${VERSION_ID}"
-OPENBUS_HOME="${BASEDIR}/install-${VERSION_ID}"
+OPENBUS_HOME="${BASEDIR}/install"
 mkdir -p $OPENBUS_HOME
 mkdir -p "${ROOT}/packages"
 mkdir -p "${ROOT}/running"
