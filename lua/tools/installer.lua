@@ -58,7 +58,7 @@ function run()
   local template, config
 
   if arguments.config then
-    hook.hookConfig(arguments.config)
+    config = hook.hookConfig(arguments.config)
   end
 
   -- Loading configuration from template file provided or from default
