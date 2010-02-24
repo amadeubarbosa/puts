@@ -35,9 +35,15 @@ function run(t,arguments,build_dir)
   -- temp behaviour, future: each package as a <name>.desc and <name>.template
   -- important for configuration procedure in installation time
   if t.conf_template then
-    for i,templateName in ipairs(t.conf_template) do
-      local content = assert(io.open(templateName,"r")):read("*a")
-      assert(io.open(PKGDIR.."/"..t.name .. i ..".template", "w")):write(content)
+
+    if arguments.compat then 
+      local content = assert(io.open(t.conf_template,"r")):read("*a")
+      assert(io.open(PKGDIR.."/"..t.name..".template","w")):write(content)
+    else
+      for i,templateName in ipairs(t.conf_template) do
+        local content = assert(io.open(templateName,"r")):read("*a")
+        assert(io.open(PKGDIR.."/"..t.name .. i ..".template", "w")):write(content)
+      end
     end
   end
   -- copying files to special packages with '-dev' suffix
