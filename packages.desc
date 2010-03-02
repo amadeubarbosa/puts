@@ -416,8 +416,8 @@ packages = {
       src = PRODAPP .."/scs/src/cpp",
       mf = { "orbix genstubs USE_NODEPEND=Yes", "orbix" },
     -- special compile instructions for solaris8
-    SunOS58 = {
-      mf = { "orbix genstubs USE_NODEPEND=Yes", "orbix", "orbix sunos58" },
+    SunOS = {
+      mf = { "orbix genstubs USE_NODEPEND=Yes", "orbix", "orbix sunos" },
     },
     },
     install_files = {
@@ -435,9 +435,9 @@ packages = {
       type = "tecmake",
       src = SVNDIR .."/core/utilities/cpp",
       mf = { "orbix genstubs USE_NODEPEND=Yes", "orbix" },
-    -- special compile instructions for solaris8
-    SunOS58 = {
-      mf = { "orbix genstubs USE_NODEPEND=Yes", "orbix", "orbix sunos58" },
+    -- special compile instructions for solaris
+    SunOS = {
+      mf = { "orbix genstubs USE_NODEPEND=Yes", "orbix", "orbix sunos" },
     }
     },
     dev_files = {
