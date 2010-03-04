@@ -200,9 +200,13 @@ packages = {
       type = "tecmake",
       src = PRODAPP .."/scs/src/cpp/cppoil",
       mf = { "config LUA51="..PRODAPP.."/lua5.1", },
+      Darwin = { mf = { 
+        "config LUA51="..PRODAPP.."/lua5.1", 
+        "config LUA51="..PRODAPP.."/lua5.1 BUILD_DYLIB=Yes"}, },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/libscsoil.so"] = "libpath/${TEC_UNAME}",
+      ["../lib/${TEC_UNAME}/libscsoil.dylib"] = "libpath/${TEC_UNAME}",
       ["../../../idl/scs.idl"] = "idlpath/",
     },
     dev_files = {
@@ -218,9 +222,17 @@ packages = {
       type = "tecmake",
       src = PRODAPP .."/ftc/cpp/src",
       mf = { "config LUA51="..PRODAPP.."/lua5.1", "without_oil LUA51="..PRODAPP.."/lua5.1", },
+      Darwin = { mf = { 
+        "config LUA51="..PRODAPP.."/lua5.1", 
+        "config LUA51="..PRODAPP.."/lua5.1 BUILD_DYLIB=Yes", 
+        "without_oil LUA51="..PRODAPP.."/lua5.1",
+        "without_oil LUA51="..PRODAPP.."/lua5.1 BUILD_DYLIB=Yes", 
+        }, 
+      },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/libftc*.so"] = "libpath/${TEC_UNAME}",
+      ["../lib/${TEC_UNAME}/libftc*.dylib"] = "libpath/${TEC_UNAME}",
     },
     dev_files = {
       ["*.h"] = "incpath/ftc/",
@@ -251,12 +263,6 @@ packages = {
          " install-reader install-static-writer install-dynamic-writer", 
     SunOS =  "make PLAT=solaris reader static-writer dynamic-writer " ..
          "&& make PLAT=solaris INSTALL_TOP=" .. TMPDIR  ..  
-         " install-reader install-static-writer install-dynamic-writer",
-    SunOS510 = "make PLAT=solaris reader static-writer dynamic-writer " ..
-         "&& make PLAT=solaris INSTALL_TOP=" .. TMPDIR  ..  
-         " install-reader install-static-writer install-dynamic-writer",
-    SunOS510x86 = "make PLAT=solaris reader static-writer dynamic-writer " ..
-         "&& make PLAT=solaris INSTALL_TOP=" .. TMPDIR  .. 
          " install-reader install-static-writer install-dynamic-writer",
     IRIX =  "make PLAT=posix reader static-writer dynamic-writer " .. 
          "&& make PLAT=posix INSTALL_TOP=" .. TMPDIR  .. 
