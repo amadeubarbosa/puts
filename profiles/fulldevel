@@ -17,7 +17,7 @@ lpw-dev
 lce-dev
 ftc-dev
 tolua5.1-dev
-latt-dev
+latt-1.0.0-dev
 openbus-core
 openbus-core-conf
 openbus-core-dev

@@ -153,11 +153,11 @@ packages = {
       ["../include/*"] = "incpath/lualdap-1.0.1",
     },
   },
-  { name = "latt",
-    url = "http://www.tecgraf.puc-rio.br/~openbus/repository/latt.tar.gz",
+  { name = "latt-1.0.0",
+    url = SVNREPURL .. "/openbus/libs/trunk/latt-1.0.0",
     build = {
       type = "tecmake",
-      src = PRODAPP .."/latt",
+      src = PRODAPP .."/latt-1.0.0",
       mf = { },
     },
     dev_files = {
