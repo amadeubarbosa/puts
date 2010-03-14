@@ -1,5 +1,5 @@
 licenses
-e2fsprogs-1.40.8-dev
+uuid-1.6.2-dev
 openssl-0.9.9-dev
 lua5.1-dev
 luafilesystem-dev

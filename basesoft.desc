@@ -9,36 +9,34 @@ basesoft = {
       ["include/cxxtest"] = "incpath/cxxtest/",
     },
   },
-  { name = "e2fsprogs-1.40.8",
-    url = "http://www.tecgraf.puc-rio.br/~openbus/repository/e2fsprogs-1.40.8.tar.gz",
+  { name = "uuid-1.6.2",
+    url = "ftp://ftp.ossp.org/pkg/lib/uuid/uuid-1.6.2.tar.gz",
     build = {
       type = "autotools",
       test_libs = {"libuuid.*"},
       -- TIP: o configure dessa versão tem algum problema que dá um erro
       -- ao tentar fazer make sem antes fazer um clean
-      Darwin = "make clean; ./configure --prefix=".. TMPDIR ..
-               " --enable-bsd-shlibs && cd lib/uuid && make && make install",
-      Linux =  "gmake clean; ./configure --prefix=".. TMPDIR ..
-               " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
-      SunOS =  "gmake clean; env CC=gcc ./configure --prefix=".. TMPDIR ..
-               " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
-      SunOS510 =  "make clean; env CC=gcc CFLAGS=-UTLS ./configure --prefix=".. TMPDIR ..
-               " --enable-elf-shlibs && cd lib/uuid && make && make install",
-      IRIX =   "gmake clean; ./configure --prefix=".. TMPDIR ..
-               " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
+      Darwin = "./configure --prefix=".. TMPDIR ..
+               " --enable-shared --enable-static && make && make install",
+      Linux =  "./configure --prefix=".. TMPDIR ..
+               " --enable-shared --enable-static && make && make install",
+      SunOS =  "./configure --prefix=".. TMPDIR .. 
+               " --with-gnu-ld=no --enable-shared --enable-static "..
+               " LD=cc CC=cc CPP='cc -E' CXX=CC && make && make install",
     },
     install_files = {
+      [".libs/uuid"] = "bin/${TEC_UNAME}",
 --      ["lib/libuuid*.dll*"] = "libpath/${TEC_UNAME}",  --dynamic windows
-      ["lib/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-      ["lib/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+      [".libs/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      [".libs/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
     },
     dev_files = {
-      ["lib/libuuid*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
+      [".libs/libuuid*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
 --      ["lib/libuuid*.lib*"] = "libpath/${TEC_UNAME}",  --static windows
 --      ["lib/libuuid*.dll*"] = "libpath/${TEC_UNAME}",  --dynamic windows
-      ["lib/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-      ["lib/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-      ["lib/uuid/uuid.h"] = "incpath/e2fsprogs-1.40.8/uuid",
+      [".libs/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      [".libs/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+      ["uuid.h"] = "incpath/uuid-1.6.2/uuid",
     },
   },
   { name = "openssl-0.9.9",
@@ -100,9 +98,9 @@ basesoft = {
                " && gmake && gmake install",
       SunOS =  "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
                " && gmake && gmake install",
-      SunOS510 = "cd build_unix; make clean; ../dist/configure CC=gcc --prefix=".. TMPDIR ..
+      SunOS510 = "cd build_unix; make clean; ../dist/configure --prefix=".. TMPDIR ..
                " && make && make install",
-      SunOS510x86 = "cd build_unix; gmake clean; ../dist/configure CC=gcc --prefix=".. TMPDIR ..
+      SunOS510x86 = "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
                " && gmake && gmake install",
       IRIX =   "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
                " && gmake && gmake install",
@@ -137,12 +135,6 @@ basesoft = {
       SunOS =  "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
                " && cd ../lib/ && make && make install ",
-      SunOS510 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
-               " && cd include/ && make && make install "..
-               " && cd ../lib/ && make && make install ",
-      SunOS510x86 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
-               " && cd include/ && make && make install "..
-               " && cd ../lib/ && make && make install ",
       IRIX =   "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
                " && cd ../lib/ && make && make install ",
@@ -171,12 +163,12 @@ basesoft = {
                " && make depend && make && make install",
       Linux =  "env CC=gcc CPPFLAGS='-D_GNU_SOURCE' ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
                " && make depend && make && make install",
-      SunOS =  "./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+      SunOS =  "./configure --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd --disable-slurpd"..
                " && make depend && make && make install",
       -- problem on sunos510 openldap compile: http://www.openldap.org/its/index.cgi/Build?id=4607
-      SunOS510 = "env CC=gcc CFLAGS='-D_AVL_H' ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+      SunOS510 = "env CFLAGS='-D_AVL_H' ./configure --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd --disable-slurpd"..
                " && make depend && make && make install",
-      SunOS510x86 =  "env CC=gcc ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+      SunOS510x86 =  "./configure --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd --disable-slurpd"..
                " && make depend && make && make install",
       IRIX =   "./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
                " && make depend && make && make install",
