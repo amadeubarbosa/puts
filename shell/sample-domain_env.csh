@@ -2,7 +2,7 @@
 #  This script sets environment variables for domain sample-domain
 
 # linux
-setenv ORBIX_HOME /home/msv/rcosme/tools/orbix63/asp/6.3
+setenv ORBIX_HOME /home/msv/openbus/third-party/orbix63sun510sparc/asp/6.3
 # solaris
 #setenv ORBIX_HOME /home/msv/rcosme/tools/orbixSunOS510/asp/6.3
 
@@ -24,9 +24,17 @@ setenv IT_LICENSE_FILE "${ORBIX_HOME}/../../etc/licenses.txt"
 
 #: ${LD_LIBRARY_PATH:=""}
 
-setenv LD_LIBRARY_PATH "${ORBIX_HOME}/../../shlib:${ORBIX_HOME}/../../shlib/default:${ORBIX_HOME}/../../shlib/lib64:${ORBIX_HOME}/../../shlib/default/lib64:$LD_LIBRARY_PATH"
+setenv LD_LIBRARY_PATH "${ORBIX_HOME}/../../shlib:${ORBIX_HOME}/../../shlib/default:$LD_LIBRARY_PATH"
 
 #: ${LD_LIBRARY_PATH_64:=""}
 
-setenv LD_LIBRARY_PATH_64 "${ORBIX_HOME}/../../shlib/lib64:${ORBIX_HOME}/../../shlib/default/lib64:${ORBIX_HOME}/../../shlib:${ORBIX_HOME}/../../shlib/default:$LD_LIBRARY_PATH_64"
+setenv LD_LIBRARY_PATH_64 "${ORBIX_HOME}/../../shlib:${ORBIX_HOME}/../../shlib/default:$LD_LIBRARY_PATH_64"
+
+if (`uname -s` == "SunOS") then
+  setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH:${ORBIX_HOME}/../../shlib/sparcv9:${ORBIX_HOME}/../../shlib/default/sparcv9"
+  setenv LD_LIBRARY_PATH_64 "${ORBIX_HOME}/../../shlib/sparcv9:${ORBIX_HOME}/../../shlib/default/sparcv9:$LD_LIBRARY_PATH_64"
+else
+  setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH:${ORBIX_HOME}/../../shlib/lib64:${ORBIX_HOME}/../../shlib/default/lib64"
+  setenv LD_LIBRARY_PATH_64 "${ORBIX_HOME}/../../shlib/lib64:${ORBIX_HOME}/../../shlib/default/lib64:$LD_LIBRARY_PATH_64"
+endif
 

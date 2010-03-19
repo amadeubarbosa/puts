@@ -23,6 +23,9 @@ basesoft = {
       SunOS =  "./configure --prefix=".. TMPDIR .. 
                " --with-gnu-ld=no --enable-shared --enable-static "..
                " LD=cc CC=cc CPP='cc -E' CXX=CC && make && make install",
+      SunOS510_64 =  "./configure --prefix=".. TMPDIR .. 
+               " --with-gnu-ld=no --enable-shared --enable-static "..
+               " LD='cc -m64' CC='cc -m64' CPP='cc -m64 -E' CXX='CC -m64' && make && make install",
     },
     install_files = {
       [".libs/uuid"] = "bin/${TEC_UNAME}",
@@ -55,6 +58,8 @@ basesoft = {
       IRIX =   "./config shared --prefix=".. TMPDIR ..
                " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
       SunOS =  "./config shared --prefix=".. TMPDIR ..
+               " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
+      SunOS510_64 = "./Configure solaris64-sparcv9-cc shared --prefix=".. TMPDIR ..
                " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
       SunOS510x86 = "./config no-asm shared --prefix=".. TMPDIR ..
                " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
@@ -100,6 +105,8 @@ basesoft = {
                " && gmake && gmake install",
       SunOS510 = "cd build_unix; make clean; ../dist/configure --prefix=".. TMPDIR ..
                " && make && make install",
+      SunOS510_64 = "cd build_unix; make clean; ../dist/configure CFLAGS=-m64 CXXFLAGS=-m64 LFLAGS=-m64 LDFLAGS=-m64 --prefix=".. TMPDIR ..
+               " && make && make install",
       SunOS510x86 = "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
                " && gmake && gmake install",
       IRIX =   "cd build_unix; gmake clean; ../dist/configure --prefix=".. TMPDIR ..
@@ -135,6 +142,9 @@ basesoft = {
       SunOS =  "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
                " && cd ../lib/ && make && make install ",
+      SunOS510_64 =  "./configure CFLAGS=-m64 CXXFLAGS=-m64 LFLAGS=-m64 LDFLAGS=-m64 --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
+               " && cd include/ && make && make install "..
+               " && cd ../lib/ && make && make install ",
       IRIX =   "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
                " && cd ../lib/ && make && make install ",
@@ -167,6 +177,8 @@ basesoft = {
                " && make depend && make && make install",
       -- problem on sunos510 openldap compile: http://www.openldap.org/its/index.cgi/Build?id=4607
       SunOS510 = "env CFLAGS='-D_AVL_H' ./configure --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd --disable-slurpd"..
+               " && make depend && make && make install",
+      SunOS510_64 = "env CFLAGS='-D_AVL_H' ./configure CFLAGS=-m64 CXXFLAGS=-m64 LFLAGS=-m64 LDFLAGS=-m64 --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd --disable-slurpd"..
                " && make depend && make && make install",
       SunOS510x86 =  "./configure --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd --disable-slurpd"..
                " && make depend && make && make install",

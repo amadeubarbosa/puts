@@ -3,6 +3,7 @@
 -- also use it, like packages that just need to copy files and make links.
 -- ATTENTION: place the fundamental packages first!
 -- If A depends on B then you should place B's description before than A's.
+SUNOS64_TECMAKE_FLAGS="USE_NODEPEND=Yes TEC_UNAME=SunOS510_64 BUILD_64=yes"
 packages = {
   -- fake package to easy the download of the oil04 and scs urls
   { name = "oil-source",
@@ -35,6 +36,7 @@ packages = {
     src = PRODAPP .."/lua5.1/src",
     mf = { "config" },
     Darwin = { mf = {"config", "config BUILD_DYLIB=Yes"} },
+    SunOS510_64 = { mf = {"config ".. SUNOS64_TECMAKE_FLAGS} },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/liblua5.1.so"] = "libpath/${TEC_UNAME}",
@@ -50,6 +52,7 @@ packages = {
       type = "tecmake",
       src = PRODAPP .."/lua5.1/src",
       mf = { "lua", --[["luac", "bin2c",]] },
+      SunOS510_64 = { mf = {"lua ".. SUNOS64_TECMAKE_FLAGS} },
     },
     install_files = {
       ["../bin/${TEC_UNAME}/lua5.1"] = "bin/${TEC_UNAME}",
@@ -62,6 +65,7 @@ packages = {
       src = PRODAPP .."/tolua5.1/src",
       mf = { "tolua5lib LUA51=../../lua5.1", "tolua5 LUA51=../../lua5.1" },
     Darwin = { mf = {"tolua5lib LUA51="..PRODAPP.."/lua5.1", "tolua5lib BUILD_DYLIB=Yes LUA51="..PRODAPP.."/lua5.1", "tolua5 LUA51="..PRODAPP.."/lua5.1"} },
+      SunOS510_64 = { mf = { "tolua5lib LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS, "tolua5 LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
     },
     dev_files = {
       ["../bin/${TEC_UNAME}/tolua5.1"] = "bin/${TEC_UNAME}",
@@ -76,6 +80,7 @@ packages = {
       src = PRODAPP .."/luafilesystem/src",
       mf = { "config LUA51=../../lua5.1", },
     Darwin = { mf = {"config LUA51="..PRODAPP.."/lua5.1", "config BUILD_DYLIB=Yes LUA51="..PRODAPP.."/lua5.1"} },
+      SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/liblfs.so"] = "libpath/${TEC_UNAME}",
@@ -93,6 +98,7 @@ packages = {
       src = PRODAPP .."/luasocket2/src",
       mf = { "config LUA51=../../lua5.1", },
     Darwin = { mf = {"config LUA51="..PRODAPP.."/lua5.1", "config BUILD_DYLIB=Yes LUA51="..PRODAPP.."/lua5.1"} },
+      SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/libluasocket.so"] = "libpath/${TEC_UNAME}",
@@ -109,6 +115,7 @@ packages = {
       src = PRODAPP .."/oil04/src",
       mf = { "oilall LUA51=../../lua5.1", },
     Darwin = { mf = {"oilall LUA51="..PRODAPP.."/lua5.1", "oilall BUILD_DYLIB=Yes LUA51="..PRODAPP.."/lua5.1"} },
+      SunOS510_64 = { mf = { "oilall LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/liboilall.so"] = "libpath/${TEC_UNAME}",
@@ -126,6 +133,7 @@ packages = {
       src = PRODAPP .."/luuid/src",
       mf = { "config LUA51=../../lua5.1", },
     Darwin = { mf = {"config LUA51="..PRODAPP.."/lua5.1", "config BUILD_DYLIB=Yes LUA51="..PRODAPP.."/lua5.1"} },
+      SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/libluuid.so"] = "libpath/${TEC_UNAME}",
@@ -143,6 +151,7 @@ packages = {
       src = PRODAPP .."/lualdap-1.0.1/src",
       mf = { "config LUA51=../../lua5.1", },
     Darwin = { mf = {"config LUA51="..PRODAPP.."/lua5.1", "config BUILD_DYLIB=Yes LUA51="..PRODAPP.."/lua5.1"} },
+      SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/liblualdap.so"] = "libpath/${TEC_UNAME}",
@@ -183,6 +192,7 @@ packages = {
       src = PRODAPP .."/scs/src/cpp/cppoil",
       mf = { "scsall LOOP_HOME="..INSTALL.TOP.."/libpath/lua/5.1 LUA51="..PRODAPP.."/lua5.1", },
     Darwin = { mf = {"scsall LOOP_HOME="..INSTALL.TOP.."/libpath/lua/5.1 LUA51="..PRODAPP.."/lua5.1", "scsall LOOP_HOME="..INSTALL.TOP.."/libpath/lua/5.1 LUA51="..PRODAPP.."/lua5.1 BUILD_DYLIB=Yes"} },
+      SunOS510_64 = { mf = { "scsall LOOP_HOME="..INSTALL.TOP.."/libpath/lua/5.1 LUA51="..PRODAPP.."/lua5.1 "..SUNOS64_TECMAKE_FLAGS, } },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/libscsall.so"] = "libpath/${TEC_UNAME}",
@@ -203,6 +213,7 @@ packages = {
       Darwin = { mf = { 
         "config LUA51="..PRODAPP.."/lua5.1", 
         "config LUA51="..PRODAPP.."/lua5.1 BUILD_DYLIB=Yes"}, },
+      SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/libscsoil.so"] = "libpath/${TEC_UNAME}",
@@ -229,6 +240,7 @@ packages = {
         "without_oil LUA51="..PRODAPP.."/lua5.1 BUILD_DYLIB=Yes", 
         }, 
       },
+      SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS, "without_oil LUA51="..PRODAPP.."/lua5.1 "..SUNOS64_TECMAKE_FLAGS } },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/libftc*.so"] = "libpath/${TEC_UNAME}",
@@ -285,6 +297,7 @@ packages = {
       src = SVNDIR .."/lib/lce/src",
       mf = { "config LUA51="..PRODAPP.."/lua5.1", },
     Darwin = { mf = {"config LUA51="..PRODAPP.."/lua5.1", "config BUILD_DYLIB=Yes LUA51="..PRODAPP.."/lua5.1"} },
+      SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/liblce*.so"] = "libpath/${TEC_UNAME}",
@@ -301,6 +314,7 @@ packages = {
       src = SVNDIR .."/lib/lpw/src",
       mf = { "config LUA51="..PRODAPP.."/lua5.1", },
     Darwin = { mf = {"config LUA51="..PRODAPP.."/lua5.1", "config BUILD_DYLIB=Yes LUA51="..PRODAPP.."/lua5.1"} },
+      SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/liblpw.so"] = "libpath/${TEC_UNAME}",
@@ -316,6 +330,7 @@ packages = {
       type = "tecmake",
       src = SVNDIR .."/core/services",
       mf = { "config LUA51="..PRODAPP.."/lua5.1", },
+      SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
       --env LFLAGS="-undefined dynamic_lookup"
     },
     install_files = {
@@ -421,9 +436,12 @@ packages = {
       type = "tecmake",
       src = PRODAPP .."/scs/src/cpp",
       mf = { "orbix genstubs USE_NODEPEND=Yes", "orbix" },
-    -- special compile instructions for solaris8
+    -- special compile instructions for solaris
     SunOS = {
       mf = { "orbix genstubs USE_NODEPEND=Yes", "orbix", "orbix sunos" },
+    },
+    SunOS510_64 = {
+      mf = { "orbix genstubs ".. SUNOS64_TECMAKE_FLAGS, "orbix "..SUNOS64_TECMAKE_FLAGS, "orbix sunos "..SUNOS64_TECMAKE_FLAGS },
     },
     },
     install_files = {
@@ -444,7 +462,10 @@ packages = {
     -- special compile instructions for solaris
     SunOS = {
       mf = { "orbix genstubs USE_NODEPEND=Yes", "orbix", "orbix sunos" },
-    }
+    },
+    SunOS510_64 = {
+      mf = { "orbix genstubs ".. SUNOS64_TECMAKE_FLAGS, "orbix "..SUNOS64_TECMAKE_FLAGS, "orbix sunos "..SUNOS64_TECMAKE_FLAGS },
+    },
     },
     dev_files = {
       ["lib/${TEC_UNAME}/libopenbusorbix.*"] = "core/utilities/cpp/lib/${TEC_UNAME}",
@@ -465,6 +486,12 @@ packages = {
       type = "tecmake",
       src = SVNDIR .."/core/test/orbix",
       mf = { "config cxxtest -C acs", "config -C acs", "config cxxtest -C rgs", "config -C rgs" },
+      SunOS510_64 = { 
+	    mf = { "config cxxtest -C acs",
+               "config -C acs ".. SUNOS64_TECMAKE_FLAGS,
+               "config cxxtest -C rgs",
+               "config -C rgs ".. SUNOS64_TECMAKE_FLAGS, },
+      },
     },
     install_files = {
       ["bin/${TEC_UNAME}/*"] = "core/test/orbix/bin/${TEC_UNAME}",
@@ -477,6 +504,7 @@ packages = {
       type = "tecmake",
       src = SVNDIR .."/demo/hello/orbix63",
       mf = { "server genstubs USE_NODEPEND=Yes", "client", "server" },
+      SunOS510_64 = { mf = { "server genstubs ".. SUNOS64_TECMAKE_FLAGS, "client "..SUNOS64_TECMAKE_FLAGS, "server "..SUNOS64_TECMAKE_FLAGS } },
     },
     dev_files = {
       ["bin/${TEC_UNAME}/*"] = "demo/hello/orbix63/bin/${TEC_UNAME}",
@@ -535,6 +563,7 @@ packages = {
       type = "tecmake",
       src = PRODAPP .."/scs/src/cpp",
       mf = { "mico genstubs USE_NODEPEND=Yes", "mico" },
+      SunOS510_64 = { mf = { "mico genstubs ".. SUNOS64_TECMAKE_FLAGS, "mico ".. SUNOS64_TECMAKE_FLAGS }, }
     },
     install_files = {
       ["../lib/${TEC_UNAME}/libscsmico.so"] = "libpath/${TEC_UNAME}",
@@ -551,10 +580,15 @@ packages = {
       type = "tecmake",
       src = SVNDIR .."/core/utilities/cpp",
       mf = { "mico genstubs USE_NODEPEND=Yes", "mico" },
-    -- special compile instructions for solaris8
-    SunOS58 = {
-      mf = { "mico genstubs USE_NODEPEND=Yes", "mico", "mico sunos58" },
+    -- special compile instructions for solaris
+    SunOS = {
+      mf = { "mico genstubs USE_NODEPEND=Yes", "mico", "mico sunos" },
     },
+      SunOS510_64 = { 
+        mf = { "mico genstubs ".. SUNOS64_TECMAKE_FLAGS, 
+               "mico ".. SUNOS64_TECMAKE_FLAGS,
+               "mico sunos".. SUNOS64_TECMAKE_FLAGS },
+      }
     },
     dev_files = {
       ["lib/${TEC_UNAME}/libopenbusmico.*"] = "core/utilities/cpp/lib/${TEC_UNAME}",
@@ -575,6 +609,7 @@ packages = {
       type = "tecmake",
       src = SVNDIR .."/demo/hello/mico",
       mf = { "server genstubs USE_NODEPEND=Yes", "client", "server" },
+      SunOS510_64 = { mf = { "server genstubs ".. SUNOS64_TECMAKE_FLAGS, "client ".. SUNOS64_TECMAKE_FLAGS, "server ".. SUNOS64_TECMAKE_FLAGS }, }
     },
     dev_files = {
       ["bin/${TEC_UNAME}/*"] = "demo/hello/mico/bin/${TEC_UNAME}",
@@ -598,6 +633,7 @@ packages = {
     type = "tecmake",
     src = SVNDIR .."/tools/src",
       mf = { "config LUA51="..PRODAPP.."/lua5.1", },
+      SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
     },
     install_files = {
       ["../bin/${TEC_UNAME}/*"] = "tools/bin/${TEC_UNAME}",
