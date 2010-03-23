@@ -161,7 +161,7 @@ basesoft = {
     },
   },
   { name = "openldap-2.4.11",
-    url = "http://www.tecgraf.puc-rio.br/~openbus/repository/openldap-2.4.11.tar.gz",
+    url = SVNREPURL .. "/openbus/libs/trunk/openldap-2.4.11",
     build = {
       type = "autotools",
       test_libs = {"libldap*.*"},
@@ -169,20 +169,20 @@ basesoft = {
         includes = "db.h", 
         libs = "libdb.so",
       },
-      Darwin = "env LIBS=-lresolv ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+      Darwin = "./configure --prefix=".. TMPDIR .." --disable-slapd"..
                " && make depend && make && make install",
-      Linux =  "env CC=gcc CPPFLAGS='-D_GNU_SOURCE' ./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+      Linux =  "./configure --prefix=".. TMPDIR .." --disable-slapd"..
                " && make depend && make && make install",
-      SunOS =  "./configure --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd --disable-slurpd"..
+      SunOS =  "./configure --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd"..
                " && make depend && make && make install",
       -- problem on sunos510 openldap compile: http://www.openldap.org/its/index.cgi/Build?id=4607
-      SunOS510 = "env CFLAGS='-D_AVL_H' ./configure --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd --disable-slurpd"..
+      SunOS510 = "./configure --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd"..
                " && make depend && make && make install",
-      SunOS510_64 = "env CFLAGS='-D_AVL_H' ./configure CFLAGS=-m64 CXXFLAGS=-m64 LFLAGS=-m64 LDFLAGS=-m64 --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd --disable-slurpd"..
+      SunOS510_64 = "./configure --target=sparc64-sun-solaris2.10 --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd"..
                " && make depend && make && make install",
-      SunOS510x86 =  "./configure --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd --disable-slurpd"..
+      SunOS510x86 =  "./configure --prefix=".. TMPDIR .." --with-tls=openssl --disable-slapd"..
                " && make depend && make && make install",
-      IRIX =   "./configure --prefix=".. TMPDIR .." --disable-slapd --disable-slurpd"..
+      IRIX =   "./configure --prefix=".. TMPDIR .." --disable-slapd"..
                " && make depend && make && make install",
     },
     install_files = {
