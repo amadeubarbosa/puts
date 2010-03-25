@@ -9,37 +9,36 @@ basesoft = {
       ["include/cxxtest"] = "incpath/cxxtest/",
     },
   },
-  { name = "uuid-1.6.2",
-    url = "ftp://ftp.ossp.org/pkg/lib/uuid/uuid-1.6.2.tar.gz",
+  { name = "e2fsprogs-1.40.8",
+    url = "http://www.tecgraf.puc-rio.br/~openbus/repository/e2fsprogs-1.40.8.tar.gz",
     build = {
       type = "autotools",
       test_libs = {"libuuid.*"},
       -- TIP: o configure dessa versão tem algum problema que dá um erro
       -- ao tentar fazer make sem antes fazer um clean
-      Darwin = "./configure --prefix=".. TMPDIR ..
-               " --enable-shared --enable-static && make && make install",
-      Linux =  "./configure --prefix=".. TMPDIR ..
-               " --enable-shared --enable-static && make && make install",
-      SunOS =  "./configure --prefix=".. TMPDIR .. 
-               " --with-gnu-ld=no --enable-shared --enable-static "..
-               " LD=cc CC=cc CPP='cc -E' CXX=CC && make && make install",
-      SunOS510_64 =  "./configure --prefix=".. TMPDIR .. 
-               " --with-gnu-ld=no --enable-shared --enable-static "..
-               " LD='cc -m64' CC='cc -m64' CPP='cc -m64 -E' CXX='CC -m64' && make && make install",
+      Darwin = "make clean; ./configure --prefix=".. TMPDIR ..
+               " --enable-bsd-shlibs && cd lib/uuid && make && make install",
+      Linux =  "gmake clean; ./configure --prefix=".. TMPDIR ..
+               " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
+      SunOS =  "gmake clean; env CC=gcc ./configure --prefix=".. TMPDIR ..
+               " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
+      SunOS510 =  "make clean; env CC=gcc CFLAGS=-UTLS ./configure --prefix=".. TMPDIR ..
+               " --enable-elf-shlibs && cd lib/uuid && make && make install",
+      IRIX =   "gmake clean; ./configure --prefix=".. TMPDIR ..
+               " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
     },
     install_files = {
-      [".libs/uuid"] = "bin/${TEC_UNAME}",
 --      ["lib/libuuid*.dll*"] = "libpath/${TEC_UNAME}",  --dynamic windows
-      [".libs/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-      [".libs/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+      ["lib/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      ["lib/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
     },
     dev_files = {
-      [".libs/libuuid*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
+      ["lib/libuuid*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
 --      ["lib/libuuid*.lib*"] = "libpath/${TEC_UNAME}",  --static windows
 --      ["lib/libuuid*.dll*"] = "libpath/${TEC_UNAME}",  --dynamic windows
-      [".libs/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
-      [".libs/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-      ["uuid.h"] = "incpath/uuid-1.6.2/uuid",
+      ["lib/libuuid*.so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
+      ["lib/libuuid*.dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
+      ["lib/uuid/uuid.h"] = "incpath/e2fsprogs-1.40.8/uuid",
     },
   },
   { name = "openssl-0.9.9",
