@@ -18,7 +18,6 @@ PATH=/usr/sbin:/usr/bin:/sbin:/bin
 OPENBUS_HOME=${OPENBUS_HOME:=/local/openbus/running}
 DESC="OpenBus Middleware Services"
 NAME=openbus
-SCRIPTNAME=/etc/init.d/$NAME
 SCRIPT_DIR=$OPENBUS_HOME/core/bin
 SCRIPT_ACS=./run_access_control_server.sh
 SCRIPT_RGS=./run_registry_server.sh
@@ -203,7 +202,7 @@ case "$1" in
 	esac
 	;;
   *)
-	echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}"
+	echo "Usage: $0 {start|stop|restart|force-reload}"
 	exit 3
 	;;
 esac
