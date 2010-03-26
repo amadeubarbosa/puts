@@ -9,5 +9,5 @@ SystemDeployment {
   id = "AccessControlService",
   system = "AccessControlService",
   description = "Serviço de Controle de Acesso do OpenBus",
-  certificate = "../../data/certificates/AccessControlService.crt"
+  certificate = "AccessControlService.crt"
 }

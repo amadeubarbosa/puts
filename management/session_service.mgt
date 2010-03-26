@@ -9,7 +9,7 @@ SystemDeployment {
   id = "SessionService",
   system = "SessionService",
   description = "Serviço de Sessão do OpenBus",
-  certificate = "../../data/certificates/SessionService.crt",
+  certificate = "SessionService.crt",
 }
 
 Interface {

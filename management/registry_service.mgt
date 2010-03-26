@@ -9,5 +9,5 @@ SystemDeployment {
   id = "RegistryService",
   system = "RegistryService",
   description = "Serviço de Registro do OpenBus",
-  certificate = "../../data/certificates/RegistryService.crt",
+  certificate = "RegistryService.crt",
 }
