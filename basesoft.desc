@@ -10,21 +10,19 @@ basesoft = {
     },
   },
   { name = "e2fsprogs-1.40.8",
-    url = "http://www.tecgraf.puc-rio.br/~openbus/repository/e2fsprogs-1.40.8.tar.gz",
+    url = SVNREPURL .. "/openbus/libs/trunk/e2fsprogs-1.40.8",
     build = {
       type = "autotools",
       test_libs = {"libuuid.*"},
-      -- TIP: o configure dessa versão tem algum problema que dá um erro
-      -- ao tentar fazer make sem antes fazer um clean
-      Darwin = "make clean; ./configure --prefix=".. TMPDIR ..
+      Darwin = "./configure --prefix=".. TMPDIR ..
                " --enable-bsd-shlibs && cd lib/uuid && make && make install",
-      Linux =  "gmake clean; ./configure --prefix=".. TMPDIR ..
+      Linux =  "./configure --prefix=".. TMPDIR ..
                " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
-      SunOS =  "gmake clean; env CC=gcc ./configure --prefix=".. TMPDIR ..
-               " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
-      SunOS510 =  "make clean; env CC=gcc CFLAGS=-UTLS ./configure --prefix=".. TMPDIR ..
-               " --enable-elf-shlibs && cd lib/uuid && make && make install",
-      IRIX =   "gmake clean; ./configure --prefix=".. TMPDIR ..
+      SunOS =  "./configure --prefix=".. TMPDIR ..
+               " --with-gnu-ld=no --enable-elf-shlibs && cd lib/uuid && make && make install",
+      SunOS510_64 =  "./configure --target=sparc64-sun-solaris2.10 --prefix=".. TMPDIR ..
+               " --with-gnu-ld=no --enable-elf-shlibs && cd lib/uuid && make && make install",
+      IRIX =   "./configure --prefix=".. TMPDIR ..
                " --enable-elf-shlibs && cd lib/uuid && gmake && gmake install",
     },
     install_files = {
