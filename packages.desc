@@ -354,7 +354,7 @@ packages = {
     },
     -- TODO: include here all templates/openbus.lua messages table!!
     conf_template = {
-      DEPLOYDIR .. "/templates/openbus.lua",
+      SVNDIR .."/tools/templates/openbus.lua",
     },
     dev_files = {
       ["../test/lua"] = "core/test",

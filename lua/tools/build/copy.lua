@@ -38,7 +38,7 @@ function run(t,arguments,build_dir)
 
     if arguments.compat then 
       local content = assert(io.open(t.conf_template,"r")):read("*a")
-      assert(io.open(PKGDIR.."/"..t.name..".template","w")):write(content)
+      assert(io.open(PKGDIR.."/"..t.name.."1.template","w")):write(content)
     else
       for i,templateName in ipairs(t.conf_template) do
         local content = assert(io.open(templateName,"r")):read("*a")
