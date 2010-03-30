@@ -44,6 +44,8 @@ basesoft = {
     build = {
       type = "autotools",
       test_libs = {"libcrypto*0.9.9*"},
+      Darwin103x86 = "./Configure darwin64-x86_64-cc no-asm shared --prefix=".. TMPDIR ..
+               " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
       Darwin102x86 = "./Configure darwin64-x86_64-cc no-asm shared --prefix=".. TMPDIR ..
                " --openssldir=".. TMPDIR .."/openssl && make && make install_sw",
       Darwin100x86 = "./Configure darwin64-x86_64-cc no-asm shared --prefix=".. TMPDIR ..
