@@ -360,6 +360,24 @@ packages = {
       ["../test/lua"] = "core/test",
     },
   },
+  { name = "openbus-lua",
+    build = {
+      type = "tecmake",
+      src = SVNDIR .."/core/utilities/lua",
+      mf = { "config debug LUA51="..PRODAPP.."/lua5.1" },
+      Darwin = { mf = { "config debug LUA51="..PRODAPP.."/lua5.1","config debug LUA51="..PRODAPP.."/lua5.1 BUILD_DYLIB=YES" }, },
+    },
+    install_files = {
+      ["lib/${TEC_UNAME}/libopenbuslua.so"] = "core/utilities/lua/lib/${TEC_UNAME}",
+      ["lib/${TEC_UNAME}/libopenbuslua.dylib"] = "core/utilities/lua/lib/${TEC_UNAME}",
+      ["../../../idl/*.idl"] = "idlpath",
+    },
+    dev_files = {
+      ["../lib/${TEC_UNAME}/libopenbuslua.*"] = "core/utilities/lua/lib/${TEC_UNAME}",
+      ["../obj/${TEC_UNAME}/openbuspreloaded.h"] = "core/utilities/lua/",
+      ["../../../idl/*.idl"] = "idlpath/",
+    },
+  },
   { name = "openbus-bin-acs",
     build = {
       type = "tecmake",
@@ -369,9 +387,6 @@ packages = {
     install_files = {
       ["../bin/${TEC_UNAME}/acs"] = "core/bin/${TEC_UNAME}",
       ["../bin/run_binary_acs.sh"] = "core/bin",
-      ["../services/accesscontrol/FT*"] = "core/services/accesscontrol",
-      ["../services/faulttolerance"] = "core/services",
-      ["../utilities/lua/openbus"] = "core/utilities/lua",
     },
   },
   { name = "openbus-bin-rgs",
