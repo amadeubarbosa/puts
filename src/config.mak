@@ -21,6 +21,7 @@ TOOLS_MODULES=$(addprefix tools., \
 	build.maven \
 	build.mavenimport \
 	build.ant \
+	build.command \
 	fetch.http \
 	fetch.svn \
 	checklibdeps \

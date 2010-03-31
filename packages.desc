@@ -32,11 +32,11 @@ packages = {
   { name = "lua5.1",
     url = SVNREPURL .. "/openbus/libs/trunk/lua5.1.2",
     build = {
-    type = "tecmake",
-    src = PRODAPP .."/lua5.1/src",
-    mf = { "config" },
-    Darwin = { mf = {"config", "config BUILD_DYLIB=Yes"} },
-    SunOS510_64 = { mf = {"config ".. SUNOS64_TECMAKE_FLAGS} },
+      type = "tecmake",
+      src = PRODAPP .."/lua5.1/src",
+      mf = { "config" },
+      Darwin = { mf = {"config", "config BUILD_DYLIB=Yes"} },
+      SunOS510_64 = { mf = {"config ".. SUNOS64_TECMAKE_FLAGS} },
     },
     install_files = {
       ["../lib/${TEC_UNAME}/liblua5.1.so"] = "libpath/${TEC_UNAME}",
@@ -514,6 +514,17 @@ packages = {
       ["runtests"] = "core/test/orbix/",
     },
   },
+  { name = "openbus-orbix-doc",
+    build = {
+      type = "command",
+      src = SVNDIR .. "/core/utilities/cpp",
+      cmd = "doxygen",
+      arguments = "doxygen.cfg"
+    },
+    install_files = {
+      ["html"] = "core/utilities/cpp/doc",
+    },
+  },
   { name = "openbus-demo-hello-orbix",
     build = {
       type = "tecmake",
@@ -707,6 +718,18 @@ packages = {
     install_files = {
       ["target/openbus-api-*.jar"] = "libpath/java",
       ["target/dependency/*.jar"] = "libpath/java",
+    },
+  },
+  { name = "openbusapi-java-doc",
+    build = {
+      type = "command",
+      src = SVNDIR .. "/core/utilities",
+      cmd = "mvn",
+      rebuild = "clean",
+      arguments = "javadoc:javadoc -Dquiet",
+    },
+    install_files = {
+      ["target/site"] = "libpath/java/doc",
     },
   },
   { name = "openbus-demo-hello-java",
