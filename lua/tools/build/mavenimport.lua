@@ -1,18 +1,12 @@
 -- Basic variables (global vars are in upper case)
 require "tools.config"
-local util = require "tools.util"
 local copy = require "tools.build.copy"
 local maven = require "tools.build.maven"
-
--- Local scope
-local string = require "tools.split"
-local platforms = require "tools.platforms"
-local myplat = platforms[TEC_SYSNAME]
 
 module("tools.build.mavenimport", package.seeall)
 
 function run(t, arguments)
-  print("[ INFO ] Importing package via maven: ".. t.name)
+  print("[ INFO ] Importing package via mavenimport: ".. t.name)
   local build_dir = t.build.src
   if not build_dir:match("/$") then build_dir = build_dir.."/" end
 
@@ -33,7 +27,7 @@ function run(t, arguments)
       " -DartifactId=" .. props.artifactId ..
       " -Dversion="    .. props.version .. 
       " -Dpackaging="  .. "jar" ..
-      " -Dfile="       .. file				
+      " -Dfile="       .. file
 
     if props.pomFile then
       repoinstall = repoinstall .. " -DpomFile=" .. props.pomFile

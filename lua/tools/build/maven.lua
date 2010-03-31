@@ -1,12 +1,7 @@
 -- Basic variables (global vars are in upper case)
 require "tools.config"
-local util = require "tools.util"
 local copy = require "tools.build.copy"
 
--- Local scope
-local string = require "tools.split"
-local platforms = require "tools.platforms"
-local myplat = platforms[TEC_SYSNAME]
 
 module("tools.build.maven", package.seeall)
 
