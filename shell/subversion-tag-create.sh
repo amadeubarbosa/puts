@@ -55,10 +55,10 @@ svn cp $FROM $NEW || die "ERROR: Problem while creating the new branch"
 for each in `echo $FILES_TO_PARSE`
 do
 	echo "INFO: Parsing file [$NEW/$each] to replace any version string"
-	sed -i "s/$FROM_VERSION_ID/$NEW_VERSION_ID/g" $NEW/$each || die "ERROR: String replacemente has failed"
+	sed -i -e "s/${FROM_VERSION_ID}/${NEW_VERSION_ID}/g" $NEW/$each || die "ERROR: String replacemente has failed"
 done	
 
 echo "QUESTION: Do you want commit your changes? Temporary files were placed at: $TEMP_DIR"
 echo "Press ENTER to proceed to commit or CTRL+C to abort"
 read
-echo svn ci $TEMP_DIR || die "ERROR: Subversion commit has failed. See directory $TEMP_DIR."
+svn ci $TEMP_DIR || die "ERROR: Subversion commit has failed. See directory $TEMP_DIR."
