@@ -104,7 +104,7 @@ function loadTemplate(tmplname)
     "ERROR: Possible BUG = Lua global environment already "..
     "has _G.messages or _G.configure_action !")
   assert(loadfile(tmplname),
-     "ERROR: Cannot import the configuration template '"..tmplname.."'.")()
+     "ERROR: Could not find/import template '"..tmplname.."'.")()
 
   local template = {
     messages = _G.messages,
