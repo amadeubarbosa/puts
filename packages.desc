@@ -348,6 +348,7 @@ packages = {
       ["../test/lua/checkInstall.lua"] = "core/test",
       ["../../tools/management"] = "tools",
       ["../../tools/shell"] = "tools",
+      ["../../tools/templates"] = "tools",
     },
     conf_files = {
       ["../../data/conf"] = "data",
