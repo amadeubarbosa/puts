@@ -126,7 +126,7 @@ configure_action = function(answers, path, util)
   RegistryServerConfiguration.accessControlServerHostPort = answers.hostPort
 
   RegistryServerConfiguration.registryServerHostName = answers.hostName
-  RegistryServerConfiguration.registryServerHostPort = answers.hostPort - 50
+  RegistryServerConfiguration.registryServerHostPort = answers.hostPort - 30
   
   RegistryServerConfiguration.privateKeyFile =
       "certificates/RegistryService.key"
@@ -143,6 +143,9 @@ configure_action = function(answers, path, util)
   -- this configuration depends of AccessControlServerConfiguration
   SessionServerConfiguration.accessControlServerHostName = answers.hostName
   SessionServerConfiguration.accessControlServerHostPort = answers.hostPort
+
+  SessionServerConfiguration.sessionServerHostName = answers.hostName
+  SessionServerConfiguration.sessionServerHostPort = answers.hostPort - 60
 
   SessionServerConfiguration.privateKeyFile = "certificates/SessionService.key"
   SessionServerConfiguration.accessControlServiceCertificateFile =
