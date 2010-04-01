@@ -5,8 +5,6 @@ local copy = require "tools.build.copy"
 
 -- Local scope
 local string = require "tools.split"
-local platforms = require "tools.platforms"
-local myplat = platforms[TEC_SYSNAME]
 
 module("tools.build.tecmake", package.seeall)
 

@@ -43,7 +43,10 @@ function run(t,arguments)
   local plat = TEC_UNAME
   if not t.build[plat] then 
     plat = TEC_SYSNAME
-    assert(t.build[plat],t.name..[[ on platform ']]..plat..[[', no build method]])
+    if not (t.build[plat]) then
+      print("[ WARNING ] ".. t.name..[[ has no build command provided for ']]..TEC_UNAME..[[' platforms. Skipping.]])
+      return nil
+    end
   end
 
   -- when '--force' is requested we will rebuild the soft or when any

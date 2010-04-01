@@ -263,22 +263,12 @@ packages = {
   { name = "luatrace",
     url = SVNREPURL .. "/openbus/libs/trunk/luatrace",
     build = {
-      type = "autotools",
-    test_libs = {"luatrace_*"},
-    external_dependencies = {},
+      type = "command",
       src = PRODAPP .."/luatrace",
-    Darwin = "make PLAT=macosx reader static-writer dynamic-writer " ..
-         "&& make PLAT=macosx INSTALL_TOP=" .. TMPDIR  ..  
-         " install-reader install-static-writer install-dynamic-writer",
-    Linux = "make PLAT=linux reader static-writer dynamic-writer "..
+      Linux = { cmd = "make PLAT=linux reader static-writer dynamic-writer "..
          "&& make PLAT=linux INSTALL_TOP=" .. TMPDIR  .. 
          " install-reader install-static-writer install-dynamic-writer", 
-    SunOS =  "make PLAT=solaris reader static-writer dynamic-writer " ..
-         "&& make PLAT=solaris INSTALL_TOP=" .. TMPDIR  ..  
-         " install-reader install-static-writer install-dynamic-writer",
-    IRIX =  "make PLAT=posix reader static-writer dynamic-writer " .. 
-         "&& make PLAT=posix INSTALL_TOP=" .. TMPDIR  .. 
-         " install-reader install-static-writer install-dynamic-writer",
+      },
     },
     install_files = {
         [TMPDIR .. "/bin/luatrace"]                       = "bin/${TEC_UNAME}", 
@@ -289,7 +279,6 @@ packages = {
         [TMPDIR .. "/lib/lua/5.1/trace/msgreader/*.so"]   = "libpath/${TEC_UNAME}/trace/msgreader", 
         [TMPDIR .. "/share/lua/5.1/trace/manager.lua"]    = "libpath/lua/5.1/trace", 
     },
-    dev_files = {}
   },
   { name = "lce",
     build = {
@@ -348,7 +337,6 @@ packages = {
       ["../test/lua/checkInstall.lua"] = "core/test",
       ["../../tools/management"] = "tools",
       ["../../tools/shell"] = "tools",
-      ["../../tools/templates"] = "tools",
     },
     conf_files = {
       ["../../data/conf"] = "data",

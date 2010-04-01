@@ -2,17 +2,17 @@
 require "tools.config"
 local copy = require "tools.build.copy"
 
-
 module("tools.build.command", package.seeall)
 
 function run(t, arguments)
-  print("[ INFO ] Importing package via command: ".. t.name)
+  print("[ INFO ] Compiling package via command: ".. t.name)
   local build_dir = t.build.src
-  local build_table = t.build
+  local build_table = t.build[TEC_UNAME] or t.build[TEC_SYSNAME] or t.build
   if not build_dir:match("/$") then build_dir = build_dir.."/" end
 
   if not build_table.cmd then
-    print("ERROR 'cmd' parameter is missing.")
+    print("[ WARNING ] ".. t.name..[[ has no build command provided for ']]..TEC_UNAME..[[' platforms. Skipping.]])
+    return nil
   end
 
   command = build_table.cmd
