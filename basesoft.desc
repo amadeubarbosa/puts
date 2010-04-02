@@ -123,8 +123,8 @@ basesoft = {
       [TMPDIR .."/include/db_cxx.h"] = "incpath/db-4.6.21",
     },
   },
-  { name = "cyrus-sasl2-2.1.22.dfsg1",
-    url = "http://www.tecgraf.puc-rio.br/~openbus/repository/cyrus-sasl2-2.1.22.dfsg1.tar.gz",
+  { name = "cyrus-sasl-2.1.23",
+    url = "http://www.tecgraf.puc-rio.br/ftp_pub/openbus/cyrus-sasl-2.1.23.tar.gz",
     build = {
       type = "autotools",
       test_libs = {"libsasl2*.*"},
@@ -134,16 +134,16 @@ basesoft = {
       },
       Darwin = "./configure --prefix=".. TMPDIR .." --disable-macos-framework --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
-               " && cd ../lib/ && make && make install ",
+               " && cd ../lib/ && make sasldb.o && make && make install ",
       Linux =  "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
-               " && cd ../lib/ && make && make install ",
+               " && cd ../lib/ && make sasldb.o && make && make install ",
       SunOS =  "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
-               " && cd ../lib/ && make && make install ",
+               " && cd ../lib/ && make sasldb.o && make && make install ",
       SunOS510_64 =  "./configure CFLAGS=-m64 CXXFLAGS=-m64 LFLAGS=-m64 LDFLAGS=-m64 --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
-               " && cd ../lib/ && make && make install ",
+               " && cd ../lib/ && make sasldb.o && make && make install ",
       IRIX =   "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
                " && cd ../lib/ && make && make install ",
@@ -156,7 +156,7 @@ basesoft = {
       [TMPDIR .."/lib/libsasl2*.a*"] = "libpath/${TEC_UNAME}",    --static linux,aix,sunos
       [TMPDIR .."/lib/libsasl2*.*so*"] = "libpath/${TEC_UNAME}",   --dynamic linux,aix,sunos
       [TMPDIR .."/lib/libsasl2*.*dylib*"] = "libpath/${TEC_UNAME}",--dynamic macos
-      [TMPDIR .."/include/sasl"] = "incpath/cyrus-sasl2-2.1.22.dfsg1",
+      [TMPDIR .."/include/sasl"] = "incpath/cyrus-sasl-2.1.23",
     },
   },
   { name = "openldap-2.4.11",

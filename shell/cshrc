@@ -10,7 +10,7 @@ setenv OPENSSL_HOME "${OPENBUS_HOME}/openssl"
 
 setenv PATH "${OPENBUS_HOME}/bin/${TEC_UNAME}:${OPENBUS_HOME}/bin:${PATH}"
 
-set OB_CPATH="${OPENBUS_HOME}/incpath/cxxtest:${OPENBUS_HOME}/incpath/e2fsprogs-1.40.8:${OPENBUS_HOME}/incpath/db-4.6.21:${OPENBUS_HOME}/incpath/openldap-2.4.11:${OPENBUS_HOME}/incpath/openssl-0.9.9:${OPENBUS_HOME}/incpath/cyrus-sasl2-2.1.22.dfsg1"
+set OB_CPATH="${OPENBUS_HOME}/incpath/cxxtest:${OPENBUS_HOME}/incpath/e2fsprogs-1.40.8:${OPENBUS_HOME}/incpath/db-4.6.21:${OPENBUS_HOME}/incpath/openldap-2.4.11:${OPENBUS_HOME}/incpath/openssl-0.9.9:${OPENBUS_HOME}/incpath/cyrus-sasl-2.1.23"
 if ($?CPATH == 0) then
   setenv CPATH "${OB_CPATH}"
 else

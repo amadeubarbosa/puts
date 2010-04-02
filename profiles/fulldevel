@@ -1,7 +1,7 @@
 licenses
 e2fsprogs-1.40.8-dev
 db-4.6.21-dev
-cyrus-sasl2-2.1.22.dfsg1-dev
+cyrus-sasl-2.1.23-dev
 openldap-2.4.11-dev
 openssl-0.9.9-dev
 lua5.1-dev
