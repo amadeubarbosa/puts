@@ -42,7 +42,7 @@ local compat = {
         error("The file '".. (arguments["basesoft"] or DEPLOYDIR.."/basesoft.desc") .. "' cannot be opened!\nTry use the --basesoft option in command line with a valid filename.\n")
       end
       f()
-	  assert(type(basesoft)=="table","invalid 'basesoft' table, probably failed on loading basesoft descriptors")
+      assert(type(basesoft)=="table","invalid 'basesoft' table, probably failed on loading basesoft descriptors")
 
       local f, err = loadfile(arguments["packages"] or DEPLOYDIR .."/packages.desc")
       if not f then
@@ -50,9 +50,9 @@ local compat = {
         error("The file '".. (arguments["packages"] or DEPLOYDIR.."/packages.desc") .. "' cannot be opened!\nTry use the --packages option in command line with a valid filename.\n")
       end
       f()
-	  assert(type(packages)=="table","invalid 'basesoft' table, probably failed on loading basesoft descriptors")
+      assert(type(packages)=="table","invalid 'basesoft' table, probably failed on loading basesoft descriptors")
 
- 	  local descriptors = indexByName(mergeTables(basesoft,packages))
+      local descriptors = indexByName(mergeTables(basesoft,packages))
       basesoft = nil
       packages = nil
       return descriptors
@@ -173,25 +173,25 @@ function run()
     -- Back-compatibility to load both old basesoft.desc and packages.desc files
     descriptors = compat.loadDescriptors(arguments)
   else
-	for _,descriptorFile in ipairs(arguments["descriptors"]) do
+    for _,descriptorFile in ipairs(arguments["descriptors"]) do
       local tempTable = {}
-	  setmetatable(tempTable,{
-		__index = function (t,name)
-		  -- global variables defined in 'tools.config' module
-	      if _G[name] then
-		    t[name] = _G[name]
-		    return t[name]
-		  end
-		end})
+      setmetatable(tempTable,{
+        __index = function (t,name)
+          -- global variables defined in 'tools.config' module
+          if _G[name] then
+            t[name] = _G[name]
+            return t[name]
+          end
+        end})
       print("[ INFO ] Loading descriptor named '".. descriptorFile .."'")
       local f, err = loadfile(descriptorFile)
       if not f then
         error("The file '".. descriptorFile .. "' cannot be opened or isn't a valid Lua file!")
-	  end
+      end
       setfenv(f,tempTable); f()
-	  assert(tempTable.descriptors,"undefined 'descriptors' table in '"..descriptorFile.."'")
-	  -- ATTENTION: 
-	  -- current descriptor file format CONSIDER a 'descriptors' table inside
+      assert(tempTable.descriptors,"undefined 'descriptors' table in '"..descriptorFile.."'")
+      -- ATTENTION: 
+      -- current descriptor file format CONSIDER a 'descriptors' table inside
       descriptors = mergeTables(descriptors,tempTable.descriptors)
     end
     descriptors = indexByName(descriptors)
@@ -231,8 +231,8 @@ function run()
 
   -- Applying --select filter provided by user
   if arguments["select"] then
-	assert(type(arguments.select) == "table")
-	local filteredDescriptorsTable = {}
+    assert(type(arguments.select) == "table")
+    local filteredDescriptorsTable = {}
     for _,pkg in ipairs(arguments["select"]) do
       -- cloning the references in a new table
       if descriptors[pkg] and not filteredDescriptorsTable[pkg] then
@@ -246,8 +246,8 @@ function run()
 
   -- Applying --exclude filter provided by user
   if arguments["exclude"] then
-	assert(type(arguments.exclude) == "table")
-	-- hack to manipulate in that form: if arguments.exclude[name] then ...
+    assert(type(arguments.exclude) == "table")
+    -- hack to manipulate in that form: if arguments.exclude[name] then ...
     for i,pkgname in ipairs(arguments.exclude) do
       arguments.exclude[pkgname] = true
     end
