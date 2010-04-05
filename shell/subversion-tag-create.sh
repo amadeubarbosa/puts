@@ -15,10 +15,11 @@ FILES_TO_PARSE="core/services/version.h"
 FROM_VERSION_ID="OB_HEAD"
 NEW_VERSION_ID=
 TEMP_DIR=/tmp/openbus-tag-creation
+SCRIPTNAME=$0
 
 function print_usage {
-	echo "Usage: $0 <old branch> <new branch> [--url svn://myserver/mydir/project]"
-	echo "By default, this script will consider the following subversion URL: $SVN_PROJECTURL"
+	echo "Usage: $SCRIPTNAME <old branch> <new branch> [--url svn://myserver/mydir/project]"
+	echo "By default, this script will consider the following subversion URL: $SVN_URL"
 	echo "To change it, you have to edit this script!"
 	exit 0
 }
@@ -26,8 +27,12 @@ function print_usage {
 ####sanity checks
 if [ -n "$1" ] && [ -n "$2" ]; then
 	if [ "$1" == "--url" ] || [ "$2" == "--url" ]; then print_usage; fi
-	if [ "$3" == "--url" ] && [ -n "$4" ]; then
-		SVN_URL=$4
+	if [ "$3" == "--url" ]; then
+		if [ -n "$4" ]; then
+			SVN_URL=$4
+		else
+			print_usage
+		fi
 	fi
 	FROM="$1"
 	NEW="$2"
