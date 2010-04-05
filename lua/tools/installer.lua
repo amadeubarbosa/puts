@@ -7,13 +7,17 @@ local platforms = require "tools.platforms"
 local myplat = platforms[TEC_SYSNAME]
 local hook = require "tools.hook"
 
+--[[ 
+See important variables:
+  hook.ANSWERS_FILENAME
+  hook.ANSWERS_PATH
+]]
+
 --[[
   USO:
   1. gera um arquivo de template da configuracao com as respostas
   2. salva esse arquivo para o admin poder reusar
-  3. faz a configuração real no openbus (substituindo valores em core/conf/*.lua)
-  4. fazer a configuração a partir de um arquivo de input considerando que
-     o admin já tem esse 'arquivo' com as respostas
+  3. repassa a tarefa de fazer a configuração real aos templates (que devem criar as configs reais)
 ]]
 
 CONFIG = "[ CONFIGURE ] "
@@ -139,9 +143,9 @@ function run()
   print("\t ksh/bash shell : export OPENBUS_HOME=\""..arguments.path.."\"")
   --~ print("\t windows shell  : set OPENBUS_HOME=\""..arguments.path.."\"")
 
-  -- Persisting the answers to future interactions
-  util.serialize_table("/tmp/latest.answers",config)
-  print(INSTALL,"Saving your answers at '/tmp/latest.answers' please backup it if you need.")
+  -- Persisting the answers for future usage
+  util.serialize_table(hook.ANSWERS_PATH,config)
+  print(INSTALL,"Saving your answers at '"..hook.ANSWERS_PATH.."', please make a backup!")
 
   print(INSTALL,"Installation DONE!")
 

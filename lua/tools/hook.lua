@@ -9,6 +9,9 @@ CONFIG = "[ CONFIGURE ] "
 
 module("tools.hook", package.seeall)
 
+ANSWERS_FILENAME = "last-answers.txt"
+ANSWERS_PATH = "/tmp/"..ANSWERS_FILENAME
+
 -- Configures with user interation
 function wizard(template, save)
   local function parser(_,t)
@@ -37,6 +40,8 @@ function wizard(template, save)
         save[t.name] = var
       end
     end
+    -- persists for each answer provided
+    util.serialize_table(ANSWERS_PATH,save)
   end
   -- call the parse for all fields in template table
   table.foreach(template,parser)
