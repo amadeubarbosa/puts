@@ -9,8 +9,6 @@ local util = require "tools.util"
 local string = require "tools.split"
 local platforms = require "tools.platforms"
 local myplat = platforms[TEC_SYSNAME]
-local default_assert = assert
-local setmetatable = setmetatable
 
 module("tools.compile", package.seeall)
 
@@ -173,6 +171,19 @@ function run()
     -- Back-compatibility to load both old basesoft.desc and packages.desc files
     descriptors = compat.loadDescriptors(arguments)
   else
+    -- Inserting automatically all .desc files into DEPLOYDIR directory
+    if not arguments.descriptors then
+      arguments.descriptors = {}
+      local files = myplat.exec(myplat.cmd.ls.." "..DEPLOYDIR.."/*.desc")
+      -- foreach filename...
+      local next = files:gmatch("[^\n]+")
+      local filename = next()
+      while (filename) do
+        print("[ INFO ] Loading descriptor '".. filename .."' automatically")
+        table.insert(arguments.descriptors,filename)
+        filename = next()
+      end
+    end
     for _,descriptorFile in ipairs(arguments["descriptors"]) do
       local tempTable = {}
       setmetatable(tempTable,{
@@ -186,7 +197,7 @@ function run()
       print("[ INFO ] Loading descriptor named '".. descriptorFile .."'")
       local f, err = loadfile(descriptorFile)
       if not f then
-        error("The file '".. descriptorFile .. "' cannot be opened or isn't a valid Lua file!")
+        error("The file '".. descriptorFile .. "' cannot be opened or isn't a valid descriptor file!")
       end
       setfenv(f,tempTable); f()
       assert(tempTable.descriptors,"undefined 'descriptors' table in '"..descriptorFile.."'")
