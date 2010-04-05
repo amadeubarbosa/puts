@@ -69,6 +69,10 @@ platforms.Linux = {
   -- libcrypto.so.0.9.9 => not found
   -- libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb7ebb000)
   missing_libraries = function(self,file)
+    -- testing if it's a script
+    if self.exec("file ".. file):match("text") then
+      return false
+    end
     local str = self.exec("ldd ".. file)
     local miss = {}
     local f = str:gmatch("[^\n]+")
@@ -131,6 +135,10 @@ platforms.IRIX = {
     return platforms.search_ldlibpath(self,file,libpath)
   end,
   missing_libraries = function(self,file)
+    -- testing if it's a script
+    if self.exec("file ".. file):match("text") then
+      return false
+    end
     local str = self.exec("elfdump -Dl ".. file)
     local miss = {}
     local f = str:gmatch("[^\n]*")
@@ -165,6 +173,10 @@ platforms.Darwin = {
     return platforms.search_ldlibpath(self,file,libpath,"DYLD_LIBRARY_PATH")
   end,
   missing_libraries = function(self,file)
+    -- testing if it's a script
+    if self.exec("file ".. file):match("text") then
+      return false
+    end
     local str = self.exec("otool -L ".. file)
     local miss = {}
     local f = str:gmatch("[^\n]*")
@@ -176,8 +188,10 @@ platforms.Darwin = {
         realpath = self.exec("find ".. file)
         if realpath == "" then
           local basedir,basename = file:gmatch("(.*%/+)(.+)")()
-          if not self:search_ldlibpath(basename) then
-            table.insert(miss,basename)
+          -- basename can be nil when linked using RPath
+          -- in this case we should try the filename
+          if not self:search_ldlibpath(basename or file) then
+            table.insert(miss,basename or file)
           end
         end
       end
