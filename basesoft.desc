@@ -215,3 +215,6 @@ basesoft = {
     },
   },
 }
+-- temporary hack! em breve vou renomear definitivamente a tabela basesoft e
+-- ela vai ficar incompativel com versoes antigas do 'tools.compile'
+descriptors = basesoft

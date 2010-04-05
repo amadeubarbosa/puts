@@ -10,8 +10,76 @@ local string = require "tools.split"
 local platforms = require "tools.platforms"
 local myplat = platforms[TEC_SYSNAME]
 local default_assert = assert
+local setmetatable = setmetatable
 
 module("tools.compile", package.seeall)
+
+-- Iterates a numeric ordered table and create a new index with field 'name'
+local function indexByName(table)
+  -- REMEMBER: 
+  -- loop.ordered.set is better but it insert 'loop' module dependency
+  for i,t in ipairs(table) do
+    table[t.name] = t
+  end
+  return table
+end
+-- Merges two tables into the first one
+local function mergeTables (t1, t2)
+  assert(t1 and t2,"both parameters must be tables")
+  for i,elem in ipairs(t2) do
+    table.insert(t1,elem)
+  end
+  return t1
+end
+
+-- Functions related to back-compatibility mode
+local compat = {
+    loadDescriptors = function (arguments)
+      -- Loading basesoft and package descriptions tables
+      local f, err = loadfile(arguments["basesoft"] or DEPLOYDIR .."/basesoft.desc")
+      if not f then
+        io.stdout:write("[ ERROR ] "); io.stdout:flush()
+        error("The file '".. (arguments["basesoft"] or DEPLOYDIR.."/basesoft.desc") .. "' cannot be opened!\nTry use the --basesoft option in command line with a valid filename.\n")
+      end
+      f()
+	  assert(type(basesoft)=="table","invalid 'basesoft' table, probably failed on loading basesoft descriptors")
+
+      local f, err = loadfile(arguments["packages"] or DEPLOYDIR .."/packages.desc")
+      if not f then
+        io.stdout:write("[ ERROR ] "); io.stdout:flush()
+        error("The file '".. (arguments["packages"] or DEPLOYDIR.."/packages.desc") .. "' cannot be opened!\nTry use the --packages option in command line with a valid filename.\n")
+      end
+      f()
+	  assert(type(packages)=="table","invalid 'basesoft' table, probably failed on loading basesoft descriptors")
+
+ 	  local descriptors = indexByName(mergeTables(basesoft,packages))
+      basesoft = nil
+      packages = nil
+      return descriptors
+    end,
+    adaptDescriptorsToNewParser = function (descriptors)
+      print("[ INFO ] Assuming the package description format used by the "..
+            "Openbus 1.4.2 or earlier.")
+      print("[ INFO ] Inserting a built-in source package to download (and "..
+            "update) the sources of the Openbus branch ("..SVNURL..") ("..SVNDIR..").")
+      -- Problem: Old versions of the 'compile' assistant downloaded the
+      -- openbus-source as default.
+      -- Solution: We have to insert a new description by default.
+      table.insert(descriptors,{
+        name = "openbus-source",
+        url = SVNURL,
+        directory = SVNDIR,
+      })
+      -- Problem: By default any package is placed under PRODAPP/pkg.name but
+      -- some packages don't use tecmake backend (or other compile backend,
+      -- what could fill the build_src third argument on build.copy) so they
+      -- won't be placed correctly for the build.copy backend executes on.
+      -- Solution: We have to insert the 'directory' field in that descriptions.
+      if descriptors["licenses"] then
+        descriptors["licenses"].directory = SVNDIR
+      end
+    end
+}
 
 -- Parses package description and delegates to tools.build.<method>.run
 function parseDescriptions(desc, arguments)
@@ -55,10 +123,6 @@ function run()
   local arguments = util.parse_args(arg,[[
     --help                   : show this help
     --verbose                : turn ON the VERBOSE mode (show the system commands)
-    --basesoft=filename      : use the 'filename' as input for basic
-                               softwares with autotools semantic (i.e: openssl)
-    --packages=filename      : use the 'filename' as input for packages
-                               with tecmake semantic (i.e: lua5.1, openbus-core)
     --rebuild                : changes the default rule to rebuild the packages if
                                they're already compiled
     --force                  : forces the compile and install (i.e: you want
@@ -66,35 +130,33 @@ function run()
                                already, very common for debug and devel purposes)
     --list                   : list all package names from description files. When
                                '--select' is used, it'll help you to validate your choose.
-    --select="pkg1 pkg2 ..." : choose which packages to compile and install
-    --profile="file1 file2..." : use a list of 'filenames' representing the profiles
-                                   which have a list of packages inside (it will append 
-                                   to the select list)
-    --exclude="pkg1 pkg2 ..."  : list of package to exclude of the compile process
-    --update           : updates the source codes from the repositories
+    --descriptors="file1 file2 ..." : uses filenames as input for package descriptors
+    --select="pkg1 pkg2 ..."        : allowchoose which packages to compile
+    --profile="file1 file2 ..."     : uses a list of profile files which shoud have a list
+                                      of package names inside (implicit --select usage)
+    --exclude="pkg1 pkg2 ..."       : list of package names to exclude of the compile process
+    --update                 : updates source codes from the repositories
 
    BACK-COMPATIBILITY OPTIONS:
     --compat                 : changes the parsing of the package descriptions to
-                                     support the old format used until the Openbus 1.4.2
+                               support the old format used until the Openbus 1.4.2
 
    NOTES:
     The prefix '--' is optional in all options.
     So '--help' or '-help' or yet 'help' all are the same option.]],true)
 
-  if arguments.select then
-    local value = arguments.select
-    -- selecting packages to build with multiple '--select' support
-    arguments.select = {value:split("[^%s]+")}
+  -- support to multiple values in these following options
+  for _,parameterName in ipairs{"descriptors","select","profile","exclude"} do
+    if arguments[parameterName] then
+      local valueString = arguments[parameterName]
+      arguments[parameterName] = {valueString:split("[^%s]+")}
+    end
   end
-  if arguments.exclude then
-    local value = arguments.exclude
-    -- selecting packages to build with multiple '--exclude' support
-    arguments.exclude = {value:split("[^%s]+")}
-  end
-  if arguments.profile then
-    local value = arguments.profile
-    -- selecting packages to build with multiple '--profile' support
-    arguments.profile = {value:split("[^%s]+")}
+
+  if (arguments.basesoft or arguments.packages) and not arguments.compat then
+    error("The arguments --packages and --basesoft are deprecated. "..
+          "Try --descriptors option. You must use --compat if you need "..
+          "back-compatibility support for older formats.")
   end
 
   if arguments["v"] then
@@ -105,35 +167,39 @@ function run()
   ".. INSTALL.TOP .." and temporary install directories \
   (for autotools based packages) on ".. TMPDIR .." .\n")
 
-  -- Loading basesoft and package descriptions tables
-  local f, err = loadfile(arguments["basesoft"] or DEPLOYDIR .."/basesoft.desc")
-  if not f then
-    io.stdout:write("[ ERROR ] "); io.stdout:flush()
-    error("The file '".. (arguments["basesoft"] or DEPLOYDIR.."/basesoft.desc") .. "' cannot be opened!\nTry use the --basesoft option in command line with a valid filename.\n")
-  end
-  f()
-
-  local f, err = loadfile(arguments["packages"] or DEPLOYDIR .."/packages.desc")
-  if not f then
-    io.stdout:write("[ ERROR ] "); io.stdout:flush()
-    error("The file '".. (arguments["packages"] or DEPLOYDIR.."/packages.desc") .. "' cannot be opened!\nTry use the --packages option in command line with a valid filename.\n")
-  end
-  f()
-
-  -- Filtering the descriptions tables with '--select' arguments
-  -- preparing the tables to provide t[pkg_name] fields
-  local function rehashByName(mytable)
-    -- REMEMBER: loop.ordered.set is better but insert 'loop' module dependency
-    for i,t in ipairs(mytable) do
-      mytable[t.name] = t
+  -- Loading description files provided
+  local descriptors = {}
+  if arguments.compat then
+    -- Back-compatibility to load both old basesoft.desc and packages.desc files
+    descriptors = compat.loadDescriptors(arguments)
+  else
+	for _,descriptorFile in ipairs(arguments["descriptors"]) do
+      local tempTable = {}
+	  setmetatable(tempTable,{
+		__index = function (t,name)
+		  -- global variables defined in 'tools.config' module
+	      if _G[name] then
+		    t[name] = _G[name]
+		    return t[name]
+		  end
+		end})
+      print("[ INFO ] Loading descriptor named '".. descriptorFile .."'")
+      local f, err = loadfile(descriptorFile)
+      if not f then
+        error("The file '".. descriptorFile .. "' cannot be opened or isn't a valid Lua file!")
+	  end
+      setfenv(f,tempTable); f()
+	  assert(tempTable.descriptors,"undefined 'descriptors' table in '"..descriptorFile.."'")
+	  -- ATTENTION: 
+	  -- current descriptor file format CONSIDER a 'descriptors' table inside
+      descriptors = mergeTables(descriptors,tempTable.descriptors)
     end
+    descriptors = indexByName(descriptors)
   end
-
-  rehashByName(basesoft)
-  rehashByName(packages)
 
   -- Including package names (using select semantics) from a profile
   if arguments["profile"] then
+    assert(type(arguments.profile) == "table")
     for _,profile in ipairs(arguments["profile"]) do 
     local _,name = profile:match("(.*)/(.*)") --extracts name "dir/name.profile"
     name = name or profile                    --could nil only if "name.profile"
@@ -163,91 +229,52 @@ function run()
     end
   end
 
-  -- real filtering
-  local newbasesoft = {}
-  local newpackages = {}
+  -- Applying --select filter provided by user
   if arguments["select"] then
+	assert(type(arguments.select) == "table")
+	local filteredDescriptorsTable = {}
     for _,pkg in ipairs(arguments["select"]) do
-      -- cloning the references in new tables
-      if basesoft[pkg] and not newbasesoft[pkg] then
-        table.insert(newbasesoft,basesoft[pkg])
-        newbasesoft[pkg] = basesoft[pkg]
-      end
-      if packages[pkg] and not newpackages[pkg] then
-        table.insert(newpackages,packages[pkg])
-        newpackages[pkg] = packages[pkg]
+      -- cloning the references in a new table
+      if descriptors[pkg] and not filteredDescriptorsTable[pkg] then
+        table.insert(filteredDescriptorsTable,descriptors[pkg])
+        filteredDescriptorsTable[pkg] = descriptors[pkg]
       end
     end
-    -- replace the main references to cloned tables
-    --it only updates the references when some package was selected
-    --if #newbasesoft > 0 then basesoft = newbasesoft end
-    --if #newpackages > 0 then packages = newpackages end
-
     -- always updates the references
-    basesoft = newbasesoft
-    packages = newpackages
+    descriptors = filteredDescriptorsTable
   end
 
-  -- Filtering the packages and basesoft list to remove some packages from the
-  -- selection
+  -- Applying --exclude filter provided by user
   if arguments["exclude"] then
-    local excludes = arguments.exclude
-    for i,pkgname in ipairs(excludes) do
-      excludes[pkgname] = i
+	assert(type(arguments.exclude) == "table")
+	-- hack to manipulate in that form: if arguments.exclude[name] then ...
+    for i,pkgname in ipairs(arguments.exclude) do
+      arguments.exclude[pkgname] = true
     end
-    local newbasesoft = {}
-    local newpackages = {}
-    for i,pkgdesc in ipairs(basesoft) do
+
+    local filteredDescriptorsTable = {}
+    for i,pkgdesc in ipairs(descriptors) do
      if not arguments.exclude[pkgdesc.name] then
-       table.insert(newbasesoft,pkgdesc)
+       table.insert(filteredDescriptorsTable,pkgdesc)
+       filteredDescriptorsTable[pkgdesc.name] = pkgdesc
      else
        print("[ INFO ] Excluding the package named: ", pkgdesc.name)
      end
     end
-    for i,pkgdesc in ipairs(packages) do
-     if not arguments.exclude[pkgdesc.name] then
-       table.insert(newpackages,pkgdesc)
-     else
-       print("[ INFO ] Excluding the package named: ", pkgdesc.name)
-     end
-    end
-    basesoft = newbasesoft
-    packages = newpackages
+    -- always updates the references
+    descriptors = filteredDescriptorsTable
   end
 
-  -- Back-compatibility option to understand the old package description format
+  -- Back-compatibility option to adapt the old package description format
   -- See the implementation of the parseDescriptions() function also.
   if arguments["compat"] then
-    print("[ INFO ] Assuming the package description format used by the "..
-          "Openbus 1.4.2 or earlier.")
-    print("[ INFO ] Inserting a built-in source package to download (and "..
-          "update) the sources of the Openbus branch ("..SVNURL..") ("..SVNDIR..").")
-    -- Problem: Old versions of the 'compile' assistant downloaded the
-    -- openbus-source as default.
-    -- Solution: We have to insert a new description by default.
-    table.insert(basesoft,{
-      name = "openbus-source",
-      url = SVNURL,
-      directory = SVNDIR,
-    })
-    -- Problem: By default any package is placed under PRODAPP/pkg.name but
-    -- some packages don't use tecmake backend (or other compile backend,
-    -- what could fill the build_src third argument on build.copy) so they
-    -- won't be placed correctly for the build.copy backend executes on.
-    -- Solution: We have to insert the 'directory' field in that descriptions.
-    if packages["licenses"] then
-      packages["licenses"].directory = SVNDIR
-    end
+    compat.adaptDescriptorsToNewParser(descriptors)
   end
 
   -- Listing packages when '--list' arguments
   if arguments["list"] then
-    print "[ INFO ] Available basesoft to compile and install:"
-    for _, t in ipairs(basesoft) do
-      print("\t"..t.name)
-    end
-    print "\n[ INFO ] Available packages to compile and install:"
-    for _, t in ipairs(packages) do
+    print "[ INFO ] Available package descriptors to compile:"
+    for _, t in ipairs(descriptors) do
       print("\t"..t.name)
     end
     os.exit(0)
@@ -272,8 +299,7 @@ function run()
   os.execute(myplat.cmd.rm .. TMPDIR .."/*")
 
   -- Parsing descriptions and proceed to compile & install procedures
-  parseDescriptions(basesoft, arguments)
-  parseDescriptions(packages, arguments)
+  parseDescriptions(descriptors, arguments)
 
   -- Cleaning environment
   os.execute(myplat.cmd.rm .. TMPDIR)
