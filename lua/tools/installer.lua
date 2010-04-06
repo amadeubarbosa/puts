@@ -72,14 +72,14 @@ function run()
 
   -- When no package is given assumes reconfiguration
   if arguments.package then
-    if arguments.package:match(".*openbus.*tar.gz$") then
+    if arguments.package:match(".*tar.gz$") then
       -- Starting the extraction of the package
       print(INSTALL, "Unpacking in a temporary dir '"..TMPDIR.."'...")
       assert(os.execute(myplat.cmd.mkdir .. TMPDIR) == 0)
 
       -- Trying extract the metadata.tar.gz from package
       print(INSTALL, "Extracting metadata.")
-      local _,release,profile,arch = arguments.package:match("(.*)openbus%-(.+)%-(.+)%-(.+).tar.gz$")
+      local _,release,profile,arch = arguments.package:match("(.*)%-(.+)%-(.+)%-(.+).tar.gz$")
       extract_cmd = myplat.cmd.install..arguments.package.." ".. TMPDIR .."/tempinstall.tar.gz;"
       extract_cmd = extract_cmd .. " cd "..TMPDIR.." ; gzip -c -d tempinstall.tar.gz | "
       extract_cmd = extract_cmd .. myplat.cmd.tar .."-xf - metadata-"..release.."-"..profile..".tar.gz && "
@@ -88,7 +88,7 @@ function run()
       assert(os.execute(extract_cmd) == 0, "ERROR: '".. arguments.package .."'"..
              " is not a valid package! Please contact the administrator!")
 
-      -- Unpacking the openbus-<<release>>_plat.tar.gz package
+      -- Unpacking the .tar.gz package
       -- Grant to user's configure_action functions that could operate over an
       -- instalation tree and at the end all files will be copied to real path
       assert(os.execute("cd "..TMPDIR.."; gzip -c -d tempinstall.tar.gz|".. myplat.cmd.tar .."-xf -") == 0)
@@ -128,7 +128,7 @@ function run()
       assert(os.execute(myplat.cmd.rm .. TMPDIR) == 0)
     else
       print(INSTALL,"Do nothing. You MUST provide a valid package filename "..
-            "'openbus-<release>-<profile>-<plat>.tar.gz' to install the OpenBus.")
+            "'<project>-<release>-<profile>-<plat>.tar.gz' to install.")
       print(INSTALL,"Please check --help for more instructions.")
       os.exit(0)
     end
@@ -138,10 +138,6 @@ function run()
   end
 
   print(CONFIG, "Configure DONE.")
-  print(INSTALL,"You MUST set in your profile the sytem variable OPENBUS_HOME as:")
-  print("\t csh shell      : setenv OPENBUS_HOME \""..arguments.path.."\"")
-  print("\t ksh/bash shell : export OPENBUS_HOME=\""..arguments.path.."\"")
-  --~ print("\t windows shell  : set OPENBUS_HOME=\""..arguments.path.."\"")
 
   -- Persisting the answers for future usage
   util.serialize_table(hook.ANSWERS_PATH,config)

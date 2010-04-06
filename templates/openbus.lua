@@ -9,15 +9,22 @@ __call = function(self,t,save)
   while (true) do
     print(CONFIG,"Property name: ".. t.name)
     print(CONFIG,"Informe o valor do vetor")
-    io.write("> ")
+    if t.value then
+      io.write("[" .. tostring(t.value[count] or "") .. "]> ")
+    else
+      io.write("[]> ")
+    end
     local var = io.read("*l")
+    if (var == nil or var == "") and t.value then
+      var = t.value[count] or ""
+    end
     if tonumber(var) then var = tonumber(var) end
     if not save[t.name] then save[t.name] = {} end
     table.insert(save[t.name],var)
     
     print(CONFIG,"Deseja informar outro elemento para o vetor '" .. t.name ..
         "'? sim ou nao?")
-    io.write("> ")
+    io.write("[nao]> ")
     if not string.upper(io.read("*l")):find("SIM") then break end
     count = count + 1
   end
@@ -39,8 +46,15 @@ __call =  function(self,t,save)
     for key, msg in pairs(self) do
       print(CONFIG,"Property name: ".. t.name .." index: ".. count)
       print(CONFIG,msg)
-      io.write("> ")
+      if t.value and t.value[count] then
+        io.write("[" .. tostring(t.value[count][key] or "").. "]> ")
+      else
+        io.write("[]> ")
+      end
       local var = io.read("*l")
+      if (var == nil or var == "") and t.value and t.value[count] then
+        var = t.value[count][key] or ""
+      end
       if tonumber(var) then var = tonumber(var) end
       tmp[key] = var
     end
@@ -49,7 +63,7 @@ __call =  function(self,t,save)
     -- Do you wish continue or not?
     print(CONFIG,"Deseja informar outro elemento para a lista '" .. t.name .. 
         "'? sim ou nao?")
-    io.write("> ")
+    io.write("[nao]> ")
     if not string.upper(io.read("*l")):find("SIM") then break end
     count = count + 1
   end
@@ -81,7 +95,7 @@ messages = {
     msg = "Lista dos servidores LDAP com portas",
     type = "list",
     check = Types.ldapHosts,
-    value = {name = "segall.tecgraf.puc-rio.br", port = 389,},
+    value = { {name = "segall.tecgraf.puc-rio.br", port = 389}, },
   },
   { name = "ldapSuffixes",
     msg = "Sufixos de busca no servidor LDAP",

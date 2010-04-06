@@ -115,7 +115,7 @@ function pack(arch,profile)
   local tar_cmd = "cd ".. INSTALL.TOP .." && "
   tar_cmd = tar_cmd .. "find . -name .svn -type d |sed \"s#^./##\" >"..excludefile.." && ".. myplat.cmd.tar .."cfX - "..excludefile.." "
   tar_cmd = tar_cmd .. tarball_files
-  tar_cmd = tar_cmd .. "|gzip > "..DOWNLOADDIR.."/openbus-".. release .."-"..name.."-".. arch .. ".tar.gz "
+  tar_cmd = tar_cmd .. "|gzip > "..DOWNLOADDIR.."/".. PKGPREFIX .. release .."-"..name.."-".. arch .. ".tar.gz "
   assert(os.execute(tar_cmd) == 0, "Cannot execute the command \n"..tar_cmd..
                     "\n, ensure that 'tar' command has --exclude option!")
 

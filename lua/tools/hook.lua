@@ -25,8 +25,8 @@ function wizard(template, save)
 
       if t.value == nil then
         t.value = ""
-      end      
-      io.write("[" .. t.value .. "]> ")      
+      end
+      io.write("[" .. tostring(t.value) .. "]> ")
       local var = io.read("*l")
       
       if t.type == "number" then
@@ -195,13 +195,13 @@ function run()
   
   local path
   path = arguments["path"] and arguments.path or os.getenv("OPENBUS_HOME")
-  assert(path,'ERRO: You need to set "path" or $OPENBUS_HOME')
+  assert(path,'ERROR: You need to set "path" or $OPENBUS_HOME')
 
   -- Cache variables
   local template, config
 
   if arguments.config then
-    hookConfig(arguments.config)
+    config = hookConfig(arguments.config)
   end
 
   -- Loading configuration from template file provided or from default
