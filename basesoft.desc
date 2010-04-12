@@ -124,7 +124,7 @@ basesoft = {
     },
   },
   { name = "cyrus-sasl-2.1.23",
-    url = "http://www.tecgraf.puc-rio.br/ftp_pub/openbus/repository/cyrus-sasl-2.1.23.tar.gz",
+    url = SVNREPURL .. "/openbus/libs/trunk/cyrus-sasl-2.1.23",
     build = {
       type = "autotools",
       test_libs = {"libsasl2*.*"},
