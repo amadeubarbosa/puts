@@ -72,6 +72,8 @@ function run()
 
   -- When no package is given assumes reconfiguration
   if arguments.package then
+    local msgInvalidFilename = "'".. arguments.package .."' is not a valid package "..
+          "filename! You MUST provide something like '<prefix>-<release>-<profile>-<plat>.tar.gz'."
     if arguments.package:match(".*tar.gz$") then
       -- Starting the extraction of the package
       print(INSTALL, "Unpacking in a temporary dir '"..TMPDIR.."'...")
@@ -80,6 +82,7 @@ function run()
       -- Trying extract the metadata.tar.gz from package
       print(INSTALL, "Extracting metadata.")
       local _,release,profile,arch = arguments.package:match("(.*)%-(.+)%-(.+)%-(.+).tar.gz$")
+      assert(release and profile and arch, "ERROR: "..msgInvalidFilename) 
       extract_cmd = myplat.cmd.install..arguments.package.." ".. TMPDIR .."/tempinstall.tar.gz;"
       extract_cmd = extract_cmd .. " cd "..TMPDIR.." ; gzip -c -d tempinstall.tar.gz | "
       extract_cmd = extract_cmd .. myplat.cmd.tar .."-xf - metadata-"..release.."-"..profile..".tar.gz && "
@@ -127,9 +130,8 @@ function run()
       assert(os.execute(myplat.cmd.install .. TMPDIR .."/* ".. arguments.path) == 0)
       assert(os.execute(myplat.cmd.rm .. TMPDIR) == 0)
     else
-      print(INSTALL,"Do nothing. You MUST provide a valid package filename "..
-            "'<project>-<release>-<profile>-<plat>.tar.gz' to install.")
-      print(INSTALL,"Please check --help for more instructions.")
+      print(INSTALL,"Do nothing. ".. msgInvalidFilename)
+      print(INSTALL,"Please check --help for other instructions.")
       os.exit(0)
     end
   else
@@ -139,9 +141,11 @@ function run()
 
   print(CONFIG, "Configure DONE.")
 
-  -- Persisting the answers for future usage
-  util.serialize_table(hook.ANSWERS_PATH,config)
-  print(INSTALL,"Saving your answers at '"..hook.ANSWERS_PATH.."', please make a backup!")
+  if config then
+    -- Persisting the answers for future usage
+    util.serialize_table(hook.ANSWERS_PATH,config)
+    print(INSTALL,"Saving your answers at '"..hook.ANSWERS_PATH.."', please make a backup!")
+  end
 
   print(INSTALL,"Installation DONE!")
 
