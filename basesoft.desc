@@ -138,10 +138,10 @@ basesoft = {
       Linux =  "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
                " && cd ../lib/ && make sasldb.o && make && make install ",
-      SunOS =  "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
+      SunOS =  "./configure --with-gnu-ld=no --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
                " && cd ../lib/ && make sasldb.o && make && make install ",
-      SunOS510_64 =  "./configure CFLAGS=-m64 CXXFLAGS=-m64 LFLAGS=-m64 LDFLAGS=-m64 --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
+      SunOS510_64 =  "./configure --target=sparc64-sun-solaris2.10 --with-gnu-ld=no --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
                " && cd include/ && make && make install "..
                " && cd ../lib/ && make sasldb.o && make && make install ",
       IRIX =   "./configure --prefix=".. TMPDIR .." --disable-ldap --enable-static=yes"..
