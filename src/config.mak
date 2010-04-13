@@ -1,4 +1,4 @@
-PROJNAME= tools
+PROJNAME= opends
 APPNAME= ${PROJNAME}
 
 LUABIN= ${LUA51}/bin/${TEC_UNAME}/lua5.1
