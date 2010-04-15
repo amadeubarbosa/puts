@@ -16,7 +16,7 @@
 -- @field PRODAPP <b>[Advanced]</b> Where the external packages will be extracted
 -- @field SVNURL <b>[Advanced]</b> Location of the source code to be compiled
 -- @field SVNDIR <b>[Advanced]</b> Where the source code will be checked out
--- @field DEPLOYDIR <b>[Advanced]</b> Where are the 'tools' related configurations
+-- @field DEPLOYDIR <b>[Advanced]</b> Where are the 'puts' related configurations
 -- @field INSTALL.TOP <b>[Advanced]</b> Where the binaries, libraries, includes and others will be place after the compilation
 
 -- Tecmake compatibility variables

@@ -82,8 +82,8 @@ echo "INFO: Press ENTER to continue or CTRL+C to stop now!"
 read ok
 
 echo "INFO: Obtaining the compile utilities, first."
-DEPLOYDIR="$SOURCES/tools-trunk"
-svn co $SVN_PROJECTURL/trunk/tools $DEPLOYDIR || die "Aborting because the \
+DEPLOYDIR="$SOURCES/puts-trunk"
+svn co $SVN_PROJECTURL/puts/trunk $DEPLOYDIR || die "Aborting because the \
 checkout of the compile utilities has failed!"
 
 echo "INFO: Obtaining the sources of the project."
@@ -118,7 +118,7 @@ fi
 [ -z "${TEC_UNAME}" ] && fetch_tecmake ;
 
 ##finishing
-echo "INFO: Generating the '`pwd`/cfg_generated.lua' as the configuration for the 'tools'"
+echo "INFO: Generating the '`pwd`/cfg_generated.lua' as the configuration for the 'puts'"
 echo '-- Customized variables
 BASEDIR = "'$BASEDIR'"
 SVNURL = "svn+'$SVNURL'"
@@ -177,5 +177,5 @@ popd > /dev/null
 
 echo ""
 echo "INFO: It was generated a kourn shell script to help you in the packaging activities."
-echo "INFO: All parameters will be forwarded as 'tools' parameters. Try --help first!."
+echo "INFO: All parameters will be forwarded as 'puts' parameters. Try --help first!."
 echo "      See there: $SCRIPT_WRAPPER"

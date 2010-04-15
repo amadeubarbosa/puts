@@ -1,0 +1,78 @@
+-- ATTENTION: place the fundamental packages first!
+-- If A depends on B then you should place B's description before than A's.
+SUNOS64_TECMAKE_FLAGS="USE_NODEPEND=Yes TEC_UNAME=SunOS510_64 BUILD_64=yes"
+descriptors = {
+  -- fake package to easy the download of the oil04 and scs urls
+  { name = "oil-source",
+    url = SVNREPURL .. "/openbus/libs/trunk/oil04",
+    directory = PRODAPP .."/oil04",
+  },
+  { name = "openbus-source",
+    url = SVNREPURL .. "/openbus/trunk",
+    directory = SVNDIR,
+  },
+  { name = "lua5.1",
+    url = SVNREPURL .. "/openbus/libs/trunk/lua5.1.3",
+    build = {
+      type = "tecmake",
+      src = PRODAPP .."/lua5.1/src",
+      mf = { "config" },
+      Darwin = { mf = {"config", "config BUILD_DYLIB=Yes"} },
+      SunOS510_64 = { mf = {"config ".. SUNOS64_TECMAKE_FLAGS} },
+    },
+    install_files = {
+      ["../lib/${TEC_UNAME}/liblua5.1.so"] = "libpath/${TEC_UNAME}",
+      ["../lib/${TEC_UNAME}/liblua5.1.dylib"] = "libpath/${TEC_UNAME}",
+    },
+    dev_files = {
+      ["../lib/${TEC_UNAME}/liblua5.1.*"] = "libpath/${TEC_UNAME}",
+      ["../include/*"] = "incpath/lua5.1.3",
+    },
+  },
+  { name = "lua5.1-bin",
+    build = {
+      type = "tecmake",
+      src = PRODAPP .."/lua5.1/src",
+      mf = { "lua" },
+      SunOS510_64 = { mf = {"lua ".. SUNOS64_TECMAKE_FLAGS} },
+    },
+    install_files = {
+      ["../bin/${TEC_UNAME}/lua5.1"] = "bin/${TEC_UNAME}",
+    },
+  },
+  -- TIP: precompiler.lua precisa do loop!
+  { name = "loop",
+    build = {
+      type = "tecmake",
+      src = PRODAPP .."/oil04",
+      mf = { },
+    },
+    dev_files = {
+      ["lua/loop"] = "libpath/lua/5.1", 
+      ["lua/precompiler.lua"] = "libpath/lua/5.1",
+      ["lua/preloader.lua"] = "libpath/lua/5.1",
+    },
+  },
+  -- self-packaging the tools as an important bootstrap strategy to deployment!
+  { name = "puts",
+    url = SVNREPURL .. "/openbus/puts/trunk",
+    build = {
+    type = "tecmake",
+    src = PRODAPP .."/puts/src",
+      mf = { "config LUA51="..PRODAPP.."/lua5.1", },
+      SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
+    },
+    install_files = {
+      ["../bin/${TEC_UNAME}/*"] = "bin/${TEC_UNAME}",
+      ["../*.desc"] = "puts",
+      ["../profiles"] = "puts",
+      ["../shell"] = "puts",
+    },
+  },
+  { name = "putslicenses",
+    install_files = {
+    [PRODAPP.."/puts/LICENSE.PUTS"] = ".",
+    [PRODAPP.."/puts/README.PUTS"]  = ".",
+    },
+  },
+}
