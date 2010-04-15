@@ -17,8 +17,8 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
-#include "toolsall.h"
-#include "tools.h"
+#include "putspreloaded.h"
+#include "puts.h"
 //#include "compile.h"
 //#include "installer.h"
 //#include "makepack.h"
@@ -352,7 +352,7 @@ static int pmain (lua_State *L) {
   // arguments treatment to create the luatable named 'arg'
   getargs(L, argv, 0);  /* collect arguments */
   lua_setglobal(L, "arg");
-  luapreload_toolsall(L);
+  luapreload_putspreloaded(L);
   lua_gc(L, LUA_GCRESTART, 0);
   // loading console.lua precompiled as library
   luaopen_tools_console(L);

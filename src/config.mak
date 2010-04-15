@@ -1,4 +1,4 @@
-PROJNAME= opends
+PROJNAME= puts
 APPNAME= ${PROJNAME}
 
 LUABIN= ${LUA51}/bin/${TEC_UNAME}/lua5.1
@@ -8,12 +8,12 @@ OPENBUSLIB= ${OPENBUS_HOME}/libpath/${TEC_UNAME}
 
 PRECMP_DIR= ../obj/${TEC_UNAME}
 PRECMP_LUA= ../lua/precompiler.lua
-PRECMP_FLAGS= -p TOOLS_API -o tools -l "$(LUASRC_DIR)/?.lua" -d $(PRECMP_DIR) -n
+PRECMP_FLAGS= -p PUTS_API -o puts -l "$(LUASRC_DIR)/?.lua" -d $(PRECMP_DIR) -n
 
 PRELOAD_LUA= ../lua/preloader.lua
-PRELOAD_FLAGS= -p TOOLS_API -o toolsall -d ${PRECMP_DIR}
+PRELOAD_FLAGS= -p PUTS_API -o putspreloaded -d ${PRECMP_DIR}
 
-TOOLS_MODULES=$(addprefix tools., \
+PUTS_MODULES=$(addprefix tools., \
 	config \
 	build.tecmake \
 	build.copy \
@@ -34,21 +34,21 @@ TOOLS_MODULES=$(addprefix tools., \
 	hook \
 	console )
 
-TOOLS_LUA= \
+PUTS_LUA= \
 $(addprefix $(LUASRC_DIR)/, \
   $(addsuffix .lua, \
-    $(subst .,/, $(TOOLS_MODULES))))
+    $(subst .,/, $(PUTS_MODULES))))
 
-${PRECMP_DIR}/tools.c: $(TOOLS_LUA) 
-	$(LUABIN) $(LUA_FLAGS) $(PRECMP_LUA)   $(PRECMP_FLAGS) $(TOOLS_MODULES) 
+${PRECMP_DIR}/puts.c: $(PUTS_LUA) 
+	$(LUABIN) $(LUA_FLAGS) $(PRECMP_LUA)   $(PRECMP_FLAGS) $(PUTS_MODULES) 
 
-${PRECMP_DIR}/toolsall.c: ${PRECMP_DIR}/tools.c
-	$(LUABIN) $(LUA_FLAGS) $(PRELOAD_LUA)  $(PRELOAD_FLAGS) -i ${PRECMP_DIR} tools.h
+${PRECMP_DIR}/putspreloaded.c: ${PRECMP_DIR}/puts.c
+	$(LUABIN) $(LUA_FLAGS) $(PRELOAD_LUA)  $(PRELOAD_FLAGS) -i ${PRECMP_DIR} puts.h
 
 #Descomente a linha abaixo caso deseje ativar o VERBOSE
 #DEFINES=VERBOSE
 
-SRC= ${PRECMP_DIR}/tools.c ${PRECMP_DIR}/toolsall.c lua.c
+SRC= ${PRECMP_DIR}/puts.c ${PRECMP_DIR}/putspreloaded.c lua.c
 
 INCLUDES= . ${PRECMP_DIR}
 LDIR += ${OPENBUSLIB}
