@@ -47,8 +47,8 @@ function run()
     So '--help' or '-help' or yet 'help' all are the same option.
 
    EXAMPLES:
-    ]].. arg[0].. " --path=~/local/openbus --package=myOpenBus.tar.gz" ..
-    "--config=myPrevious.answers ]]")
+    ]].. arg[0].. " --path=/mydir/openbus --package=myOpenBus.tar.gz" ..
+    "--config=myPrevious.answers ")
 
   -- Setting verbose level if requested
   if arguments["verbose"] then

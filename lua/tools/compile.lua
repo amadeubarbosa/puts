@@ -174,7 +174,7 @@ function run()
     -- Inserting automatically all .desc files into DEPLOYDIR directory
     if not arguments.descriptors then
       arguments.descriptors = {}
-      local files = myplat.exec(myplat.cmd.ls.." "..DEPLOYDIR.."/*.desc")
+      local files = myplat.exec(myplat.cmd.ls.." "..DEPLOYDIR.."/*.desc "..myplat.pipe_stderr)
       -- foreach filename...
       local next = files:gmatch("[^\n]+")
       local filename = next()
