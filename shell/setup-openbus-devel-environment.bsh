@@ -124,7 +124,6 @@ BASEDIR = "'$BASEDIR'"
 SVNURL = "svn+'$SVNURL'"
 SVNDIR = "'$SVNDIR'"
 INSTALL = { TOP = "'${OPENBUS_HOME}'" }
-DEPLOYDIR = "'$DEPLOYDIR'"
 ' > cfg_generated.lua
 
 SCRIPT_WRAPPER=${SOURCES}/console-${VERSION_ID}.ksh
