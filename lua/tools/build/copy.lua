@@ -21,7 +21,7 @@ function run(t,arguments,build_dir)
     for orig, dest in pairs(t.install_files) do
       -- if absolute path we assume that you know where get the files
       if orig:match("^/") then build_dir = "" end
-      util.install(t.name, build_dir .. orig, dest)
+      util.install(t.name, build_dir.."/"..orig, dest)
     end
   end
   -- copying files related to configuration with '-conf' suffix
@@ -29,7 +29,7 @@ function run(t,arguments,build_dir)
     for orig, dest in pairs(t.conf_files) do
       -- if absolute path we assume that you know where get the files
       if orig:match("^/") then build_dir = "" end
-      util.install(t.name.."-conf", build_dir.. orig, dest)
+      util.install(t.name.."-conf", build_dir.."/"..orig, dest)
     end
   end
   -- temp behaviour, future: each package as a <name>.desc and <name>.template
@@ -51,7 +51,7 @@ function run(t,arguments,build_dir)
     for orig, dest in pairs(t.dev_files) do
       -- if absolute path we assume that you know where get the files
       if orig:match("^/") then build_dir = "" end
-      util.install(t.name.."-dev", build_dir.. orig, dest)
+      util.install(t.name.."-dev", build_dir.."/"..orig, dest)
     end
   end
   -- linking files described on packages table
