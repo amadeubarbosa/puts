@@ -5,6 +5,7 @@ LUABIN= ${LUA51}/bin/${TEC_UNAME}/lua5.1
 LUASRC_DIR= ../lua
 
 OPENBUSLIB= ${OPENBUS_HOME}/libpath/${TEC_UNAME}
+LUA_FLAGS= -e "package.path='${OPENBUS_HOME}/libpath/lua/5.1/?.lua;'..package.path"
 
 PRECMP_DIR= ../obj/${TEC_UNAME}
 PRECMP_LUA= ../lua/precompiler.lua
@@ -14,6 +15,7 @@ PRELOAD_LUA= ../lua/preloader.lua
 PRELOAD_FLAGS= -p PUTS_API -o putspreloaded -d ${PRECMP_DIR}
 
 PUTS_MODULES=$(addprefix tools., \
+	platformid \
 	config \
 	build.tecmake \
 	build.copy \

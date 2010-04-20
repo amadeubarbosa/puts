@@ -42,7 +42,7 @@ if arg[1] then
       end
     end
     if valid_options == false then
-      print("[ ERROR ] Requesting the load of an unknown assistant:",opt)
+      print("[ ERROR ] Requesting the load of an unknown assistant: ".. tostring(opt))
     end
   end
 end
@@ -62,17 +62,18 @@ end
 require "tools.config"
 
 if valid_options then
-  print("[ CONSOLE ] Loading the assistant: ",opt)
+  opt = tostring(opt)
+  print("[ CONSOLE ] Loading the assistant: ".. opt)
   table.remove(arg,1)
   -- fixing the self-name of the script to be loaded
   arg[0] = opt
-  local tools = require ("tools."..opt)
+  local tools = require ("tools.".. opt)
   if tools == nil then
-    print("ERRO: module tools." .. opt .. " not found.")
+    print("ERRO: module tools." .. opt .." not found.")
     os.exit(1)
   end
   tools.run()
-  print("[ CONSOLE ] Assistant ",opt,"has finished sucessfuly.")
+  print("[ CONSOLE ] Assistant ".. opt .." finished successfully.")
   os.exit(0)
 else
   print([[

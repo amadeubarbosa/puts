@@ -4,7 +4,6 @@ package.path = "?.lua;../?.lua;" .. package.path
 require "tools.config"
 local util = require "tools.util"
 local platforms = require "tools.platforms"
-local myplat = platforms[TEC_SYSNAME]
 local hook = require "tools.hook"
 
 --[[ 
@@ -75,14 +74,17 @@ function run()
     local msgInvalidFilename = "'".. arguments.package .."' is not a valid package "..
           "filename! You MUST provide something like '<prefix>-<release>-<profile>-<plat>.tar.gz'."
     if arguments.package:match(".*tar.gz$") then
+      -- Parsing the package filename to extract some informations
+      
+      local _,release,profile,arch = arguments.package:match("(.*)%-(.+)%-(.+)%-(.+).tar.gz$")
+      assert(release and profile and arch, "ERROR: "..msgInvalidFilename)
+      local myplat = platforms[TEC_SYSNAME]
       -- Starting the extraction of the package
-      print(INSTALL, "Unpacking in a temporary dir '"..TMPDIR.."'...")
+      print(INSTALL, "Unpacking the package in a temporary dir: "..TMPDIR)
       assert(os.execute(myplat.cmd.mkdir .. TMPDIR) == 0)
 
       -- Trying extract the metadata.tar.gz from package
-      print(INSTALL, "Extracting metadata.")
-      local _,release,profile,arch = arguments.package:match("(.*)%-(.+)%-(.+)%-(.+).tar.gz$")
-      assert(release and profile and arch, "ERROR: "..msgInvalidFilename) 
+      print(INSTALL, "Extracting ...")
       extract_cmd = myplat.cmd.install..arguments.package.." ".. TMPDIR .."/tempinstall.tar.gz;"
       extract_cmd = extract_cmd .. " cd "..TMPDIR.." ; gzip -c -d tempinstall.tar.gz | "
       extract_cmd = extract_cmd .. myplat.cmd.tar .."-xf - metadata-"..release.."-"..profile..".tar.gz && "
@@ -96,17 +98,17 @@ function run()
       -- instalation tree and at the end all files will be copied to real path
       assert(os.execute("cd "..TMPDIR.."; gzip -c -d tempinstall.tar.gz|".. myplat.cmd.tar .."-xf -") == 0)
       assert(os.remove(TMPDIR.."/tempinstall.tar.gz"))
-      print(INSTALL, "Unpack DONE.")
+      print(INSTALL, "Unpack finished.")
 
       -- Verifying the openbus libraries consistency for this system
-      print(INSTALL, "Searching missing dependencies...")
+      print(INSTALL, "Searching for missing dependencies...")
       local libchecker = require "tools.checklibdeps"
       local ok, msg = libchecker:start(TMPDIR)
       if not ok then error(msg.."\n '"..arguments.package.."'"..
                      " has missing dependencies! Please contact the administrator!")
       else print(INSTALL,msg) end
 
-      print(CONFIG, "Configuring the package based on package metadata")
+      print(CONFIG, "Configuring the installation using package metadata...")
       local metadata_dirname = "metadata-"..release.."-"..profile
       -- Configure main step, using all .template of this package metadata
       local files = myplat.exec(myplat.cmd.ls .. TMPDIR .."/".. metadata_dirname)
@@ -139,7 +141,7 @@ function run()
     error("ERROR: Mandatory argument --package was not provided. Aborting!")
   end
 
-  print(CONFIG, "Configure DONE.")
+  print(CONFIG,"Configuration finished.")
 
   if config then
     -- Persisting the answers for future usage
@@ -147,6 +149,6 @@ function run()
     print(INSTALL,"Saving your answers at '"..hook.ANSWERS_PATH.."', please make a backup!")
   end
 
-  print(INSTALL,"Installation DONE!")
+  print(INSTALL,"Installation finished!")
 
 end

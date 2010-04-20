@@ -29,6 +29,20 @@ local function mergeTables (t1, t2)
   end
   return t1
 end
+-- Selects all .desc from a directory
+local function loadDescriptorsFromDir(dir, list)
+  assert(type(dir) == "string" and type(list) == "table","directory must be a string and list must be a table")
+  local files = myplat.exec(myplat.cmd.ls.." "..dir.."/*.desc "..myplat.pipe_stderr)
+  -- foreach filename...
+  local nextFile = files:gmatch("[^\n]+")
+  local filename = nextFile()
+  while (filename) do
+    print("[ INFO ] Descriptor '".. filename .."' found automatically")
+    table.insert(list,filename)
+    filename = nextFile()
+  end
+  return list
+end
 
 -- Functions related to back-compatibility mode
 local compat = {
@@ -161,9 +175,8 @@ function run()
     arguments["verbose"] = true
   end
 
-  print("[ INFO ] We are going to install full openbus dependencies on \
-  ".. INSTALL.TOP .." and temporary install directories \
-  (for autotools based packages) on ".. TMPDIR .." .\n")
+  print("[ INFO ] The packages will be compiled and copied to: ".. INSTALL.TOP)
+  print("[ INFO ] Temporary directory used: ".. TMPDIR)
 
   -- Loading description files provided
   local descriptors = {}
@@ -174,15 +187,7 @@ function run()
     -- Inserting automatically all .desc files into DEPLOYDIR directory
     if not arguments.descriptors then
       arguments.descriptors = {}
-      local files = myplat.exec(myplat.cmd.ls.." "..DEPLOYDIR.."/*.desc "..myplat.pipe_stderr)
-      -- foreach filename...
-      local next = files:gmatch("[^\n]+")
-      local filename = next()
-      while (filename) do
-        print("[ INFO ] Loading descriptor '".. filename .."' automatically")
-        table.insert(arguments.descriptors,filename)
-        filename = next()
-      end
+      loadDescriptorsFromDir(DEPLOYDIR,arguments.descriptors)
     end
     for _,descriptorFile in ipairs(arguments["descriptors"]) do
       local tempTable = {}
@@ -200,7 +205,7 @@ function run()
         error("The file '".. descriptorFile .. "' cannot be opened or isn't a valid descriptor file!")
       end
       setfenv(f,tempTable); f()
-      assert(tempTable.descriptors,"undefined 'descriptors' table in '"..descriptorFile.."'")
+      assert(tempTable.descriptors,"'descriptors' table not defined in '"..descriptorFile.."'")
       -- ATTENTION: 
       -- current descriptor file format CONSIDER a 'descriptors' table inside
       descriptors = mergeTables(descriptors,tempTable.descriptors)
@@ -284,11 +289,15 @@ function run()
 
   -- Listing packages when '--list' arguments
   if arguments["list"] then
-    print "[ INFO ] Available package descriptors to compile:"
-    for _, t in ipairs(descriptors) do
-      print("\t"..t.name)
+    if #descriptors > 0 then
+      print "[ INFO ] Available package descriptors to compile:"
+      for _, t in ipairs(descriptors) do
+        print("\t"..t.name)
+      end
+      return true
+    else
+      print("[ INFO ] No descriptor was provided.")
     end
-    os.exit(0)
   end
 
   -- Setting verbose level if requested

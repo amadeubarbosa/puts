@@ -21,10 +21,11 @@
 
 -- Tecmake compatibility variables
 -- You could (in a very special case) redefine this to work with the compile.lua
-TEC_UNAME = TEC_UNAME or os.getenv("TEC_UNAME")
-assert(TEC_UNAME or os.getenv("TEC_UNAME"), "ERROR: TEC_UNAME env var not defined")
-TEC_SYSNAME = TEC_SYSNAME or os.getenv("TEC_SYSNAME")
-assert(TEC_SYSNAME or os.getenv("TEC_SYSNAME"), "ERROR: TEC_SYSNAME env var not defined")
+id = require "tools.platformid"
+TEC_UNAME = TEC_UNAME or os.getenv("TEC_UNAME") or id.TEC_UNAME
+assert(TEC_UNAME, "ERROR: TEC_UNAME env var not defined")
+TEC_SYSNAME = TEC_SYSNAME or os.getenv("TEC_SYSNAME") or id.TEC_SYSNAME
+assert(TEC_SYSNAME, "ERROR: TEC_SYSNAME env var not defined")
 
 -- Base variables to compile and install time
 BASEDIR = BASEDIR or os.getenv("HOME") .."/openbus"
