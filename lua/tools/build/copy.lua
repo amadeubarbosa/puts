@@ -12,7 +12,7 @@ function run(t,arguments,build_dir)
   assert(type(t) == "table")
   -- we assume a default build_dir pointing to PRODAPP
   if not build_dir then
-    build_dir = PRODAPP .."/".. t.name .."/"
+    build_dir = PRODAPP .."/".. t.name
   end
   print("[ INFO ] Using source directory '"..build_dir.."' for the package: ".. t.name)
 
