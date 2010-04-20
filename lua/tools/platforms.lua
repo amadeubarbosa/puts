@@ -3,8 +3,9 @@ local os     = os
 local ipairs = ipairs
 local print,io  = print,io
 local setmetatable = setmetatable 
+local id = require "tools.platformid"
 
-module("platforms")
+module("tools.platforms")
 
 -- PROBLEMA: como identificar corretamente quais diretórios padrões são usados
 -- pelo link editor em tempo de carga? se a LD_LBIRARY_PATH estiver vazia
@@ -14,6 +15,7 @@ module("platforms")
 -- plataforma de busca de bibliotecas dependentes! precisamos mesmo?
 
 platforms = {
+  id = id,
   pipe_stderr = " 2>/dev/null",
   dylibext = "so",
   cmd = { install = "cp -rf ", make = "make ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls ",
