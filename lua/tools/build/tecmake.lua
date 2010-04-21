@@ -11,7 +11,6 @@ module("tools.build.tecmake", package.seeall)
 function run(t, arguments)
   print("[ INFO ] Compiling package via tecmake: ".. t.name)
   local build_dir = t.build.src
-  if not build_dir:match("/$") then build_dir = build_dir.."/" end
 
   -- using per-platform tables to take the specific build actions
   local build = t.build[TEC_UNAME] or t.build[TEC_SYSNAME] or t.build

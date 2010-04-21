@@ -56,7 +56,7 @@ function run(t,arguments)
       -- verifying if all build dependencies are ok, if don't we'll abort
       check_external_deps(t)
 
-      local build_dir = PRODAPP .."/".. t.name .."/"
+      local build_dir = PRODAPP .."/".. t.name
 
       -- running the build and install command
       local build_cmd = t.build[plat]

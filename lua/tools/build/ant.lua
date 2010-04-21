@@ -8,7 +8,6 @@ module("tools.build.ant", package.seeall)
 function run(t, arguments)
   print("[ INFO ] Compiling package via ant: ".. t.name)
   local build_dir = t.build.src
-  if not build_dir:match("/$") then build_dir = build_dir.."/" end
 
   -- Making command
   local ant_cmd =  "ant "

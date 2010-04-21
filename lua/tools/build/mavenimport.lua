@@ -8,7 +8,6 @@ module("tools.build.mavenimport", package.seeall)
 function run(t, arguments)
   print("[ INFO ] Importing package via mavenimport: ".. t.name)
   local build_dir = t.build.src
-  if not build_dir:match("/$") then build_dir = build_dir.."/" end
 
   -- Making command
   local maven_cmd =  "mvn "
