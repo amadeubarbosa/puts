@@ -43,7 +43,7 @@ function checker:libraries_deps(openbus_home)
 
   local misses = {}
   for _, path in ipairs(check_paths) do
-    local files = {myplat.exec(myplat.cmd.ls..path.." 2>/dev/null"):split("[^%s]+")}
+    local files = {myplat.exec(myplat.cmd.ls..path..myplat.pipe_stderr):split("[^%s]+")}
     if #files == 0 then
       -- TODO:
       -- quando o pacote n√o tem bin/TEC_UNAME ou

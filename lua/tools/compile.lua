@@ -47,22 +47,29 @@ end
 -- Functions related to back-compatibility mode
 local compat = {
     loadDescriptors = function (arguments)
-      -- Loading basesoft and package descriptions tables
-      local f, err = loadfile(arguments["basesoft"] or DEPLOYDIR .."/basesoft.desc")
-      if not f then
-        io.stdout:write("[ ERROR ] "); io.stdout:flush()
-        error("The file '".. (arguments["basesoft"] or DEPLOYDIR.."/basesoft.desc") .. "' cannot be opened!\nTry use the --basesoft option in command line with a valid filename.\n")
-      end
-      f()
-      assert(type(basesoft)=="table","invalid 'basesoft' table, probably failed on loading basesoft descriptors")
+      -- Earlier we used DEPLOYDIR = SVNDIR.."/tools"
+      -- Hack needed to convert from SVNDIR.."/specs" to old name
+      local oldDirectory = DEPLOYDIR:gsub("specs$","tools")
+      local filepath = arguments["basesoft"] or oldDirectory.."/basesoft.desc"
 
-      local f, err = loadfile(arguments["packages"] or DEPLOYDIR .."/packages.desc")
+      -- Loading basesoft description table
+      local f, err = loadfile(filepath)
       if not f then
         io.stdout:write("[ ERROR ] "); io.stdout:flush()
-        error("The file '".. (arguments["packages"] or DEPLOYDIR.."/packages.desc") .. "' cannot be opened!\nTry use the --packages option in command line with a valid filename.\n")
+        error("The file '".. filepath .. "' cannot be opened or hasn't a valid syntax!")
       end
       f()
-      assert(type(packages)=="table","invalid 'basesoft' table, probably failed on loading basesoft descriptors")
+      assert(type(basesoft)=="table","invalid 'basesoft' table, probably failed on loading "..filepath.." descriptor")
+
+      -- Loading packages description table
+      filepath = arguments["packages"] or oldDirectory.."/packages.desc"
+      local f, err = loadfile(filepath)
+      if not f then
+        io.stdout:write("[ ERROR ] "); io.stdout:flush()
+        error("The file '".. filepath .. "' cannot be opened or hasn't a valid syntax!")
+      end
+      f()
+      assert(type(packages)=="table","invalid 'packages' table, probably failed on loading "..filepath.." descriptor")
 
       local descriptors = indexByName(mergeTables(basesoft,packages))
       basesoft = nil
@@ -77,7 +84,7 @@ local compat = {
       -- Problem: Old versions of the 'compile' assistant downloaded the
       -- openbus-source as default.
       -- Solution: We have to insert a new description by default.
-      table.insert(descriptors,{
+      table.insert(descriptors,1,{
         name = "openbus-source",
         url = SVNURL,
         directory = SVNDIR,

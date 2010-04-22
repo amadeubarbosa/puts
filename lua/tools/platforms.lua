@@ -187,7 +187,7 @@ platforms.Darwin = {
       line = line:gsub(".*:","")
       file = line:split("[^%s]+",true)
       if file then
-        realpath = self.exec("find ".. file)
+        realpath = self.exec("find ".. file ..self.pipe_stderr)
         if realpath == "" then
           local basedir,basename = file:gmatch("(.*%/+)(.+)")()
           -- basename can be nil when linked using RPath
