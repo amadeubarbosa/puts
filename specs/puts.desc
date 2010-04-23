@@ -51,7 +51,7 @@ descriptors = {
   },
   -- self-packaging the tools as an important bootstrap strategy to deployment!
   { name = "puts",
-    url = SVNREPURL .. "/openbus/puts/branches/PUTS_v1_00_2010_04_22",
+    url = SVNREPURL .. "/openbus/puts/tags/PUTS_v1_00_00_2010_04_22",
     build = {
     type = "tecmake",
     src = PRODAPP .."/puts/src",
