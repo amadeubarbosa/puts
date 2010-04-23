@@ -60,8 +60,8 @@ descriptors = {
     },
     install_files = {
       ["../bin/${TEC_UNAME}/*"] = "bin/${TEC_UNAME}",
-      ["../*.desc"] = "puts",
-      ["../profiles"] = "puts",
+      ["../specs/*.desc"] = "puts/specs",
+      ["../specs/profiles"] = "puts/specs",
       ["../shell"] = "puts",
     },
   },
