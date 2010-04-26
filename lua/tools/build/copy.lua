@@ -18,8 +18,8 @@ function run(t,arguments,build_dir)
 
   -- copying files described on packages table
   if t.install_files then
-    local dir = build_dir
     for orig, dest in pairs(t.install_files) do
+      local dir = build_dir
       -- if absolute path we assume that you know where get the files
       if orig:match("^/") then dir = "" end
       util.install(t.name, dir.."/"..orig, dest)
@@ -27,8 +27,8 @@ function run(t,arguments,build_dir)
   end
   -- copying files related to configuration with '-conf' suffix
   if t.conf_files then
-    local dir = build_dir
     for orig, dest in pairs(t.conf_files) do
+      local dir = build_dir
       -- if absolute path we assume that you know where get the files
       if orig:match("^/") then dir = "" end
       util.install(t.name.."-conf", dir.."/"..orig, dest)
@@ -49,8 +49,8 @@ function run(t,arguments,build_dir)
   end
   -- copying files to special packages with '-dev' suffix
   if t.dev_files then
-    local dir = build_dir
     for orig, dest in pairs(t.dev_files) do
+      local dir = build_dir
       -- if absolute path we assume that you know where get the files
       if orig:match("^/") then dir = "" end
       util.install(t.name.."-dev", dir.."/"..orig, dest)
