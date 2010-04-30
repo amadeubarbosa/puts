@@ -28,11 +28,11 @@ function wizard(template, save)
       end
       io.write("[" .. tostring(t.value) .. "]> ")
       local var = io.read("*l")
-      
+
       if t.type == "number" then
         var = tonumber(var)
       end
-      
+
       if var == nil or var == "" then
         save[t.name] = t.value
       else
@@ -54,7 +54,7 @@ function checker(template, cfg)
     -- if missing configuration marks in the missing table
     if not cfg[t.name] then
       table.insert(missing, t.name)
-    elseif (type(cfg[t.name]) ~= t.type) and 
+    elseif (type(cfg[t.name]) ~= t.type) and
       (type(cfg[t.name]) ~= "table" or t.type ~= "list") then
       return false , "Invalid type on definition of '"..t.name.."'"
     end
@@ -161,7 +161,7 @@ end
 
 function hookTemplate(template,config,path)
   config = parseTemplate(template,config,path)
-  if config == nil then  
+  if config == nil then
     print("ERROR: Failed parsing template '"..template.."'.")
   end
   return config
@@ -171,7 +171,7 @@ end
 -- Main code -------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-function run() 
+function run()
   -- Parsing arguments
   local arguments = util.parse_args(arg,[[
     --help                   : show this help
@@ -188,14 +188,17 @@ function run()
    EXAMPLES:
     ]].. arg[0].. " --template=file")
 
+  assert(arguments["config"] or arguments["template"],
+      'ERROR: You need to set "--config" or "--template"')
+
   -- Setting verbose level if requested
   if arguments["verbose"] then
     util.verbose(1)
   end
-  
+
   local path
   path = arguments["path"] and arguments.path or os.getenv("OPENBUS_HOME")
-  assert(path,'ERROR: You need to set "path" or $OPENBUS_HOME')
+  assert(path,'ERROR: You need to set "--path" or $OPENBUS_HOME')
 
   -- Cache variables
   local template, config
