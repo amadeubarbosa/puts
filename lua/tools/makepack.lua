@@ -82,7 +82,7 @@ function pack(arch,profile)
   local file = assert(io.open(profile,"r") or 
       io.open(name..".profile","r") or 
       io.open(DEPLOYDIR .."/profiles/".. name,"r") or 
-      io.open(DEPLOYDIR .."/profiles/".. name ..".profile","r"))
+      io.open(DEPLOYDIR .."/profiles/".. name ..".profile","r"),"ERROR: Couldn't find the file describing the profile "..name)
 
   -- Listing packages from profile description
   local l = file:lines()
@@ -101,7 +101,7 @@ function pack(arch,profile)
 
   -- Creates a metadata.tar.gz and include it in tarball_files
   -- Tip: the installation actually is inside of INSTALL.TOP !
-  local release = getrelease()
+  local release = RELEASEINFO or getrelease()
   local metadata_dirname = "metadata-"..release.."-"..name
   assert(os.execute(myplat.cmd.mkdir .. TMPDIR .."/"..metadata_dirname) == 0)
   assert(os.execute(myplat.cmd.install .. metadata_files .." "..TMPDIR.."/"..metadata_dirname) == 0)
@@ -138,6 +138,10 @@ function run()
                                list of packages to packaging
     --arch=tecmake_arch      : specifies the arch based on tecmake way. Use 'all'
                                to pack all supported architectures
+    --svndir=/my/directory   : path to directory where are the source codes
+                               (helps to extract release information)
+    --release=STRING_RELEASE : string to be used as release information
+
    NOTES:
     The prefix '--' is optional in all options.
     So '--help' or '-help' or yet 'help' all are the same option.]])
@@ -145,6 +149,13 @@ function run()
   -- Overloading the os.execute to dummy verbose
   if arguments["verbose"] then
     util.verbose(1)
+  end
+  if arguments["svndir"] then
+    SVNDIR = arguments["svndir"]
+  end
+  if arguments["release"] then
+    print("[WARNING] You're overloading the 'release' information that should be extracted from the source directory!")
+    RELEASEINFO = arguments["release"]
   end
 
   assert(arguments["profile"],"Missing argument --profile!")
