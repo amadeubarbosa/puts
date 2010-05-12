@@ -58,5 +58,5 @@ if [ "${TEC_SYSNAME}" == "SunOS" ] ;then
   export TECMAKE_MAKE=/usr/sfw/bin/gmake
 fi
 
-export LUA_PATH="${OPENBUS_HOME}/?.lua;${OPENBUS_HOME}/core/utilities/lua/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?/init.lua;./?.lua;?.lua"
+export LUA_PATH="${OPENBUS_HOME}/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?/init.lua;./?.lua;?.lua"
 export LUA_CPATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}/lib?.so;./?.so"

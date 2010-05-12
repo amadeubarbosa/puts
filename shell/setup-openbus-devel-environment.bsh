@@ -59,17 +59,17 @@ if [ -n "$1" ]; then
 	echo "INFO: Using the following subversion path: $SVN_PROJECTURL"
 fi
 
-ROOT=${ROOT:-"/local/openbus"}
-BASEDIR="$ROOT/tmpBuild/$VERSION_ID"
-export SOURCES="$ROOT/source"
-PACKAGES="$ROOT/packages"
-RUNDIR="$ROOT/running"
+WORKSPACE=${WORKSPACE:-"/local/openbus"}
+BASEDIR="$WORKSPACE/tmpBuild/$VERSION_ID"
+export SOURCES="$WORKSPACE/source"
+PACKAGES="$WORKSPACE/packages"
+RUNDIR="$WORKSPACE/running"
 
 SVNURL="$SVN_PROJECTURL/$VERSION"
 SVNDIR="$SOURCES/$VERSION_ID"
 
-is_dir $ROOT || die "Aborting because the ROOT directory [$ROOT] doesn't exist.\
- You must to create it or to define a ROOT environment variable to force other!"
+is_dir $WORKSPACE || die "Aborting because the WORKSPACE directory [$WORKSPACE] doesn't exist.\
+ You must to create it or to define a WORKSPACE environment variable to force other!"
 is_dir $SVNDIR || mkdir -p $SVNDIR
 is_dir $BASEDIR || mkdir -p $BASEDIR
 
@@ -77,12 +77,12 @@ is_dir $BASEDIR || mkdir -p $BASEDIR
 echo "INFO: Verifying the internal variables:"
 echo "    SVNURL=$SVNURL"
 echo "    SVNDIR=$SVNDIR"
-echo "    ROOT=$ROOT"
+echo "    WORKSPACE=$WORKSPACE"
 echo "INFO: Press ENTER to continue or CTRL+C to stop now!"
 read ok
 
 echo "INFO: Obtaining the compile utilities, first."
-DEPLOYDIR="$SOURCES/puts-trunk"
+DEPLOYDIR="$SOURCES/puts"
 svn co $SVN_PROJECTURL/puts/trunk $DEPLOYDIR || die "Aborting because the \
 checkout of the compile utilities has failed!"
 
@@ -96,19 +96,19 @@ pushd $SVNDIR > /dev/null
 
 OPENBUS_HOME="${BASEDIR}/install"
 mkdir -p $OPENBUS_HOME
-mkdir -p "${ROOT}/packages"
-mkdir -p "${ROOT}/running"
+mkdir -p "${WORKSPACE}/packages"
+mkdir -p "${WORKSPACE}/running"
 
-DEFAULT_ORBIX="/home/msv/openbus/third-party/orbix63sp3gcc34/"
+IT_PRODUCT_DIR=${IT_PRODUCT_DIR:-"/home/msv/openbus/third-party/orbix63sp3gcc34"}
 echo ""
 echo "QUESTION: Where is your ORBIX installation?"
-echo "  INFO: default orbix path = $DEFAULT_ORBIX"
+echo "  INFO: default orbix path = $IT_PRODUCT_DIR"
 echo "  INFO: Press ENTER to keep the default."
 read USERINPUT_ORBIX
 
-[ -n "${USERINPUT_ORBIX}" ] && DEFAULT_ORBIX=${USERINPUT_ORBIX}
-if [ ! -d "${DEFAULT_ORBIX}" ]; then
-	echo "ERROR: No such directory for the ORBIX installation (${DEFAULT_ORBIX})"
+[ -n "${USERINPUT_ORBIX}" ] && IT_PRODUCT_DIR=${USERINPUT_ORBIX}
+if [ ! -d "${IT_PRODUCT_DIR}" ]; then
+	echo "ERROR: No such directory for the ORBIX installation (${IT_PRODUCT_DIR})"
 	echo "QUESTION: Are you sure? Do you want continue?" 
 	echo "    INFO: Press ENTER to continue or CTRL+C to abort."
 	read waiting_enter
@@ -128,6 +128,8 @@ INSTALL = { TOP = "'${OPENBUS_HOME}'" }
 
 SCRIPT_WRAPPER=${SOURCES}/console-${VERSION_ID}.ksh
 echo "#!/bin/bash
+# WARNING: this script uses some bash-specific commands like: pushd, popd and source
+ 
 # including tecmake system identification
 # using TECMAKE_HOME as ${TECMAKE_HOME}
 source ${TECMAKE_HOME}/tec_uname.bsh
@@ -146,27 +148,24 @@ export SVNDIR=$SVNDIR
 export OPENBUS_HOME=$OPENBUS_HOME
 export DEPLOYDIR=$DEPLOYDIR
 export BASEDIR=$BASEDIR
-export DEFAULT_ORBIX=$DEFAULT_ORBIX
+export IT_PRODUCT_DIR=$IT_PRODUCT_DIR
+export ORBIX_HOME=$IT_PRODUCT_DIR/asp/6.3
 
-sed -e 's#ORBIX_HOME=.*#ORBIX_HOME=\$DEFAULT_ORBIX/asp/6.3#' \$DEPLOYDIR/shell/sample-domain_env.ksh > ${TEMPFILE}
-mv ${TEMPFILE} \$DEPLOYDIR/shell/sample-domain_env.ksh
-sed -e 's#setenv ORBIX_HOME.*#setenv ORBIX_HOME \"\$DEFAULT_ORBIX/asp/6.3\"#' \$DEPLOYDIR/shell/sample-domain_env.csh > ${TEMPFILE}
-mv ${TEMPFILE} \$DEPLOYDIR/shell/sample-domain_env.csh
-
-rm -f ${TEMPFILE}
-
-. \$DEPLOYDIR/shell/kshrc
-. \$DEPLOYDIR/shell/sample-domain_env.ksh
+source \$DEPLOYDIR/shell/kshrc
+source \$DEPLOYDIR/shell/sample-domain_env.ksh
 
 export LUA_PATH=\"\$DEPLOYDIR/lua/?.lua;\${LUA_PATH}\"
 # uncomment this line if you're using other ORBIX License, for example:
-#export IT_LICENSE_FILE="\$ROOT/source/Orbix_licenses.txt"
+#export IT_LICENSE_FILE="\$WORKSPACE/source/Orbix_licenses.txt"
 
 echo \"INFO: Trying compile using OPENBUS_HOME as \$OPENBUS_HOME\"
 \${DEPLOYDIR}/lua/tools/console.lua config=\${SVNDIR}/cfg_generated.lua \"\$@\"
+RETCODE=$?
 
 echo \"INFO: Cleaning the temporary directories\"
 rm -rf /tmp/openbus-building*
+
+exit ${RETCODE}
 " > $SCRIPT_WRAPPER
 
 chmod +x $SCRIPT_WRAPPER

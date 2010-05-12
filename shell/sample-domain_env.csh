@@ -1,10 +1,13 @@
 #!/bin/csh
 #  This script sets environment variables for domain sample-domain
 
-# linux
-setenv ORBIX_HOME /home/msv/openbus/third-party/orbix63sun510sparc/asp/6.3
-# solaris
-#setenv ORBIX_HOME /home/msv/rcosme/tools/orbixSunOS510/asp/6.3
+# example in solaris
+#setenv ORBIX_HOME /home/msv/openbus/third-party/orbix63sun510sparc/asp/6.3
+
+if ( ! $?ORBIX_HOME ) then
+  echo "Missing ORBIX_HOME system variable."
+  exit 1
+endif
 
 echo Setting environment for domain sample-domain
 

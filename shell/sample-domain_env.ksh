@@ -1,8 +1,10 @@
 #!/bin/ksh
 #  This script sets environment variables for domain sample-domain
 
-# solaris
-export ORBIX_HOME=/home/msv/openbus/third-party/orbix63sun510sparc/asp/6.3
+# example in solaris
+#export ORBIX_HOME=/home/msv/openbus/third-party/orbix63sun510sparc/asp/6.3
+
+[ -z "${ORBIX_HOME}" ] && echo "Missing ORBIX_HOME system variable." && exit 1
 
 echo Setting environment for domain sample-domain
 
