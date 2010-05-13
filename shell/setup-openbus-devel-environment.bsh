@@ -61,7 +61,7 @@ fi
 
 WORKSPACE=${WORKSPACE:-"/local/openbus"}
 BASEDIR="$WORKSPACE/tmpBuild/$VERSION_ID"
-export SOURCES="$WORKSPACE/source"
+SOURCES="$WORKSPACE/source"
 PACKAGES="$WORKSPACE/packages"
 RUNDIR="$WORKSPACE/running"
 
@@ -148,8 +148,8 @@ export SVNDIR=$SVNDIR
 export OPENBUS_HOME=$OPENBUS_HOME
 export DEPLOYDIR=$DEPLOYDIR
 export BASEDIR=$BASEDIR
-export IT_PRODUCT_DIR=$IT_PRODUCT_DIR
-export ORBIX_HOME=$IT_PRODUCT_DIR/asp/6.3
+export IT_PRODUCT_DIR=${IT_PRODUCT_DIR}
+export ORBIX_HOME=\$IT_PRODUCT_DIR/asp/6.3
 
 source \$DEPLOYDIR/shell/kshrc
 source \$DEPLOYDIR/shell/sample-domain_env.ksh
@@ -165,7 +165,7 @@ RETCODE=$?
 echo \"INFO: Cleaning the temporary directories\"
 rm -rf /tmp/openbus-building*
 
-exit ${RETCODE}
+exit \${RETCODE}
 " > $SCRIPT_WRAPPER
 
 chmod +x $SCRIPT_WRAPPER
