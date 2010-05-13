@@ -104,7 +104,7 @@ end
 -- @return boolean or (boolean, string): true on success, false and an error message on failure.
 function unpack_archive(path,archive)
   assert(type(archive) == "string")
-  
+
   local unpack_cmd
   if archive:match("%.tar%.gz$") or archive:match("%.tgz$") then
     unpack_cmd = myplat.cmd.gunzip ..archive.."|".. myplat.cmd.tar .."-xf -"
@@ -123,7 +123,7 @@ function unpack_archive(path,archive)
   return true
 end
 ------------------------------------------------------------------------------
--- Downloading 
+-- Downloading
 function download(pkgname, from, targetdir)
   assert(type(pkgname) == "string" and type(from) == "string")
   local proto, url = split_url(from)
@@ -232,7 +232,7 @@ end
 -- Serializing table to file (original: http://lua.org/pil)
 function serialize_table(filename,t,name)
 
-  local f = io.open(filename,"w")
+  local f = assert(io.open(filename,"w"))
   -- if we got a named table
   if type(name) == "string" then
     f:write(name.." = ")
