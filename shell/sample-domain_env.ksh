@@ -4,8 +4,9 @@
 # example in solaris
 #export ORBIX_HOME=/home/msv/openbus/third-party/orbix63sun510sparc/asp/6.3
 
-[ -z "${ORBIX_HOME}" ] && echo "Missing ORBIX_HOME system variable." && exit 1
-
+if [ -z "${ORBIX_HOME}" ]; then
+  echo "Missing ORBIX_HOME system variable."
+else
 echo Setting environment for domain sample-domain
 
 PATH=$ORBIX_HOME/bin:$ORBIX_HOME/../../etc/bin:$PATH; export PATH
@@ -41,3 +42,4 @@ fi
 
 export LD_LIBRARY_PATH
 export LD_LIBRARY_PATH_64
+fi

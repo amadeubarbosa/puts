@@ -6,8 +6,7 @@
 
 if ( ! $?ORBIX_HOME ) then
   echo "Missing ORBIX_HOME system variable."
-  exit 1
-endif
+else
 
 echo Setting environment for domain sample-domain
 
@@ -40,4 +39,4 @@ else
   setenv LD_LIBRARY_PATH "$LD_LIBRARY_PATH:${ORBIX_HOME}/../../shlib/lib64:${ORBIX_HOME}/../../shlib/default/lib64"
   setenv LD_LIBRARY_PATH_64 "${ORBIX_HOME}/../../shlib/lib64:${ORBIX_HOME}/../../shlib/default/lib64:$LD_LIBRARY_PATH_64"
 endif
-
+endif
