@@ -5,6 +5,7 @@ local string = require "tools.split"
 local platforms = require "tools.platforms"
 local myplat = platforms[TEC_SYSNAME]
 local default_osexecute = os.execute
+local io = io
 
 module("tools.util", package.seeall)
 
@@ -68,6 +69,20 @@ function link(package, orig, linkpath)
   -- ... and real link to destination
   os.execute("ln -sf "..orig.." "..INSTALL.TOP.."/"..linkpath)
 end
+
+---
+-- Executa um comando no sistema operacional.
+--
+-- @return A resposta do comando em questão.
+---
+function execute(cmd)
+  local pipe = io.popen(cmd,"r")
+  local out = pipe:read("*a")
+  pipe:close()
+
+  return out
+end
+
 ------------------------------------------------------------------------------
 -- LuaRocks (http://www.luarocks.org) code. Thanks LuaRocks Team!
 -- ... from "luarocks/fs/unix.lua"
