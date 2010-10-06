@@ -19,6 +19,7 @@ function getrelease()
   local url,tag
   if os.execute("which svn >/dev/null") == 0 then
     url = myplat.exec("cd "..SVNDIR.." && env LANG=C svn info |grep URL")
+    -- Removing 'URL:' and '\n'.
     url = url:match("URL:%s*(.+)([%p%c%s]+)$")
     print("[ DEBUG ] Generating release information: Parsing the URL '".. url .."'")
   end
