@@ -57,8 +57,8 @@ function pack(arch,profile)
       f:close()
     end
   end
-  
-  local function addmetadata(filename)  
+
+  local function addmetadata(filename)
     local name = filename:match("(.*).template")
     if name ~= nil then
       local i = 1
@@ -79,9 +79,9 @@ function pack(arch,profile)
 
   print "----------------------------------------------------------------------"
   print("[ INFO ] Generating the tarball for arch:".. arch .." profile:".. name)
-  local file = assert(io.open(profile,"r") or 
-      io.open(name..".profile","r") or 
-      io.open(DEPLOYDIR .."/profiles/".. name,"r") or 
+  local file = assert(io.open(profile,"r") or
+      io.open(name..".profile","r") or
+      io.open(DEPLOYDIR .."/profiles/".. name,"r") or
       io.open(DEPLOYDIR .."/profiles/".. name ..".profile","r"),"ERROR: Couldn't find the file describing the profile "..name)
 
   -- Listing packages from profile description
