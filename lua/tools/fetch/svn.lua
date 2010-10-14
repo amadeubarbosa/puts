@@ -16,6 +16,8 @@ function run(path, url)
     download_cmd = "svn co ".. url .." ".. path
     return (os.execute(download_cmd) == 0), path
   end
+  --normalizando a url
+  url = url:match("(.+)/$") or url
   if info:find(url,1,true) == nil then
     local actualRepository = info:match("URL: ([%w%c%p]*)\n") or "?"
     error(string.format("[ ERROR ] Already exists repository in this path. " ..
