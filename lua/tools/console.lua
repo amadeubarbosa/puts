@@ -69,11 +69,11 @@ if valid_options then
   arg[0] = opt
   local tools = require ("tools.".. opt)
   if tools == nil then
-    print("ERRO: module tools." .. opt .." not found.")
+    print("ERROR: module tools." .. opt .." not found.")
     os.exit(1)
   end
   tools.run()
-  print("[ CONSOLE ] Assistant ".. opt .." finished successfully.")
+  print("[ CONSOLE ] Assistant ".. opt .." finished.")
   os.exit(0)
 else
   print([[

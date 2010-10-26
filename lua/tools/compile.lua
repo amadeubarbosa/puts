@@ -12,6 +12,10 @@ local myplat = platforms[TEC_SYSNAME]
 
 module("tools.compile", package.seeall)
 
+--------------------------------------------------------------------------------
+-- Utility functions -----------------------------------------------------------
+--------------------------------------------------------------------------------
+
 -- Iterates a numeric ordered table and create a new index with field 'name'
 local function indexByName(table)
   -- REMEMBER: 
@@ -43,6 +47,80 @@ local function loadDescriptorsFromDir(dir, list)
   end
   return list
 end
+
+--------------------------------------------------------------------------------
+-- Checkpoint code -------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+-- Checkpoint allows us to 'restore' and 'save' recover files.
+-- Recover files register when the compiler assistant fails on building a package.
+-- The compiler will continue the package building from the last package compiled successfully.
+local checkpoint = { filename = BASEDIR.."/compiler.recover", packages = {} }
+
+function checkpoint:clean()
+  os.remove(self.filename)
+  return true
+end
+
+function checkpoint:loadRecoverFile()
+  local alreadyCompiled = {}
+  local loader = loadfile(self.filename,"r")
+  if not loader then
+    -- there is no checkpoint to recover from
+    return false
+  end
+  
+  setfenv(loader, alreadyCompiled)
+  loader()
+  self.packages = alreadyCompiled.packages
+
+  return true
+end
+
+function checkpoint:filterCorrectlyCompiled(packageRequestedList)
+  if not self:loadRecoverFile() then
+    return packageRequestedList
+  end
+  
+  local newDescriptor = {}
+  for i, pkg in ipairs(packageRequestedList) do
+    -- discards packages already compiled on last execution
+    if not self.packages[pkg.name] then
+      table.insert(newDescriptor, pkg)
+    end
+  end
+  
+  return indexByName(newDescriptor)
+end
+
+function checkpoint:saveRecoverFile(descriptors, lastPkgBeingCompiled)
+  assert(type(descriptors) == "table")
+  assert(type(lastPkgBeingCompiled) == "number")
+  
+  local info = {}
+  -- persists the package names about the current checkpoint (if it exists)
+  -- plus the packages built in this current execution
+  for i=1,lastPkgBeingCompiled-1 do
+    -- saving pkginfo as 'mypackage = true' in recover file
+    self.packages[ descriptors[i].name ] = true
+  end
+  
+  assert(util.serialize_table(self.filename, self.packages, "packages"))
+  -- registering when this file was created
+  local recoverFile = io.open(self.filename,"a+")
+  recoverFile:write("-- date: "..os.date().."\n")
+  recoverFile:write("-- arguments: ")
+  for i,param in ipairs(arg) do
+    recoverFile:write(param.." ")
+  end
+  recoverFile:write("\n")
+  recoverFile:close()
+  return true
+end
+
+--------------------------------------------------------------------------------
+-- Back-compatibility code -----------------------------------------------------
+--------------------------------------------------------------------------------
 
 -- Functions related to back-compatibility mode
 local compat = {
@@ -100,9 +178,13 @@ local compat = {
     end
 }
 
+--------------------------------------------------------------------------------
+-- Main code -------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
 -- Parses package description and delegates to tools.build.<method>.run
 function parseDescriptions(desc, arguments)
-  for _, t in ipairs(desc) do
+  local function compile(t)
     print "----------------------------------------------------------------------"
     -- hack when no build is provided, to _always_ copy install_files , dev_files
     if not t.build then
@@ -126,18 +208,23 @@ function parseDescriptions(desc, arguments)
                         "' for package: ".. t.name)
 
     -- starting specific build methods
-    build_type.run(t,arguments,t.directory)
-
-    print "[ INFO ] Done!"
-    print "----------------------------------------------------------------------"
+    return pcall(build_type.run, t, arguments, t.directory)
   end
+  
+  for i, t in ipairs(desc) do
+    -- check if already compiled in last faulty compilation 
+    if not checkpoint.packages[t.name] then
+      local ok, err = compile(t)
+      if not ok then
+        -- returning the package index in desc table
+        return false, i
+      end
+    end
+  end
+  return true
 end
 
---------------------------------------------------------------------------------
--- Main code -------------------------------------------------------------------
---------------------------------------------------------------------------------
-
-function run()
+function run()  
   -- Parsing arguments
   local arguments = util.parse_args(arg,[[
     --help                   : show this help
@@ -311,6 +398,17 @@ function run()
   if arguments["verbose"] then
     util.verbose(1)
   end
+  
+  -- Checkpoint checks
+  if arguments.force then
+    -- Removing the checkpoint file when --force is passed
+    -- Assumption: the user wants to control manually
+    assert(checkpoint:clean())
+  else
+    -- Recovering from the last package that was built successfully
+    -- but only if the last compilation failed
+    assert(checkpoint:loadRecoverFile())
+  end
 
   -- Creating the build environment to create .tar.gz (later) from it
   os.execute(myplat.cmd.mkdir .. INSTALL.TOP)
@@ -326,7 +424,19 @@ function run()
   os.execute(myplat.cmd.rm .. TMPDIR .."/*")
 
   -- Parsing descriptions and proceed to compile & install procedures
-  parseDescriptions(descriptors, arguments)
+  local ok, last = parseDescriptions(descriptors, arguments)
+  if not ok then
+    -- checkpoint
+    assert(checkpoint:saveRecoverFile(descriptors, last))
+    print("[ INFO ] Some errors were raised. In next time, the building will"..
+      " continue from the '"..descriptors[last].name.."' package."..
+      " You can delete the '"..checkpoint.filename.."' file to avoid this behaviour.")
+  else
+    -- Removing the checkpoint file when packages compiled fine
+    assert(checkpoint:clean())
+    print "[ INFO ] Done !"
+    print "----------------------------------------------------------------------"
+  end
 
   -- Cleaning environment
   os.execute(myplat.cmd.rm .. TMPDIR)
