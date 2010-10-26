@@ -256,13 +256,17 @@ function serialize_table(filename,t,name)
   local function serialize(o)
     if type(o) == "number" then
       f:write(o)
+    elseif type(o) == "boolean" then
+      f:write(tostring(o))
     elseif type(o) == "string" then
       f:write(string.format("%q",o))
     elseif type(o) == "table" then
       f:write("{\n")
       for k,v in pairs(o) do
         if type(k) == "number" then
-          f:write(" ["..tostring(k).."]=")
+          f:write(" ["..tostring(k).."] = ")
+        elseif k:match("%p") then
+          f:write(" [\""..tostring(k).."\"] = ")
         else
           f:write(" "..k.." = ")
         end
