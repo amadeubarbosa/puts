@@ -407,7 +407,7 @@ function run()
   else
     -- Recovering from the last package that was built successfully
     -- but only if the last compilation failed
-    assert(checkpoint:loadRecoverFile())
+    checkpoint:loadRecoverFile()
   end
 
   -- Creating the build environment to create .tar.gz (later) from it
