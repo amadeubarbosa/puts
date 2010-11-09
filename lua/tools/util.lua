@@ -15,7 +15,7 @@ function verbose(level)
     os.execute = default_osexecute
   elseif level == 1 then
     os.execute = function(...)
-      print(" [verbose]: ",...)
+      print("[ VERBOSE ] ",...)
       return default_osexecute(...)
     end
   end
