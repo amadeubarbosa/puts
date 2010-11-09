@@ -184,6 +184,9 @@ local compat = {
 
 -- Parses package description and delegates to tools.build.<method>.run
 function parseDescriptions(desc, arguments)
+  ------------------------------------------------------------------------------
+  -- Auxiliar local function 'compile' -----------------------------------------
+  ------------------------------------------------------------------------------
   local function compile(t)
     print "----------------------------------------------------------------------"
     -- hack when no build is provided, to _always_ copy install_files , dev_files
@@ -207,17 +210,19 @@ function parseDescriptions(desc, arguments)
                         "build back-end for build type: '".. t.build.type ..
                         "' for package: ".. t.name)
 
-    -- starting specific build methods
+    -- starting specific build methods in a protected way
     return pcall(build_type.run, t, arguments, t.directory)
   end
-  
+
+
   for i, t in ipairs(desc) do
     -- check if already compiled in last faulty compilation 
     if not checkpoint.packages[t.name] then
       local ok, err = compile(t)
       if not ok then
-        -- returning the package index in desc table
-        return false, i
+        -- returning the package index of the desc table to identify
+        --  the package that was the last successfully compiled
+        return false, err, i
       end
     end
   end
@@ -424,17 +429,18 @@ function run()
   os.execute(myplat.cmd.rm .. TMPDIR .."/*")
 
   -- Parsing descriptions and proceed to compile & install procedures
-  local ok, last = parseDescriptions(descriptors, arguments)
+  -- REMEMBER: parseDescriptions returns true/false and 
+  local ok, err, last = parseDescriptions(descriptors, arguments)
   if not ok then
     -- checkpoint
     assert(checkpoint:saveRecoverFile(descriptors, last))
-    print("[ INFO ] Some errors were raised. In next time, the building will"..
+    print("[ ERROR ] Some errors were raised. In next time, the building will"..
       " continue from the '"..descriptors[last].name.."' package."..
       " You can delete the '"..checkpoint.filename.."' file to avoid this behaviour.")
   else
     -- Removing the checkpoint file when packages compiled fine
     assert(checkpoint:clean())
-    print "[ INFO ] Done !"
+    print "[ INFO ] Packages were compiled successfully !"
     print "----------------------------------------------------------------------"
   end
 
@@ -448,4 +454,8 @@ function run()
   -- Closing install log files
   util.close_log()
 
+  -- After the environment cleaning, we throw the lua error
+  if not ok then
+    error(err)
+  end
 end
