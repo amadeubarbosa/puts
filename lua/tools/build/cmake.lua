@@ -18,6 +18,11 @@ function run(t, arguments)
   -- Making command
   local cmake_cmd = "cd " .. build_dir .. " && " .. "cmake " .. t.build.src
 
+  local build = t.build[TEC_UNAME] or t.build[TEC_SYSNAME] or t.build
+  for n,v in pairs(build.definitions) do
+     cmake_cmd = cmake_cmd.." -D"..n.."="..v
+  end
+
   print(t.build.src)
 
   if arguments["rebuild"] then
