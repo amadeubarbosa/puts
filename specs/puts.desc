@@ -4,8 +4,8 @@ SUNOS64_TECMAKE_FLAGS="USE_NODEPEND=Yes TEC_UNAME=SunOS510_64 BUILD_64=yes"
 descriptors = {
   -- fake package to easy the download of the oil04 and scs urls
   { name = "oil-source",
-    url = SVNREPURL .. "/openbus/libs/trunk/oil04",
-    directory = PRODAPP .."/oil04",
+    url = SVNREPURL .. "/openbus/libs/trunk/oil-0.5.0",
+    directory = PRODAPP .."/oil-0.5.0",
   },
   { name = "lua5.1",
     url = SVNREPURL .. "/openbus/libs/trunk/lua5.1.3",
