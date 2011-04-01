@@ -1,0 +1,62 @@
+# bash completion for GNU tar
+
+_puts() 
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    command="${COMP_WORDS[1]}"
+    opts="help config compile makepack installer hook"
+
+    #
+    #  Complete the arguments to some of the basic commands.
+    #
+    case "${prev}" in
+        descriptors)
+            local files=$(for x in `ls *.desc`; do echo "${x}" ; done )
+            COMPREPLY=( $(compgen -W "${files}" -- ${cur/=/}) )
+            return 0
+            ;;
+        =)
+            local files=$(for x in `ls *.desc`; do echo "${x}" ; done )
+            COMPREPLY=( $(compgen -W "${files}" -- ${cur}) )
+            return 0
+            ;;
+        *)
+        ;;
+    esac
+
+    case "${command}" in
+        compile)
+            local running="help verbose list rebuild force descriptors select profile exclude update"
+            COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
+            return 0
+            ;;
+        makepack)
+            local names="help profile verbose arch svndir release"
+            COMPREPLY=( $(compgen -W "${names}" -- ${cur}) )
+            return 0
+            ;;
+        installer)
+            local names="help config package template path"
+            COMPREPLY=( $(compgen -W "${names}" -- ${cur}) )
+            return 0
+            ;;
+        *)
+        ;;
+    esac
+    
+    
+    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    return 0
+}
+complete -F _puts puts
+
+# Local variables:
+# mode: shell-script
+# sh-basic-offset: 4
+# sh-indent-comment: t
+# indent-tabs-mode: nil
+# End:
+# ex: ts=4 sw=4 et filetype=sh

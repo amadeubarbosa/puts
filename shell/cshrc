@@ -1,0 +1,64 @@
+# personal settings
+setenv PATH "$HOME/bin:$PATH"
+
+# openbus settings
+
+# common path
+#setenv OPENBUS_HOME "${HOME}/openbus/install"
+
+setenv OPENSSL_HOME "${OPENBUS_HOME}/openssl"
+
+setenv PATH "${OPENBUS_HOME}/bin/${TEC_UNAME}:${OPENBUS_HOME}/bin:${PATH}"
+
+set OB_CPATH="${OPENBUS_HOME}/incpath/cxxtest:${OPENBUS_HOME}/incpath/e2fsprogs-1.40.8:${OPENBUS_HOME}/incpath/openldap-2.4.11:${OPENBUS_HOME}/incpath/openssl-0.9.9"
+if ($?CPATH == 0) then
+  setenv CPATH "${OB_CPATH}"
+else
+  setenv CPATH "${OB_CPATH}:${CPATH}"
+endif
+
+set OB_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+if ($?LIBRARY_PATH == 0) then
+  setenv LIBRARY_PATH "${OB_LIBRARY_PATH}"
+else
+  setenv LIBRARY_PATH "${OB_LIBRARY_PATH}:${LIBRARY_PATH}"
+endif
+
+set OB_LD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+if ($?LD_LIBRARY_PATH == 0) then
+  setenv LD_LIBRARY_PATH "${OB_LD_LIBRARY_PATH}"
+else
+  setenv LD_LIBRARY_PATH "${OB_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH}"
+endif
+
+if ($?TEC_SYSNAME == 1) then
+  if ($TEC_SYSNAME == 'Darwin') then
+    set OB_DYLD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+    if ($?DYLD_LIBRARY_PATH == 0) then
+      setenv DYLD_LIBRARY_PATH "${OB_DYLD_LIBRARY_PATH}"
+    else
+      setenv DYLD_LIBRARY_PATH "${OB_DYLD_LIBRARY_PATH}:${DYLD_LIBRARY_PATH}"
+    endif
+  endif
+  if ($TEC_SYSNAME == "SunOS" ) then
+    #gnu compilers
+    setenv LIBRARY_PATH "${LIBRARY_PATH}:/usr/sfw/lib:/usr/local/lib:/usr/ucblib"
+    setenv CPATH "${CPATH}:/usr/sfw/include:/usr/local/include:/usr/ucbinclude"
+    #sun compilers
+    setenv LDFLAGS "-L/usr/lib -L/usr/sfw/lib -L/usr/local/lib -L/usr/ucblib"
+    setenv CPPFLAGS "-I/usr/include -I/usr/sfw/include -I/usr/local/include -I/usr/ucbinclude"
+    setenv LD_LIBRARY_PATH "${LD_LIBRARY_PATH}:/usr/ucblib:/usr/local/lib:/usr/sfw/lib"
+    setenv LD_LIBRARY_PATH_64 "/usr/lib/64:/lib/64:/usr/openwin/lib/64:/usr/sfw/lib/64:/usr/local/lib/sparcv9:/usr/ucblib/sparcv9:${LD_LIBRARY_PATH_64}"
+    setenv PATH "${PATH}:/usr/ucb:/usr/sfw/bin:/usr/local/bin:/usr/ccs/bin"
+    
+    #openbus flags first
+    setenv LDFLAGS "-L${OPENBUS_HOME}/libpath/$TEC_UNAME $LDFLAGS"
+    setenv CFLAGS "-I${OPENBUS_HOME}/incpath/e2fsprogs-1.40.8 -I${OPENBUS_HOME}/incpath/openldap-2.4.11 -I${OPENBUS_HOME}/incpath/openssl-0.9.9" 
+    #tecmake because it doesn't work with Sun make
+    setenv TECMAKE_MAKE "/usr/sfw/bin/gmake"
+  endif
+
+endif
+
+setenv LUA_PATH "${OPENBUS_HOME}/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?/init.lua;./?.lua;?.lua"
+setenv LUA_CPATH "${OPENBUS_HOME}/libpath/${TEC_UNAME}/lib?.so;./?.so"
