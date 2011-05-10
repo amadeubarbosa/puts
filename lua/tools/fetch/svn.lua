@@ -20,8 +20,8 @@ function run(path, url)
   url = url:match("(.+)/$") or url
   if info:find(url,1,true) == nil then
     local actualRepository = info:match("URL: ([%w%c%p]*)\n") or "?"
-    error(string.format("[ ERROR ] Already exists repository in this path. " ..
-        "Remove '%s' in '%s' before checkout '%s'", actualRepository, path, url))
+    error(string.format("[ ERROR ] A different SVN URL (%s) has been used in '%s' directory. " ..
+        "Remove '%s' directory if you need to use '%s' in this directory.", actualRepository, path, path, url))
   end
 
   download_cmd = "svn up ".. path
