@@ -43,9 +43,9 @@ PKGPREFIX = PKGPREFIX or "openbus-"
 
 INSTALL = INSTALL or {}
 INSTALL.TOP = INSTALL.TOP or BASEDIR .."/install"
-INSTALL.BIN = INSTALL.BIN or INSTALL.TOP .."/bin/".. TEC_UNAME .."/"
-INSTALL.LIB = INSTALL.LIB or INSTALL.TOP .."/libpath/".. TEC_UNAME .."/"
-INSTALL.INC = INSTALL.INC or INSTALL.TOP .."/incpath/"
+INSTALL.BIN = INSTALL.BIN or INSTALL.TOP .."/bin"
+INSTALL.LIB = INSTALL.LIB or INSTALL.TOP .."/lib"
+INSTALL.INC = INSTALL.INC or INSTALL.TOP .."/include"
 TMPDIR = TMPDIR or "/tmp/openbus-building_".. math.random(os.time()%100000)
 
 -- Supported arch to makepack

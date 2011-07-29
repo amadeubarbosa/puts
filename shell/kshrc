@@ -8,23 +8,23 @@ export PATH="$HOME/bin:$PATH"
 
 export OPENSSL_HOME="${OPENBUS_HOME}/openssl"
 
-export PATH="${OPENBUS_HOME}/bin/${TEC_UNAME}:${OPENBUS_HOME}/bin:${PATH}"
+export PATH="${OPENBUS_HOME}/bin:${PATH}"
 
-OB_CPATH="${OPENBUS_HOME}/incpath/cxxtest:${OPENBUS_HOME}/incpath/e2fsprogs-1.40.8:${OPENBUS_HOME}/incpath/openldap-2.4.11:${OPENBUS_HOME}/incpath/openssl-0.9.9"
+OB_CPATH="${OPENBUS_HOME}/include/cxxtest:${OPENBUS_HOME}/include/e2fsprogs-1.40.8:${OPENBUS_HOME}/include/openldap-2.4.11:${OPENBUS_HOME}/include/openssl-0.9.9"
 if [ -z ${CPATH} ]; then
   export CPATH="${OB_CPATH}"
 else
   export CPATH="${OB_CPATH}:${CPATH}"
 fi
 
-OB_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+OB_LIBRARY_PATH="${OPENBUS_HOME}/lib"
 if [ -z ${LIBRARY_PATH} ]; then
   export LIBRARY_PATH="${OB_LIBRARY_PATH}"
 else
   export LIBRARY_PATH="${OB_LIBRARY_PATH}:${LIBRARY_PATH}"
 fi
 
-OB_LD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+OB_LD_LIBRARY_PATH="${OPENBUS_HOME}/lib"
 if [ -z ${LD_LIBRARY_PATH} ]; then
   export LD_LIBRARY_PATH="${OB_LD_LIBRARY_PATH}"
 else
@@ -32,7 +32,7 @@ else
 fi
 
 if [ "${TEC_SYSNAME}" == "Darwin" ]; then
-  OB_DYLD_LIBRARY_PATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}"
+  OB_DYLD_LIBRARY_PATH="${OPENBUS_HOME}/lib"
   if [ -z ${DYLD_LIBRARY_PATH} ]; then
     export DYLD_LIBRARY_PATH="${OB_DYLD_LIBRARY_PATH}"
   else
@@ -52,11 +52,11 @@ if [ "${TEC_SYSNAME}" == "SunOS" ] ;then
   export PATH="${PATH}:/usr/ucb:/usr/sfw/bin:/usr/local/bin:/usr/ccs/bin"
   
   #openbus flags first
-  export LDFLAGS="-L${OPENBUS_HOME}/libpath/$TEC_UNAME $LDFLAGS"
-  export CFLAGS="-I${OPENBUS_HOME}/incpath/e2fsprogs-1.40.8 -I${OPENBUS_HOME}/incpath/openldap-2.4.11 -I${OPENBUS_HOME}/incpath/openssl-0.9.9" 
+  export LDFLAGS="-L${OPENBUS_HOME}/lib $LDFLAGS"
+  export CFLAGS="-I${OPENBUS_HOME}/include/e2fsprogs-1.40.8 -I${OPENBUS_HOME}/include/openldap-2.4.11 -I${OPENBUS_HOME}/include/openssl-0.9.9" 
   #tecmake because it doesn't work with Sun make
   export TECMAKE_MAKE=/usr/sfw/bin/gmake
 fi
 
-export LUA_PATH="${OPENBUS_HOME}/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?.lua;${OPENBUS_HOME}/libpath/lua/5.1/?/init.lua;./?.lua;?.lua"
-export LUA_CPATH="${OPENBUS_HOME}/libpath/${TEC_UNAME}/lib?.so;./?.so"
+export LUA_PATH="${OPENBUS_HOME}/src/lua/?.lua;${OPENBUS_HOME}/lib/lua/5.1/?.lua;${OPENBUS_HOME}/lib/lua/5.1/?/init.lua;./?.lua;?.lua"
+export LUA_CPATH="${OPENBUS_HOME}/lib/lib?.so;./?.so"
