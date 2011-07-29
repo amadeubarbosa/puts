@@ -14,7 +14,7 @@ function die {
         exit 1
 }                                                   
 function fetch_tecmake {
-	FILE="tecmake.tar.gz"
+	FILE="tecmake-3.21.tar.gz"
 	URL="http://www.tecgraf.puc-rio.br/tecmake/download/${FILE}"
 	#see SOURCES definition in the ##variables section of this script
 	export TECMAKE_HOME="${SOURCES}/tecmake" 
@@ -83,7 +83,7 @@ read ok
 
 echo "[ INFO ] Obtaining the compile utilities, first."
 DEPLOYDIR="$SOURCES/puts"
-svn co $SVN_PROJECTURL/puts/trunk $DEPLOYDIR || die "Aborting because the \
+svn co $SVN_PROJECTURL/puts/branches/PUTS_v1_01_2011_07_28 $DEPLOYDIR || die "Aborting because the \
 checkout of the compile utilities has failed!"
 
 echo "[ INFO ] Obtaining the sources of the project."
