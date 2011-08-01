@@ -46,7 +46,17 @@ INSTALL.TOP = INSTALL.TOP or BASEDIR .."/install"
 INSTALL.BIN = INSTALL.BIN or INSTALL.TOP .."/bin"
 INSTALL.LIB = INSTALL.LIB or INSTALL.TOP .."/lib"
 INSTALL.INC = INSTALL.INC or INSTALL.TOP .."/include"
-TMPDIR = TMPDIR or "/tmp/openbus-building_".. math.random(os.time()%100000)
+
+function giveRandomEmptyDir()
+  repeat
+    tmp = os.tmpname()
+    ok, err = os.remove(tmp)
+  until (ok)
+
+  return tmp
+end
+
+TMPDIR = TMPDIR or giveRandomEmptyDir().."_putsbuilding"
 
 -- Supported arch to makepack
 SUPPORTED_ARCH = SUPPORTED_ARCH or {
