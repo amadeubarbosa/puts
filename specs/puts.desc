@@ -14,6 +14,7 @@ descriptors = {
       src = PRODAPP .."/lua5.1/src",
       mf = { "config" },
       Darwin = { mf = {"config", "config BUILD_DYLIB=Yes"} },
+      MacOS = { mf = {"config", "config BUILD_DYLIB=Yes"} },
       SunOS510_64 = { mf = {"config ".. SUNOS64_TECMAKE_FLAGS} },
     },
     install_files = {

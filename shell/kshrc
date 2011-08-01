@@ -40,6 +40,15 @@ if [ "${TEC_SYSNAME}" == "Darwin" ]; then
   fi
 fi
 
+if [ "${TEC_SYSNAME}" == "MacOS" ]; then
+  OB_DYLD_LIBRARY_PATH="${OPENBUS_HOME}/lib"
+  if [ -z ${DYLD_LIBRARY_PATH} ]; then
+    export DYLD_LIBRARY_PATH="${OB_DYLD_LIBRARY_PATH}"
+  else
+    export DYLD_LIBRARY_PATH="${OB_DYLD_LIBRARY_PATH}:${DYLD_LIBRARY_PATH}"
+  fi
+fi
+
 if [ "${TEC_SYSNAME}" == "SunOS" ] ;then
   #gnu compilers
   export LIBRARY_PATH="${LIBRARY_PATH}:/usr/sfw/lib:/usr/local/lib:/usr/ucblib"

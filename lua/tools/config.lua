@@ -62,6 +62,7 @@ SUPPORTED_ARCH = SUPPORTED_ARCH or {
   "SunOS510x86", 
   "Darwin811x86",
   "Darwin96x86",
+  "MacOS107",
 }
 
 -- Given a way to change platform specific variables.

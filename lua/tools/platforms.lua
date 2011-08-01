@@ -206,6 +206,7 @@ platforms.Darwin = {
     end
   end,
 }
+platforms.MacOS = platforms.Darwin
 --~ platforms.Windows = {
   --~ pipe_stderr = " >STDERR.txt",
   --~ dylibext = "dll",

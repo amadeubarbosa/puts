@@ -40,6 +40,14 @@ if ($?TEC_SYSNAME == 1) then
       setenv DYLD_LIBRARY_PATH "${OB_DYLD_LIBRARY_PATH}:${DYLD_LIBRARY_PATH}"
     endif
   endif
+  if ($TEC_SYSNAME == 'MacOS') then
+    set OB_DYLD_LIBRARY_PATH="${OPENBUS_HOME}/lib"
+    if ($?DYLD_LIBRARY_PATH == 0) then
+      setenv DYLD_LIBRARY_PATH "${OB_DYLD_LIBRARY_PATH}"
+    else
+      setenv DYLD_LIBRARY_PATH "${OB_DYLD_LIBRARY_PATH}:${DYLD_LIBRARY_PATH}"
+    endif
+  endif
   if ($TEC_SYSNAME == "SunOS" ) then
     #gnu compilers
     setenv LIBRARY_PATH "${LIBRARY_PATH}:/usr/sfw/lib:/usr/local/lib:/usr/ucblib"
