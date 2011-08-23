@@ -1,5 +1,5 @@
 --
-Copyright (C) 2010 Tecgraf/PUC-Rio. All rights reserved.
+Copyright (C) 2011 Tecgraf/PUC-Rio. All rights reserved.
 --
 Puts software is an utility to compile, create and install packages.
 Originally, Puts was developed to create packages of Openbus artifacts.
