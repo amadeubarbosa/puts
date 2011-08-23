@@ -4,8 +4,8 @@ APPNAME= ${PROJNAME}
 LUABIN= ${LUA51}/bin/${TEC_UNAME}/lua5.1
 LUASRC_DIR= ../lua
 
-OPENBUSLIB= ${OPENBUS_HOME}/libpath/${TEC_UNAME}
-LUA_FLAGS= -e "package.path='${OPENBUS_HOME}/libpath/lua/5.1/?.lua;'..package.path"
+OPENBUSLIB= ${OPENBUS_HOME}/lib
+LUA_FLAGS= -e "package.path='${OPENBUS_HOME}/lib/lua/5.1/?.lua;'..package.path"
 
 PRECMP_DIR= ../obj/${TEC_UNAME}
 PRECMP_LUA= ../lua/precompiler.lua

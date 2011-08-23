@@ -26,7 +26,7 @@ Identity()
 
 -- Some fixes made by Tecmake
 local sysname = Identity.TEC_SYSNAME
-if sysname:match("SunOS") or sysname:match("IRIX") or sysname:match("Darwin") then
+if sysname:match("SunOS") or sysname:match("IRIX") or sysname:match("Darwin") or sysname:match("MacOS") then
   Identity.commands.TEC_SYSARCH = "uname -p"
 elseif sysname:match("FreeBSD") then
   Identity.commands.TEC_SYSMINOR = "uname -r|cut -f2 -d.|cut -f1 -d-"
@@ -70,7 +70,7 @@ end
 if Identity.TEC_SYSNAME == "Linux" and Identity.TEC_SYSARCH == "ppc" then
   Identity.TEC_UNAME = Identity.TEC_UNAME.."ppc"
 elseif 
-  (Identity.TEC_SYSNAME == "SunOS" or Identity.TEC_SYSNAME == "Darwin")
+  (Identity.TEC_SYSNAME == "SunOS" or Identity.TEC_SYSNAME == "Darwin" or Identity.TEC_SYSNAME == "MacOS")
   and Identity.TEC_SYSARCH == "x86" then
   Identity.TEC_UNAME = Identity.TEC_UNAME.."x86"
 end

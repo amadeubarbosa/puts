@@ -14,15 +14,16 @@ descriptors = {
       src = PRODAPP .."/lua5.1/src",
       mf = { "config" },
       Darwin = { mf = {"config", "config BUILD_DYLIB=Yes"} },
+      MacOS = { mf = {"config", "config BUILD_DYLIB=Yes"} },
       SunOS510_64 = { mf = {"config ".. SUNOS64_TECMAKE_FLAGS} },
     },
     install_files = {
-      ["../lib/${TEC_UNAME}/liblua5.1.so"] = "libpath/${TEC_UNAME}",
-      ["../lib/${TEC_UNAME}/liblua5.1.dylib"] = "libpath/${TEC_UNAME}",
+      ["../lib/${TEC_UNAME}/liblua5.1.so"] = "lib",
+      ["../lib/${TEC_UNAME}/liblua5.1.dylib"] = "lib",
     },
     dev_files = {
-      ["../lib/${TEC_UNAME}/liblua5.1.*"] = "libpath/${TEC_UNAME}",
-      ["../include/*"] = "incpath/lua5.1.3",
+      ["../lib/${TEC_UNAME}/liblua5.1.*"] = "lib",
+      ["../include/*"] = "include/lua5.1.3",
     },
   },
   { name = "lua5.1-bin",
@@ -33,20 +34,20 @@ descriptors = {
       SunOS510_64 = { mf = {"lua ".. SUNOS64_TECMAKE_FLAGS} },
     },
     install_files = {
-      ["../bin/${TEC_UNAME}/lua5.1"] = "bin/${TEC_UNAME}",
+      ["../bin/${TEC_UNAME}/lua5.1"] = "bin",
     },
   },
   -- TIP: precompiler.lua precisa do loop!
   { name = "loop",
     build = {
       type = "tecmake",
-      src = PRODAPP .."/oil04",
+      src = PRODAPP .."/oil-0.5.0",
       mf = { },
     },
     dev_files = {
-      ["lua/loop"] = "libpath/lua/5.1", 
-      ["lua/precompiler.lua"] = "libpath/lua/5.1",
-      ["lua/preloader.lua"] = "libpath/lua/5.1",
+      ["lua/loop"] = "lib/lua/5.1", 
+      ["lua/precompiler.lua"] = "lib/lua/5.1",
+      ["lua/preloader.lua"] = "lib/lua/5.1",
     },
   },
   -- self-packaging the tools as an important bootstrap strategy to deployment!
@@ -59,7 +60,7 @@ descriptors = {
       SunOS510_64 = { mf = { "config LUA51="..PRODAPP.."/lua5.1 ".. SUNOS64_TECMAKE_FLAGS } },
     },
     install_files = {
-      ["../bin/${TEC_UNAME}/*"] = "bin/${TEC_UNAME}",
+      ["../bin/${TEC_UNAME}/*"] = "bin",
       ["../specs/*.desc"] = "puts/specs",
       ["../specs/profiles"] = "puts/specs",
       ["../shell"] = "puts",

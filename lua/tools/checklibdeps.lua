@@ -27,6 +27,10 @@ function checker:libraries_deps(openbus_home)
   
   local msg = "[ checker:libraries_deps ] "
   local check_paths = { 
+    -- since OPENBUS-653
+    openbus_home.."/lib",
+    openbus_home.."/bin",
+    -- keeping support to previous hierarchy
     openbus_home.."/libpath/"..TEC_UNAME,
     openbus_home.."/bin/"..TEC_UNAME,
     openbus_home.."/core/bin/"..TEC_UNAME,
