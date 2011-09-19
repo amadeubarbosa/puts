@@ -11,16 +11,18 @@ module("tools.build.cmake", package.seeall)
 function run(t, arguments)
   print("[ INFO ] Creating Makefiles with CMake for: ".. t.name)
 
-  os.execute(plat.cmd.mkdir .. TMPDIR)
-  
-  local build_dir = TMPDIR
+  local build_dir = TMPDIR .. "/" .. t.name 
+
+  os.execute(plat.cmd.mkdir .. build_dir)
 
   -- Making command
   local cmake_cmd = "cd " .. build_dir .. " && " .. "cmake " .. t.build.src
 
   local build = t.build[TEC_UNAME] or t.build[TEC_SYSNAME] or t.build
-  for n,v in pairs(build.definitions) do
-     cmake_cmd = cmake_cmd.." -D"..n.."="..v
+  if build.definitions then
+      for n,v in pairs(build.definitions) do
+         cmake_cmd = cmake_cmd.." -D"..n.."="..v
+      end
   end
 
   print(t.build.src)
