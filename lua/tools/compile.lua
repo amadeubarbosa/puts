@@ -200,7 +200,10 @@ function parseDescriptions(desc, arguments)
     end
     -- fetching and unpacking
     if t.url and arguments["update"] then
-      util.fetch_and_unpack(t.name, t.url, t.directory)
+      local ok, err = pcall(util.fetch_and_unpack, t.name, t.url, t.directory)
+      if not ok then
+        return false, err
+      end
     end
   
     assert(t.build.type, "ERROR: build.type is missing for package: "..t.name)
