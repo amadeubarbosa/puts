@@ -51,7 +51,8 @@ if reconfigure then
   print("[ CONSOLE ] Overriding the default configuration with: ",reconfigure)
   local f,err = loadfile(reconfigure)
   if not f then
-    print("[ WARNING ] The file '"..reconfigure.."' cannot be opened! Continuing with default configuration.")
+    print("[ WARNING ] The file '"..reconfigure.."' cannot be loaded successfuly ("..err..")!")
+    print("[ WARNING ] Using default configuration.")
   else
     f()
   end
