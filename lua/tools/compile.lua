@@ -77,15 +77,15 @@ function checkpoint:loadRecoverFile()
   return true
 end
 
-function checkpoint:filterCorrectlyCompiled(packageRequestedList)
+function checkpoint:getCorrectlyCompiled(packageRequestedList)
   if not self:loadRecoverFile() then
     return packageRequestedList
   end
   
   local newDescriptor = {}
   for i, pkg in ipairs(packageRequestedList) do
-    -- discards packages already compiled on last execution
-    if not self.packages[pkg.name] then
+    -- packages compiled correctly on last execution
+    if self.packages[pkg.name] then
       table.insert(newDescriptor, pkg)
     end
   end
@@ -200,7 +200,10 @@ function parseDescriptions(desc, arguments)
     end
     -- fetching and unpacking
     if t.url and arguments["update"] then
-      util.fetch_and_unpack(t.name, t.url, t.directory)
+      local ok, err = pcall(util.fetch_and_unpack, t.name, t.url, t.directory)
+      if not ok then
+        return false, err
+      end
     end
   
     assert(t.build.type, "ERROR: build.type is missing for package: "..t.name)
@@ -413,6 +416,13 @@ function run()
     -- Recovering from the last package that was built successfully
     -- but only if the last compilation failed
     checkpoint:loadRecoverFile()
+    if arguments.select and arguments.rebuild then
+      local selected = arguments.select
+      okays = checkpoint:getCorrectlyCompiled(arguments.select)
+      for i, pkgname in ipairs(okays) do
+        checkpoint.packages[pkgname] = nil
+      end
+    end
   end
 
   -- Creating the build environment to create .tar.gz (later) from it
