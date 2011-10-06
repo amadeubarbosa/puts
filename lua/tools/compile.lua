@@ -82,15 +82,15 @@ function checkpoint:getCorrectlyCompiled(packageRequestedList)
     return packageRequestedList
   end
   
-  local newDescriptor = {}
+  local compiled = {}
   for i, pkg in ipairs(packageRequestedList) do
-    -- packages compiled correctly on last execution
-    if self.packages[pkg.name] then
-      table.insert(newDescriptor, pkg)
+    if self.packages[pkg] then
+      table.insert(compiled, pkg)
+      compiled[pkg] = true
     end
   end
   
-  return indexByName(newDescriptor)
+  return compiled
 end
 
 function checkpoint:saveRecoverFile(descriptors, lastPkgBeingCompiled)
