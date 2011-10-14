@@ -51,7 +51,7 @@ VERSION_ID="OB_HEAD"
 
 ####sanity checks
 if [ -n "$1" ]; then
-	is_tag_or_branch=$( echo $1 |egrep -e "tags|branches" )
+	is_tag_or_branch=$( echo $1 |egrep -e "tags|branches|core/trunk" )
 	[ "$?" != "0" ] && die "[ ERROR ] I just know to handle tags and branches.\
  Do you want to use the trunk? Use no arguments!"
 	VERSION="$1"
