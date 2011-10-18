@@ -72,7 +72,7 @@ function checkpoint:loadRecoverFile()
   
   setfenv(loader, alreadyCompiled)
   loader()
-  self.packages = alreadyCompiled.packages
+  self.packages = alreadyCompiled.packages or self.packages
 
   return true
 end
