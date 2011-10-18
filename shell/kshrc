@@ -68,4 +68,4 @@ if [ "${TEC_SYSNAME}" == "SunOS" ] ;then
 fi
 
 export LUA_PATH="${OPENBUS_HOME}/src/lua/?.lua;${OPENBUS_HOME}/lib/lua/5.1/?.lua;${OPENBUS_HOME}/lib/lua/5.1/?/init.lua;./?.lua;?.lua"
-export LUA_CPATH="${OPENBUS_HOME}/lib/lib?.so;./?.so"
+export LUA_CPATH="${OPENBUS_HOME}/lib/lib?.so;${OPENBUS_HOME}/lib/liblua?.so;./?.so"
