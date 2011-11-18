@@ -9,6 +9,9 @@ local io = io
 
 module("tools.util", package.seeall)
 
+function nameversion(spec)
+  return spec.name .. ((spec.version and "-"..spec.version) or "")
+end
 -- Overloading the os.execute to dummy verbose
 function verbose(level)
   if not level or level <= 0 then
@@ -168,7 +171,11 @@ function download(pkgname, from, targetdir)
       from = proto .."://".. url
     end
   else
-    error("ERROR: Unknown protocol '"..proto.."'. The URL was '"..from.."'.")
+    -- trying load from disk a handler
+    ok, handler = pcall(require, "tools.fetch."..proto)
+    if not ok then
+      error("ERROR: Unknown protocol '"..proto.."'. The URL was '"..from.."'.")
+    end
   end
   print("[ INFO ] Downloading "..pkgname.." via the protocol "..proto)
   return handler.run(targetdir,from)

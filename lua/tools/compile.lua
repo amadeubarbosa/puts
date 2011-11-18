@@ -188,6 +188,7 @@ function parseDescriptions(desc, arguments)
   -- Auxiliar local function 'compile' -----------------------------------------
   ------------------------------------------------------------------------------
   local function compile(t)
+    local nameversion = util.nameversion(t)
     print "----------------------------------------------------------------------"
     -- hack when no build is provided, to _always_ copy install_files , dev_files
     if not t.build then
@@ -200,23 +201,22 @@ function parseDescriptions(desc, arguments)
     end
     -- fetching and unpacking
     if t.url and arguments["update"] then
-      local ok, err = pcall(util.fetch_and_unpack, t.name, t.url, t.directory)
+      local ok, err = pcall(util.fetch_and_unpack, nameversion, t.url, t.directory)
       if not ok then
         return false, err
       end
     end
   
-    assert(t.build.type, "ERROR: build.type is missing for package: "..t.name)
+    assert(t.build.type, "ERROR: build.type is missing for package: "..nameversion)
     -- loading specific build methods
     ok, build_type = pcall(require, "tools.build." .. t.build.type)
     assert(ok and type(build_type) == "table","ERROR: failed initializing "..
                         "build back-end for build type: '".. t.build.type ..
-                        "' for package: ".. t.name)
+                        "' for package: ".. nameversion)
 
     -- starting specific build methods in a protected way
     return pcall(build_type.run, t, arguments, t.directory)
   end
-
 
   for i, t in ipairs(desc) do
     -- check if already compiled in last faulty compilation 

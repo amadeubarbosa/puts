@@ -9,7 +9,8 @@ local plat = platforms[TEC_SYSNAME]
 module("tools.build.cmake", package.seeall)
 
 function run(t, arguments)
-  print("[ INFO ] Creating Makefiles with CMake for: ".. t.name)
+  local nameversion = util.nameversion(t)
+  print("[ INFO ] Creating Makefiles with CMake for: ".. nameversion)
 
   os.execute(plat.cmd.mkdir .. TMPDIR)
   
@@ -32,7 +33,7 @@ function run(t, arguments)
   
   local ret = os.execute(cmake_cmd)
   -- assert ensure that we could continue
-  assert(ret == 0,"ERROR Generating Makefile".. t.name .."")
+  assert(ret == 0,"ERROR Generating Makefile".. nameversion .."")
 
   local make_cmd = plat.cmd.make .. (t.build.target or "")
 
@@ -46,7 +47,7 @@ function run(t, arguments)
 
   ret = os.execute(build_cmd)
   -- assert ensure that we could continue
-  assert(ret == 0,"ERROR compiling the software ".. t.name .."")
+  assert(ret == 0,"ERROR compiling the software ".. nameversion .."")
 
   -- re-using copy method to parse install_files, conf_files, dev_files
   copy.run(t,arguments,build_dir)

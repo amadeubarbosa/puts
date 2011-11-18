@@ -6,7 +6,8 @@ local copy = require "tools.build.copy"
 module("tools.build.maven", package.seeall)
 
 function run(t, arguments)
-  print("[ INFO ] Compiling package via maven: ".. t.name)
+  local nameversion = util.nameversion(t)
+  print("[ INFO ] Compiling package via maven: ".. nameversion)
   local build_dir = t.build.src
 
   -- Making command
@@ -26,7 +27,7 @@ function run(t, arguments)
 
   local ret = os.execute(build_cmd)
   -- assert ensure that we could continue
-  assert(ret == 0,"ERROR compiling the software ".. t.name .."")
+  assert(ret == 0,"ERROR compiling the software ".. nameversion .."")
 
   -- re-using copy method to parse install_files, conf_files, dev_files
   copyDependence(t,arguments,build_dir)
@@ -46,5 +47,5 @@ function copyDependence(t,arguments,build_dir)
   build_cmd = "cd " .. build_dir .. " && " .. maven_cmd .. maven_args
 
   local ret = os.execute(build_cmd)
-  assert(ret == 0, "ERRO copying-dependencies" .. t.name)
+  assert(ret == 0, "ERRO copying-dependencies" .. nameversion)
 end 

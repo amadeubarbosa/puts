@@ -6,7 +6,8 @@ local copy = require "tools.build.copy"
 module("tools.build.ant", package.seeall)
 
 function run(t, arguments)
-  print("[ INFO ] Compiling package via ant: ".. t.name)
+  local nameversion = util.nameversion(t)
+  print("[ INFO ] Compiling package via ant: ".. nameversion)
   local build_dir = t.build.src
 
   -- Making command
@@ -26,7 +27,7 @@ function run(t, arguments)
 
   local ret = os.execute(build_cmd)
   -- assert ensure that we could continue
-  assert(ret == 0,"ERROR compiling the software ".. t.name .."")
+  assert(ret == 0,"ERROR compiling the software ".. nameversion .."")
 
   -- re-using copy method to parse install_files, conf_files, dev_files
   copy.run(t,arguments,build_dir)

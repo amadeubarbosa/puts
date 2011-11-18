@@ -5,12 +5,14 @@ local copy = require "tools.build.copy"
 module("tools.build.command", package.seeall)
 
 function run(t, arguments)
-  print("[ INFO ] Compiling package via command: ".. t.name)
+  local nameversion = util.nameversion(t)
+  
+  print("[ INFO ] Compiling package via command: ".. nameversion)
   local build_dir = t.build.src
   local build_table = t.build[TEC_UNAME] or t.build[TEC_SYSNAME] or t.build
 
   if not build_table.cmd then
-    print("[ WARNING ] ".. t.name..[[ has no build command provided for ']]..TEC_UNAME..[[' platforms. Skipping.]])
+    print("[ WARNING ] ".. nameversion..[[ has no build command provided for ']]..TEC_UNAME..[[' platforms. Skipping.]])
     return nil
   end
 
@@ -32,7 +34,7 @@ function run(t, arguments)
   build_cmd = "cd " .. build_dir .. " && " .. command
 
   local ret = os.execute(build_cmd)
-  assert(ret == 0,"ERROR compiling the software ".. t.name .."")
+  assert(ret == 0,"ERROR compiling the software ".. nameversion .."")
 
   -- re-using copy method to parse install_files, conf_files, dev_files
   copy.run(t,arguments,build_dir)

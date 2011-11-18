@@ -9,12 +9,13 @@ local myplat = platforms[TEC_SYSNAME]
 module("tools.build.copy", package.seeall)
 
 function run(t,arguments,build_dir)
+  local nameversion = util.nameversion(t)
   assert(type(t) == "table")
   -- we assume a default build_dir pointing to PRODAPP
   if not build_dir then
-    build_dir = PRODAPP .."/".. t.name
+    build_dir = PRODAPP .."/".. nameversion
   end
-  print("[ INFO ] Using source directory '"..build_dir.."' for the package: ".. t.name)
+  print("[ INFO ] Using source directory '"..build_dir.."' for the package: ".. nameversion)
 
   -- copying files described on packages table
   if t.install_files then
@@ -22,7 +23,7 @@ function run(t,arguments,build_dir)
       local dir = build_dir
       -- if absolute path we assume that you know where get the files
       if orig:match("^/") then dir = "" end
-      util.install(t.name, dir.."/"..orig, dest)
+      util.install(nameversion, dir.."/"..orig, dest)
     end
   end
   -- copying files related to configuration with '-conf' suffix
@@ -31,7 +32,7 @@ function run(t,arguments,build_dir)
       local dir = build_dir
       -- if absolute path we assume that you know where get the files
       if orig:match("^/") then dir = "" end
-      util.install(t.name.."-conf", dir.."/"..orig, dest)
+      util.install(nameversion.."-conf", dir.."/"..orig, dest)
     end
   end
   -- temp behaviour, future: each package as a <name>.desc and <name>.template
@@ -39,11 +40,11 @@ function run(t,arguments,build_dir)
   if t.conf_template then
     if arguments.compat then 
       local content = assert(io.open(t.conf_template,"r")):read("*a")
-      assert(io.open(PKGDIR.."/"..t.name.."1.template","w")):write(content)
+      assert(io.open(PKGDIR.."/"..nameversion.."1.template","w")):write(content)
     else
       for i,templateName in ipairs(t.conf_template) do
         local content = assert(io.open(templateName,"r")):read("*a")
-        assert(io.open(PKGDIR.."/"..t.name .. i ..".template", "w")):write(content)
+        assert(io.open(PKGDIR.."/"..nameversion .. i ..".template", "w")):write(content)
       end
     end
   end
@@ -53,13 +54,13 @@ function run(t,arguments,build_dir)
       local dir = build_dir
       -- if absolute path we assume that you know where get the files
       if orig:match("^/") then dir = "" end
-      util.install(t.name.."-dev", dir.."/"..orig, dest)
+      util.install(nameversion.."-dev", dir.."/"..orig, dest)
     end
   end
   -- linking files described on packages table
   if t.symbolic_links then
     for orig, linkpath in pairs(t.symbolic_links) do
-      util.link(t.name, orig, linkpath)
+      util.link(nameversion, orig, linkpath)
     end
   end
 end

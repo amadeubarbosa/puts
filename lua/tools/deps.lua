@@ -2,22 +2,116 @@
 -- see www.luarocks.org -> luarocks-2.0.6/src/luarocks/deps.lua
 -- Thanks to LuaRocks Team for the insights!
 
+require "tools.config"
+
+-- required environment
+os.execute("rm -f /tmp/*.spec")
+os.execute("mkdir -p ".. PKGDIR)
+ARGUMENTS={
+  update=true
+}
+-- end
+
 module("tools.deps", package.seeall)
 
+-- waving puts and luarocks dependencies
+util = require "tools.util"
+
+rock_nameconcat = function(name,version)
+  assert((type(name) == "string") and (type(version)== "string"))
+  return name.."-"..version
+end
+rock_nameconcat2 = function(rock)
+  return rock_nameconcat(rock.name,rock.version)
+end
+fetch_hook = function (specfile)
+  return util.download(util.base_name(specfile),specfile,"/tmp")
+end
+
+build_hook = function (rock,arguments)
+  local nameversion = rock_nameconcat(rock.name,rock.version)
+  if not rock.build then
+    rock.build = { type = "copy" }
+  end
+  -- loading specific build methods
+  local ok, build_type = pcall(require, "tools.build." .. rock.build.type)
+  assert(ok and type(build_type) == "table","[ERROR] failed initializing "..
+                      "build back-end for build type: '".. rock.build.type ..
+                      "' for package: ".. nameversion)
+
+  -- starting specific build methods in a protected way
+  return pcall(build_type.run, rock, arguments, rock.directory)
+end
+
+function load_puts_spec(file) 
+
+  local rockspec = {os=os,require=require,assert=assert,SUNOS64_TECMAKE_FLAGS=""}
+  chunk = loadfile(file)
+  setfenv(chunk,rockspec)
+  chunk()
+--[[
+  print("--- DEBUG rockspec load")
+  table.foreach(rockspec,print)
+  print("--- DEBUG END")
+  io.read()
+  ]]
+  rockspec.name = rockspec.name:lower() or rockspec.package:lower()
+  
+  if rockspec.dependencies then
+    for i = 1, #rockspec.dependencies do
+       local parsed = parse_dep(rockspec.dependencies[i])
+       if not parsed then
+          return nil, "Parse error processing dependency '"..rockspec.dependencies[i].."'"
+       end
+       rockspec.dependencies[i] = parsed
+    end
+  else
+    rockspec.dependencies = {}
+  end
+
+  return rockspec
+end
+
+compile = { 
+run = function (specfile)
+   print("[info] [experimental] fetching and compiling ",specfile)
+
+   local ok, tempfile = fetch_hook(specfile)
+--[[debug]]     print("[debug]",ok,tempfile)
+   local puts_desc = load_puts_spec(tempfile)
+--[[debug]]   print("[debug] descriptor contents:")   
+--[[debug   table.foreach(puts_desc,print)
+]]
+   assert(fulfill_dependencies(puts_desc, compile.run))
+   if puts_desc.url then
+--[[debug]]   print(puts_desc.name, puts_desc.url, puts_desc.directory)     
+     local ok, err = pcall(
+         util.fetch_and_unpack, puts_desc.name.."-"..puts_desc.version, puts_desc.url, puts_desc.directory)
+     if not ok then
+       return false, err
+     end
+   end
+   assert(build_hook(puts_desc,ARGUMENTS))
+   return true
+end
+}
+
+--[[ debug functions
 function trace (event, line)
   local info = debug.getinfo(2)
   local funcname = info.name or ""
   local line = info.currentline or line
   if line > 0 then
     if event == "return" then
-      print("[ return ]", funcname..":"..(line or ""))
+      print("[return]", funcname..":"..(line or ""))
     else
-      print("[ call ]",funcname .. ":" .. (line or ""))
+      print("[call]",funcname .. ":" .. (line or ""))
     end
   end
 end
 
 debug.sethook(trace, "c")
+]]
 
 require "tools.config"
 local config = {
@@ -32,8 +126,30 @@ MANIFEST
 SPECS_DIR
 ]]
 
-SPEC_SERVERS = {"file:///tmp/server"}
+SPEC_SERVERS = {"file:///Users/amadeu/Work/Tecgraf/Openbus/puts-server"}
 SPECS_DIR = "/tmp"
+
+local manif_core = {}
+function manif_core.get_versions(name)
+  if not (MANIFEST.repository and name and MANIFEST.repository[name]) then
+    return nil
+  end
+
+  local ks = {}
+  for k,_ in pairs(MANIFEST.repository[name]) do
+     table.insert(ks, k)
+  end
+  return ks
+end
+
+function manif_core.manifest_loader(path, url)
+  local manifest = {}
+  local loader = loadfile(path)
+  assert(loader)
+  setfenv(loader,manifest)
+  loader()
+  return manifest
+end
 
 local path = {}
 path.path = function (...)
@@ -58,9 +174,9 @@ path.make_url = function(pathname, name, version, arch)
 
    local filename = name.."-"..version
    if arch == "installed" then
-      filename = path.path(name, version, filename..".rockspec")
-   elseif arch == "rockspec" then
-      filename = filename..".rockspec"
+      filename = path.path(name, version, filename..".spec")
+   elseif arch == "spec" then
+      filename = filename..".spec"
    else
       filename = filename.."."..arch..".rock"
    end
@@ -70,7 +186,7 @@ path.rockspec_file = function(name, version, repo)
    assert(type(name) == "string")
    assert(type(version) == "string")
    repo = repo or SPECS_DIR
-   return path.path(repo, name, version, name.."-"..version..".rockspec")
+   return path.path(repo, name, version, name.."-"..version..".spec")
 end
 
 local function split_url(url)
@@ -111,35 +227,35 @@ local function pick_latest_version(name, versions)
    if items then
       local pick = 1
       for i, item in ipairs(items) do
-         if (item.arch == 'src' and items[pick].arch == 'rockspec')
-         or (item.arch ~= 'src' and item.arch ~= 'rockspec') then
+         if (item.arch == 'src' and items[pick].arch == 'spec')
+         or (item.arch ~= 'src' and item.arch ~= 'spec') then
             pick = i
          end
       end
-      return path.make_url(items[pick].repo, name, version, items[pick].arch)
+      return path.make_url(items[pick].repo, name, version, items[pick].arch), name, version
    end
    return nil
 end
 
---[[
 local function load_manifest(repo_url)
    assert(type(repo_url) == "string")
 
-   local protocol, pathname = dir.split_url(repo_url)
+   local protocol, pathname = split_url(repo_url)
    if protocol == "file" then
-      pathname = dir.path(pathname, "manifest")
-   else
-      local url = dir.path(repo_url, "manifest")
+      pathname = path.path(pathname, "manifest")
+   else -- FIXME: NOT TESTED
+      local url = path.path(repo_url, "manifest")
       local name = repo_url:gsub("[/:]","_")
-      local file, err, errcode = fetch.fetch_url_at_temp_dir(url, "luarocks-manifest-"..name)
+      print("[debug] load_manifest ",name,url)
+      local ok, file = util.download(name,url, "/tmp")
       if not file then
-         return nil, "Failed fetching manifest for "..repo_url, errcode
+         return nil, "Failed fetching manifest for "..repo_url
       end
       pathname = file
    end
+   print("[debug] load_manifest ",pathname, repo_url)
    return manif_core.manifest_loader(pathname, repo_url)
 end
-]]
 
 local function store_result(results, name, version, arch, repo)
    assert(type(results) == "table")
@@ -152,7 +268,9 @@ local function store_result(results, name, version, arch, repo)
    if not results[name][version] then results[name][version] = {} end
    table.insert(results[name][version], {
       arch = arch,
-      repo = repo
+      repo = repo,
+      name = name,
+      version = version,
    })
 end
 
@@ -184,7 +302,7 @@ local function query_arch_as_table(query)
       local accept = {}
       accept["src"] = true
       accept["all"] = true
-      accept["rockspec"] = true
+      accept["spec"] = true
       accept["installed"] = true
       accept[TEC_UNAME] = true
       query.arch = accept
@@ -203,7 +321,7 @@ local function manifest_search(results, repo, query)
    assert(type(query) == "table")
    
    query_arch_as_table(query)
-   local manifest, err = MANIFEST, nil -- load_manifest(repo) --FIXME
+   local manifest, err = load_manifest(repo)
    --TODO: parei aqui
    if not manifest then
       return nil, "Failed loading manifest: "..err
@@ -218,7 +336,8 @@ local function manifest_search(results, repo, query)
    return true
 end
 
-local function search_repos(query)
+local search = {}
+function search.search_repos(query)
    assert(type(query) == "table")
 
    local results = {}
@@ -235,21 +354,19 @@ local function search_repos(query)
    return results
 end
 
-local search = {}
 function search.find_suitable_rock(query)
    assert(type(query) == "table")
    
-   local results, err = search_repos(query)
+   local results, err = search.search_repos(query)
    if not results then
       return nil, err
    end
    local first = next(results)
    if not first then
       return nil, "No results matching query were found."
-   elseif not next(results, first) then
-      return pick_latest_version(query.name, results[first])
    else
-      return results
+     assert(not next(results, first),"[BUG] I don't understand when results could have many keys")
+     return pick_latest_version(query.name, results[first])
    end
 end
 
@@ -263,11 +380,46 @@ MY_PLATFORMS = { config.TEC_UNAME , config.TEC_SYSNAME }
 
 MANIFEST = {
   repository = {
-    ["lua"] = {
+    lua = {
       ["5.1"] = { --[[what]] },
     },
-    ["openldap"] = {
-      ["2.4.13"] = { --[[what]] },
+--[[    luaidl={
+      ['0.8.9beta-1']={
+        {
+          dependencies={lua='5.1'},
+          arch='not installed',
+        }
+      }
+    },
+    loop={
+      ['2.3beta-1']={
+        {
+          dependencies={},
+          arch='not installed',
+        }
+      }
+    },
+    oil={
+      ['0.4beta-1']={
+        {
+          dependencies={loop='2.3beta-1', luasocket='2.0.2-3', luaidl='0.8.9beta-1'},
+          arch='installed',
+          
+        }
+      }
+    },
+    luasocket={
+      ['2.0.2-3']={
+        {
+          dependencies={},
+          arch='not installed',
+        }
+      }
+    },    
+]]    ["openldap"] = {
+      ["2.4.13"] = { --[[what]] 
+        
+      },
     }
   }
 }
@@ -292,8 +444,21 @@ local function platform_overrides(pkg)
    
   for _, platform in ipairs(MY_PLATFORMS) do
     for _, context in ipairs(overrides) do
-      if pkg[context][platform] then
-        pkg[context] = pkg[context][platform]
+      if pkg[context] and pkg[context][platform] then
+        -- ORIGINAL DO LUAROCKS: pkg[context] = pkg[context][platform]
+        -- hack 
+        if type(pkg[context][platform]) == "table" then
+          -- overriding all platform specific <key,values> information
+          for k,v in pairs(pkg[context][platform]) do
+            pkg[context][k] = v
+          end
+          -- overriding all numeric entries
+          for i,v in ipairs(pkg[context][platform]) do
+            -- respecting previous values
+            pkg[context][i] = v
+          end
+        end
+        -- fim do hack
       end
      end
   end
@@ -519,22 +684,11 @@ function match_constraints(version, constraints)
    return ok
 end
 
+
 local function match_dep(dep, blacklist)
    assert(type(dep) == "table")
 
-         local function get_versions(name)
-           if not (MANIFEST.repository and name and MANIFEST.repository[name]) then
-             return nil
-           end
-     
-           local ks = {}
-           for k,_ in pairs(MANIFEST.repository[name]) do
-              table.insert(ks, k)
-           end
-           return ks
-         end
-
-   local versions = get_versions(dep.name)
+   local versions = manif_core.get_versions(dep.name)
 
    if not versions then
       return nil
@@ -586,6 +740,7 @@ function match_deps(rockspec, blacklist)
          end
       end
    end
+
    return matched, missing, no_upgrade
 end
 
@@ -597,7 +752,7 @@ local function values_set(tbl)
    return set
 end
 
-function fulfill_dependencies(rockspec)
+function fulfill_dependencies(rockspec, hook)
 
 --   local search = require("luarocks.search")
 --   local install = require("luarocks.install")
@@ -657,26 +812,13 @@ function fulfill_dependencies(rockspec)
       for _, dep in pairs(missing) do
          -- Double-check in case dependency was filled during recursion.
          if not match_dep(dep) then
-            local rock = search.find_suitable_rock(dep)
+            local specfile = search.find_suitable_rock(dep)
             
-
-if rock then
-            print("---- amadeu")
-            table.foreach(rock,print)
-            print("---- uedama")
-            io.read()
-end
-            return true
---[[
-            --TODO: parei aqui
-            if not rock then
-               return nil, "Could not find a rock to satisfy dependency: "..show_dep(dep)
+            if not specfile then
+              print("[info] rock not found",show_dep(dep))
+            else
+              assert(hook(specfile))
             end
-            local ok, err, errcode = install.run(rock)
-            if not ok then
-               return nil, "Failed installing dependency: "..rock.." - "..err, errcode
-            end
-]]
          end
       end
    end
@@ -728,35 +870,10 @@ end
 
 -- main
 --local rockspec, err, errcode = fetch.load_rockspec(rockspec_file)
+-- input
+specfile = (arg[1] and "/Users/amadeu/Work/Tecgraf/Openbus/puts-server/"..arg[1]) 
+            or "/Users/amadeu/Work/Tecgraf/Openbus/puts.specs"
 
-local function load_puts_spec(file) 
-
-  local rockspec = {}
-  chunk = loadfile(file)
-  setfenv(chunk,rockspec)
-  chunk()
-
-  print("--- debug rockspec load")
-  table.foreach(rockspec,print)
-  io.read()
-  print("--- debug end")
-  rockspec.name = rockspec.name:lower() or rockspec.package:lower()
-  
-  if rockspec.dependencies then
-    for i = 1, #rockspec.dependencies do
-       local parsed = parse_dep(rockspec.dependencies[i])
-       if not parsed then
-          return nil, "Parse error processing dependency '"..rockspec.dependencies[i].."'"
-       end
-       rockspec.dependencies[i] = parsed
-    end
-  else
-    rockspec.dependencies = {}
-  end
-
-  return rockspec
-end
-
-local rockspec, err = load_puts_spec("/tmp/puts.specs")
-print(rockspec, err, "load_puts_spec")
-print(fulfill_dependencies(rockspec), "fulfill_dependencies")
+print("[info] [experimental] fetching and compiling ",specfile)
+-- building the initial specfile
+compile.run(specfile)

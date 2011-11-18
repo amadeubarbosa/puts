@@ -39,12 +39,13 @@ end
 
 -- Function that implements the autotools building
 function run(t,arguments)
-  print("[ INFO ] Verifying if needs to compile via autotools: "..t.name)
+  local nameversion = util.nameversion(t)
+  print("[ INFO ] Verifying if needs to compile via autotools: "..nameversion)
   local plat = TEC_UNAME
   if not t.build[plat] then 
     plat = TEC_SYSNAME
     if not (t.build[plat]) then
-      print("[ WARNING ] ".. t.name..[[ has no build command provided for ']]..TEC_UNAME..[[' platforms. Skipping.]])
+      print("[ WARNING ] ".. nameversion..[[ has no build command provided for ']]..TEC_UNAME..[[' platforms. Skipping.]])
       return nil
     end
   end
@@ -56,7 +57,7 @@ function run(t,arguments)
       -- verifying if all build dependencies are ok, if don't we'll abort
       check_external_deps(t)
 
-      local build_dir = PRODAPP .."/".. t.name
+      local build_dir = PRODAPP .."/".. nameversion
 
       -- running the build and install command
       local build_cmd = t.build[plat]
@@ -69,10 +70,10 @@ function run(t,arguments)
       -- prepend the command to enter on software directory
       build_cmd = "cd ".. build_dir .."; ".. build_cmd
 
-      print("[ INFO ] Compiling package via autotools: "..t.name)
+      print("[ INFO ] Compiling package via autotools: "..nameversion)
       local ret = os.execute(build_cmd)
       -- assert ensure that we could continue
-      assert(ret == 0,"ERROR compiling the software ".. t.name .."")
+      assert(ret == 0,"ERROR compiling the software ".. nameversion .."")
 
       -- re-using copy method to parse install_files, conf_files, dev_files
       copy.run(t,arguments,build_dir)

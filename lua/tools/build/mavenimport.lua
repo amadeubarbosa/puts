@@ -6,7 +6,8 @@ local maven = require "tools.build.maven"
 module("tools.build.mavenimport", package.seeall)
 
 function run(t, arguments)
-  print("[ INFO ] Importing package via mavenimport: ".. t.name)
+  local nameversion = util.nameversion(t)
+  print("[ INFO ] Importing package via mavenimport: ".. nameversion)
   local build_dir = t.build.src
 
   -- Making command
@@ -36,7 +37,7 @@ function run(t, arguments)
       maven_args .. repoinstall
     local ret = os.execute(build_cmd)
     -- assert ensure that we could continue
-    assert(ret == 0,"ERROR compiling the software ".. t.name ..
+    assert(ret == 0,"ERROR compiling the software ".. nameversion ..
       " when it tried to install the file: ".. file .. 
       " in the maven repository.")
   end
