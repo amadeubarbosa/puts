@@ -21,7 +21,16 @@
 
 -- Tecmake compatibility variables
 -- You could (in a very special case) redefine this to work with the compile.lua
-id = require "tools.platformid"
+
+local id = require "tools.platformid"
+
+module("tools.config", package.seeall)
+
+SPEC_SERVERS = {
+"http://www.tecgraf.puc-rio.br/ftp_pub/openbus/repository/specs",
+--  "file:///Users/amadeu/Work/Tecgraf/SVN/openbus/puts/trunk/files/converted",
+}
+
 TEC_UNAME = TEC_UNAME or os.getenv("TEC_UNAME") or id.TEC_UNAME
 assert(TEC_UNAME, "ERROR: TEC_UNAME env var not defined")
 TEC_SYSNAME = TEC_SYSNAME or os.getenv("TEC_SYSNAME") or id.TEC_SYSNAME
@@ -84,5 +93,3 @@ function changePlatform(arch)
   local installlib = INSTALL.LIB:gsub(TEC_UNAME,arch)
   return pkgdir, installbin, installlib
 end
-
--- print("[ INFO ] Default configuration loaded.")

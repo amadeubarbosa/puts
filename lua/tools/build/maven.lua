@@ -1,14 +1,15 @@
 -- Basic variables (global vars are in upper case)
-require "tools.config"
+local config = require "tools.config"
 local copy = require "tools.build.copy"
-
+local util = require "tools.util"
+local path = require "tools.path"
 
 module("tools.build.maven", package.seeall)
 
 function run(t, arguments)
   local nameversion = util.nameversion(t)
-  print("[ INFO ] Compiling package via maven: ".. nameversion)
-  local build_dir = t.build.src
+  util.log.info("Building",nameversion,"using maven driver.")
+  local build_dir = t.build.src or path.pathname(config.PRODAPP,util.nameversion(t))
 
   -- Making command
   local maven_cmd =  "mvn "
@@ -27,8 +28,8 @@ function run(t, arguments)
 
   local ret = os.execute(build_cmd)
   -- assert ensure that we could continue
-  assert(ret == 0,"ERROR compiling the software ".. nameversion .."")
-
+  assert(ret == 0,"ERROR compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
+  
   -- re-using copy method to parse install_files, conf_files, dev_files
   copyDependence(t,arguments,build_dir)
   copy.run(t,arguments,build_dir)

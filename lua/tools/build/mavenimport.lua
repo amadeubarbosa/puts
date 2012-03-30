@@ -1,14 +1,16 @@
 -- Basic variables (global vars are in upper case)
-require "tools.config"
+local config = require "tools.config"
 local copy = require "tools.build.copy"
 local maven = require "tools.build.maven"
+local util = require "tools.util"
+local path = require "tools.path"
 
 module("tools.build.mavenimport", package.seeall)
 
 function run(t, arguments)
   local nameversion = util.nameversion(t)
-  print("[ INFO ] Importing package via mavenimport: ".. nameversion)
-  local build_dir = t.build.src
+  util.log.info("Building",nameversion,"using mavenimport driver.")
+  local build_dir = t.build.src or path.pathname(config.PRODAPP,util.nameversion(t))
 
   -- Making command
   local maven_cmd =  "mvn "

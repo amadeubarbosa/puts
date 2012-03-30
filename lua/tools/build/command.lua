@@ -1,18 +1,20 @@
 -- Basic variables (global vars are in upper case)
-require "tools.config"
+local config = require "tools.config"
+local util = require "tools.util"
 local copy = require "tools.build.copy"
+local path = require "tools.path"
 
 module("tools.build.command", package.seeall)
 
 function run(t, arguments)
   local nameversion = util.nameversion(t)
   
-  print("[ INFO ] Compiling package via command: ".. nameversion)
-  local build_dir = t.build.src
-  local build_table = t.build[TEC_UNAME] or t.build[TEC_SYSNAME] or t.build
+  util.log.info("Building",nameversion,"using command driver.")
+  local build_dir = t.build.src or path.pathname(config.PRODAPP,util.nameversion(t))
+  local build_table = t.build[config.TEC_UNAME] or t.build[config.TEC_SYSNAME] or t.build
 
   if not build_table.cmd then
-    print("[ WARNING ] ".. nameversion..[[ has no build command provided for ']]..TEC_UNAME..[[' platforms. Skipping.]])
+    util.log.warning(nameversion..[[ has no build command provided for ']]..config.TEC_UNAME..[[' platforms. Skipping.]])
     return nil
   end
 
@@ -34,7 +36,7 @@ function run(t, arguments)
   build_cmd = "cd " .. build_dir .. " && " .. command
 
   local ret = os.execute(build_cmd)
-  assert(ret == 0,"ERROR compiling the software ".. nameversion .."")
+  assert(ret == 0,"ERROR compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
 
   -- re-using copy method to parse install_files, conf_files, dev_files
   copy.run(t,arguments,build_dir)

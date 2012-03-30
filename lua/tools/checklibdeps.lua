@@ -4,7 +4,7 @@ local package_cpath = package.cpath
 
 package.path = "?.lua;../?.lua;" .. package.path
 
-require "tools.config"
+local config = require "tools.config"
 local string = require "tools.split"
 local platforms = require "tools.platforms"
 local util = require "tools.util"
@@ -16,7 +16,7 @@ local checker = {}
 -- Checks libraries dependencies in an OpenBus installation
 function checker:libraries_deps(openbus_home)
   assert(type(openbus_home) == "string", "ERROR: Check libraries function receives a nil parameter.")
-  local myplat = platforms[TEC_SYSNAME]
+  local myplat = platforms[config.TEC_SYSNAME]
   assert(type(myplat.dylibext) == "string", "ERROR: Missing dynamic libraries extension information on 'platforms'.")
   
   local function rollback()
@@ -31,9 +31,9 @@ function checker:libraries_deps(openbus_home)
     openbus_home.."/lib",
     openbus_home.."/bin",
     -- keeping support to previous hierarchy
-    openbus_home.."/libpath/"..TEC_UNAME,
-    openbus_home.."/bin/"..TEC_UNAME,
-    openbus_home.."/core/bin/"..TEC_UNAME,
+    openbus_home.."/libpath/"..config.TEC_UNAME,
+    openbus_home.."/bin/"..config.TEC_UNAME,
+    openbus_home.."/core/bin/"..config.TEC_UNAME,
   }
   
   print(msg.."assuming that libraries has '"..myplat.dylibext.."' extension.")
@@ -50,8 +50,8 @@ function checker:libraries_deps(openbus_home)
     local files = {myplat.exec(myplat.cmd.ls..path..myplat.pipe_stderr):split("[^%s]+")}
     if #files == 0 then
       -- TODO:
-      -- quando o pacote nÃo tem bin/TEC_UNAME ou
-      -- libpath/TEC_UNAME seria gerado um erro, mas pode
+      -- quando o pacote nÃo tem bin/${TEC_UNAME} ou
+      -- libpath/${TEC_UNAME} seria gerado um erro, mas pode
       -- ser um pacote apenas com outros artefatos
       -- [questao] serÃ¡ que preciso mesmo fazer esses checks?
       --
@@ -115,7 +115,7 @@ function checker:start(openbus_home)
   if not ok then
     for i,t in ipairs(misses) do
       if #t.miss > 0 then
-        print("   ERROR: "..t.name.." depends on:")
+        print("   ERROR: "..util.nameversion(t).." depends on:")
         for _,libname in ipairs(t.miss) do print(libname) end
       end
      end

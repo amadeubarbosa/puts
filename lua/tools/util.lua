@@ -1,16 +1,26 @@
-require "tools.config"
+local config = require "tools.config"
 
 -- Local scope
 local string = require "tools.split"
 local platforms = require "tools.platforms"
-local myplat = platforms[TEC_SYSNAME]
+local myplat = platforms[config.TEC_SYSNAME]
 local default_osexecute = os.execute
 local io = io
 
 module("tools.util", package.seeall)
 
+function split_nameversion(nameversion)
+  local name, version = nameversion:match("(.-)%-(%d+.*)$")
+  if not name and not version then
+    name = nameversion:match("[%w%-%_]+") -- second by pass
+    return name
+  end
+  return name, version
+end
+
 function nameversion(spec)
-  return spec.name .. ((spec.version and "-"..spec.version) or "")
+  assert(spec.name)
+  return spec.name:lower() .. ((spec.version and "-"..spec.version) or "")
 end
 -- Overloading the os.execute to dummy verbose
 function verbose(level)
@@ -18,7 +28,7 @@ function verbose(level)
     os.execute = default_osexecute
   elseif level == 1 then
     os.execute = function(...)
-      print("[ VERBOSE ] ",...)
+      log.debug(...)
       return default_osexecute(...)
     end
   end
@@ -28,15 +38,15 @@ end
 -- look: debug.getinfo ([thread,] function [, what])
 
 -- Temporary table to register all install calls for a package
-local log = { --[[ { ['name'] = { files = {}, links = {} } } ]] }
+local cache = { --[[ { ['name'] = { files = {}, links = {} } } ]] }
 
--- Install method registering what is installing on file 'BASEDIR/pkg_name.files'
+-- Install method registering what is installing on file 'config.BASEDIR/pkg_name.files'
 function install(package, orig, dest)
   assert(type(package) == "string")
-  -- ensure open the log file if not already
-  if not log[package] or not log[package].files then
-    if not log[package] then log[package] = { } end
-    log[package].files = assert(io.open(PKGDIR.."/"..package..".files", "w"),package)
+  -- ensure open the cache file if not already
+  if not cache[package] or not cache[package].files then
+    if not cache[package] then cache[package] = { } end
+    cache[package].files = assert(io.open(config.PKGDIR.."/"..package..".files", "w"))
   end
 
   -- parsing possible regular expression of orig specification and listing
@@ -45,32 +55,32 @@ function install(package, orig, dest)
   local next = files:gmatch("[^\n]+")
   local line = next()
   while (line) do
-    -- ... register your dest/basename to logfile
+    -- ... register your dest/basename to cachefile
     local dir, name = line:gmatch("(.*%/+)(.+)")()
     name = name or line
-    log[package].files:write(dest.."/"..name.."\n")
+    cache[package].files:write(dest.."/"..name.."\n")
     -- ... and real install of files on destination
-    os.execute(myplat.cmd.mkdir .. INSTALL.TOP.. "/".. dest)
-    os.execute(myplat.cmd.install .." "..orig.." "..INSTALL.TOP.."/"..dest)
+    os.execute(myplat.cmd.mkdir .. config.INSTALL.TOP.. "/".. dest)
+    os.execute(myplat.cmd.install .." "..orig.." "..config.INSTALL.TOP.."/"..dest)
     line = next()
   end
 
 end
 
--- Link method registering what is linking on file 'BASEDIR/pkg_name.links'
+-- Link method registering what is linking on file 'config.BASEDIR/pkg_name.links'
 function link(package, orig, linkpath)
   assert(type(package) == "string")
-  -- ensure open the log file if not already
-  if not log[package] or not log[package].links then
-    if not log[package] then log[package] = { } end
-    log[package].links = assert(io.open(PKGDIR.."/"..package..".links", "w"),package)
+  -- ensure open the cache file if not already
+  if not cache[package] or not cache[package].links then
+    if not cache[package] then cache[package] = { } end
+    cache[package].links = assert(io.open(config.PKGDIR.."/"..package..".links", "w"))
   end
-  log[package].links:write(linkpath.."\n")
+  cache[package].links:write(linkpath.."\n")
   local dir,name = linkpath:gmatch("(.*%/+)(.+)")()
   dir = dir or "."
-  os.execute("cd "..INSTALL.TOP .."; ".. myplat.cmd.mkdir .. dir)
+  os.execute("cd "..config.INSTALL.TOP .."; ".. myplat.cmd.mkdir .. dir)
   -- ... and real link to destination
-  os.execute("ln -sf "..orig.." "..INSTALL.TOP.."/"..linkpath)
+  os.execute("ln -sf "..orig.." "..config.INSTALL.TOP.."/"..linkpath)
 end
 
 ---
@@ -151,17 +161,17 @@ function download(pkgname, from, targetdir)
     -- location where put the downloaded file
     -- ATTENTION: ignoring the targetdir to use a common directory to put the
     -- downloaded files
-    targetdir = DOWNLOADDIR
+    targetdir = targetdir or config.DOWNLOADDIR
     assert(os.execute(myplat.cmd.mkdir .. targetdir) == 0, "ERROR: Cannot create the directory '".. targetdir .."' to download the package into it.")
     if exists_pkgfile(targetdir, pkgname) then
       filepath = targetdir.."/"..base_name(url)
-      print("[ INFO ] Skipping the download of the "..pkgname.." because is already downloaded. If you need update it so you must to remove the file '"..filepath.."'")
+      log.info("Skipping the download of the "..pkgname.." because is already downloaded. If you need update it so you must to remove the file '"..filepath.."'")
       return true, filepath
     end
     handler = require "tools.fetch.http"
   elseif proto:match("^svn") then
     -- location as the checkout directory
-    targetdir = targetdir or PRODAPP .."/".. pkgname
+    targetdir = targetdir or  config.PRODAPP.."/".. pkgname
     handler = require "tools.fetch.svn"
     -- https or http isn't a valid tunnel in subversion syntax
     -- we use the "svn+https" to represent "svn" protocol using an "https" url
@@ -177,7 +187,7 @@ function download(pkgname, from, targetdir)
       error("ERROR: Unknown protocol '"..proto.."'. The URL was '"..from.."'.")
     end
   end
-  print("[ INFO ] Downloading "..pkgname.." via the protocol "..proto)
+  log.debug("Downloading ",pkgname,"using the protocol",proto)
   return handler.run(targetdir,from)
 end
 
@@ -201,33 +211,36 @@ function fetch_and_unpack(package,from,targetdir)
          type(from) == "string")
   local ok, filepath = download(package,from,targetdir)
   if not targetdir then
-    targetdir = PRODAPP .."/".. package
+    targetdir = config.PRODAPP .."/".. package
   end
   assert(ok, "ERROR: Unable to download the package. You must download this package manually from '"..from.."' and extract it in the '"..targetdir.."' directory.")
   -- it only extracts the source once
   local exists = os.execute("test -d ".. targetdir)
   if exists ~= 0 then
-    -- it will extract inside the PRODAPP directory using the filename
-    assert(unpack_archive(PRODAPP,filepath), "ERROR: Unable to extract the package '".. filepath.."' in the directory '"..PRODAPP.."'.")
+    -- it will extract inside the config.PRODAPP directory using the filename
+    assert(unpack_archive(config.PRODAPP,filepath), "ERROR: Unable to extract the package '".. filepath.."' in the directory '".. config.PRODAPP .."'.")
   end
   return true
 end
 
--- Closing install log files
-function close_log()
-  for _,p in ipairs(log) do
+-- Closing install cache files
+function close_cache()
+  for _,p in ipairs(cache) do
     if p then p:close() end
   end
 end
 
-patt="%-?%-?(%w+)(=?)(.*)"
+-- this pattern only matches identifiers that could be used as a Lua variable identifier
+local patt="%-?%-?([%w%_]+)(=?)(.*)"
+
 -- Parsing arguments and returns a 'table[option]=value'
 function parse_args(arg, usage_msg, allowempty)
   assert(type(arg)=="table","ERROR: Missing arguments! This program should be loaded from console.")
+  assert(usage_msg)
   local arguments = {}
   -- concatenates with the custom usage_msg
   usage_msg=[[
- Usage: ]]..arg[0]..[[ OPTIONS
+ Usage: ]]..tostring(arg[0])..[[ OPTIONS
  Valid OPTIONS:
 ]] ..usage_msg
 
@@ -241,7 +254,11 @@ function parse_args(arg, usage_msg, allowempty)
     end
     if opt and value then
       if arguments[opt] then
-        arguments[opt] = arguments[opt].." "..value
+        if #arguments[opt] == 0 then
+          arguments[opt] = value
+        else
+          arguments[opt] = arguments[opt].." "..value
+        end
       else
         arguments[opt] = value
       end
@@ -253,14 +270,13 @@ end
 
 -- Serializing table to file (original: http://lua.org/pil)
 function serialize_table(filename,t,name)
-
   local f = assert(io.open(filename,"w"))
   -- if we got a named table
   if type(name) == "string" then
     f:write(name.." = ")
   end
 
-  local function serialize(o)
+  local function serialize(o,firsttime)
     if type(o) == "number" then
       f:write(o)
     elseif type(o) == "boolean" then
@@ -268,19 +284,27 @@ function serialize_table(filename,t,name)
     elseif type(o) == "string" then
       f:write(string.format("%q",o))
     elseif type(o) == "table" then
-      f:write("{\n")
-      for k,v in pairs(o) do
-        if type(k) == "number" then
-          f:write(" ["..tostring(k).."] = ")
-        elseif k:match("%p") then
-          f:write(" [\""..tostring(k).."\"] = ")
-        else
+      if firsttime then
+        for k,v in pairs(o) do
+          assert(type(k)=="string")
           f:write(" "..k.." = ")
+          serialize(v)
         end
-        serialize(v)
-        f:write(",\n")
+      else
+        f:write("{\n")
+        for k,v in pairs(o) do
+          if type(k) == "number" then
+            f:write(" ["..tostring(k).."] = ")
+          elseif k:match("%p") then
+            f:write(" [\""..tostring(k).."\"] = ")
+          else
+            f:write(" "..k.." = ")
+          end
+          serialize(v)
+          f:write(",\n")
+        end
+        f:write("}\n")
       end
-      f:write("}\n")
     else
       f:close()
       os.remove(filename)
@@ -288,7 +312,99 @@ function serialize_table(filename,t,name)
     end
   end
 
-  serialize(t)
+  if name then
+    serialize(t)
+  else
+    serialize(t,true)
+  end
   f:close()
   return true
 end
+
+function deep_copy(table_orig, table_new)
+  table_new = table_new or {}
+  if type(table_orig) ~= "table" then
+    return table_orig
+  end
+  
+  local function copy(index, value)
+    if type(value) == "table" then
+      table_new[index] = deep_copy(table_orig[index])
+    else
+      assert(type(value) ~= "userdata", "userdata types not supported in util.deep_copy function")
+      table_new[index] = value
+    end
+  end
+  -- key/value pairs
+  for key,value in pairs(table_orig) do
+    copy(key,value)
+  end
+  -- numeric values
+  for index,value in ipairs(table_orig) do
+    copy(index,value)
+  end
+  
+  return table_new
+end
+
+--------------------------------------------------
+------------------------------- logging facilities
+log = {
+  -- levels configuration by default
+  _levels = {
+    debug = false,
+    info = true,
+    warning = true,
+    error = true,
+  },
+  _tags = {
+   info   ="[INFO   ] ",
+   debug  ="[DEBUG  ] ",
+   error  ="[ERROR  ] ",
+   warning="[WARNING] ",
+  },
+  _handlers = {
+    info = io.stdout,
+    debug = io.stdout,
+    warning = io.stdout,
+    error = io.stderr,
+  }
+}
+for level,_ in pairs(log._levels) do
+  log[level]=function(...)
+    if log._levels[level] then
+      log._handlers[level]:write(log._tags[level]..table.concat({...}," ").."\n")
+      log._handlers[level]:flush()
+    end
+  end
+end
+--------------------------------------------------
+
+--------------------------------------------------
+--------------------------- fileysystem facilities
+fs = {}
+function fs.is_dir(at)
+   return (at and (os.execute(myplat.cmd.test.." -d "..at) == 0))
+end
+
+function fs.list_dir(at)
+   assert(type(at) == "string" or not at)
+   if not at then
+      at, count = myplat.exec(myplat.cmd.pwd):gsub("\n","")
+      if count ~= 1 then
+        at = nil
+      end
+   end
+
+   if not fs.is_dir(at) then
+      return {}
+   end
+   local result = {}
+   local pipe = io.popen("cd "..at.." && ".. myplat.cmd.ls)
+   for file in pipe:lines() do
+      table.insert(result, file)
+   end
+   pipe:close()
+   return result
+end
+--------------------------------------------------

@@ -1,7 +1,7 @@
 #!/usr/bin/env lua5.1
 package.path = "?.lua;../?.lua;" .. package.path
 
-require "tools.config"
+local config = require "tools.config"
 local util = require "tools.util"
 local platforms = require "tools.platforms"
 local hook = require "tools.hook"
@@ -86,19 +86,19 @@ function run()
         version = _str
       end
       assert(version and profile and arch, "ERROR: "..msgInvalidFilename)
-      local myplat = platforms[TEC_SYSNAME]
+      local myplat = platforms[config.TEC_SYSNAME]
       -- Starting the extraction of the package
-      print(INSTALL, "Unpacking the package in a temporary dir: "..TMPDIR)
-      assert(os.execute(myplat.cmd.mkdir .. TMPDIR) == 0)
+      print(INSTALL, "Unpacking the package in a temporary dir: "..config.TMPDIR)
+      assert(os.execute(myplat.cmd.mkdir .. config.TMPDIR) == 0)
 
       -- Trying extract the metadata.tar.gz from package first!
       print(INSTALL, "Extracting ...")
       local metadataDirname = "metadata-"..version.."-"..profile
       local metadataFilename = metadataDirname..".tar.gz"
       local tempfile = "tempinstall.tar.gz"
-      -- copy the original package to TMPDIR
-      extract_cmd = myplat.cmd.install..arguments.package.." ".. TMPDIR .."/".. tempfile ..";"..
-                    "cd "..TMPDIR.." ; gzip -c -d "..tempfile.." | ".. -- gunzipping
+      -- copy the original package to config.TMPDIR
+      extract_cmd = myplat.cmd.install..arguments.package.." ".. config.TMPDIR .."/".. tempfile ..";"..
+                    "cd "..config.TMPDIR.." ; gzip -c -d "..tempfile.." | ".. -- gunzipping
                     myplat.cmd.tar .."-xf - "..metadataFilename.." && ".. -- expanding the metadata.tar.gz file
                     "gzip -c -d "..metadataFilename.." |"..               -- gunzipping the metadata.tar.gz file
                     myplat.cmd.tar .."-xf -"                              -- expanding the metadata contents
@@ -108,40 +108,40 @@ function run()
       -- Unpacking the .tar.gz package as the second step
       -- Grant to user's configure_action functions that could operate over an
       -- instalation tree and at the end all files will be copied to real path
-      assert(os.execute("cd "..TMPDIR.."; gzip -c -d "..tempfile.." | ".. myplat.cmd.tar .."-xf -") == 0)
-      assert(os.remove(TMPDIR.."/"..tempfile))
+      assert(os.execute("cd "..config.TMPDIR.."; gzip -c -d "..tempfile.." | ".. myplat.cmd.tar .."-xf -") == 0)
+      assert(os.remove(config.TMPDIR.."/"..tempfile))
       print(INSTALL, "Unpack finished.")
 
       -- Verifying the libraries consistency for the current platform
       print(INSTALL, "Searching for missing dependencies...")
       local libchecker = require "tools.checklibdeps"
-      local ok, msg = libchecker:start(TMPDIR)
+      local ok, msg = libchecker:start(config.TMPDIR)
       if not ok then error(msg.."\n '"..arguments.package.."'"..
                      " has missing dependencies! Please contact the administrator!")
       else print(INSTALL,msg) end
 
       print(CONFIG, "Configuring the installation using package metadata...")
       -- Configure main step, using all .template contained in package metadata
-      local files = myplat.exec(myplat.cmd.ls .. TMPDIR .."/".. metadataDirname)
+      local files = myplat.exec(myplat.cmd.ls .. config.TMPDIR .."/".. metadataDirname)
       local nexttmpl = files:gmatch("%S+.template")
       local tmplname, template
       tmplname = nexttmpl()
       -- For each template ...
       while type(tmplname) == "string" do
         -- parse the template
-        local filename = TMPDIR.."/"..metadataDirname.."/"..tmplname
+        local filename = config.TMPDIR.."/"..metadataDirname.."/"..tmplname
         config = hook.hookTemplate(filename,config)
         -- go to next template!
         tmplname = nexttmpl()
       end
       -- Removing metadata files to clean the temporary tree
       -- Maybe it's important for futher actions like uninstall or pos-install checks
-      assert(os.execute(myplat.cmd.rm .. TMPDIR .."/".. metadataDirname) == 0)
+      assert(os.execute(myplat.cmd.rm .. config.TMPDIR .."/".. metadataDirname) == 0)
       -- Moving the temporary tree to real tree (given by user)
       assert(os.execute(myplat.cmd.mkdir .. arguments.path) == 0,
              "ERROR: The installation path is invalid or you has no write permission there!")
-      assert(os.execute(myplat.cmd.install .. TMPDIR .."/* ".. arguments.path) == 0)
-      assert(os.execute(myplat.cmd.rm .. TMPDIR) == 0)
+      assert(os.execute(myplat.cmd.install .. config.TMPDIR .."/* ".. arguments.path) == 0)
+      assert(os.execute(myplat.cmd.rm .. config.TMPDIR) == 0)
     else
       print(INSTALL,"Do nothing. ".. msgInvalidFilename)
       print(INSTALL,"Please check --help for other instructions.")

@@ -48,11 +48,11 @@ if arg[1] then
 end
 -- When '--config' is used, the reconfigure will contain the filename
 if reconfigure then
-  print("[ CONSOLE ] Overriding the default configuration with: ",reconfigure)
+  print("[CONSOLE] Overriding the default configuration with: ",reconfigure)
   local f,err = loadfile(reconfigure)
   if not f then
-    print("[ WARNING ] The file '"..reconfigure.."' cannot be loaded successfuly ("..err..")!")
-    print("[ WARNING ] Using default configuration.")
+    util.log.warning("The file '"..reconfigure.."' cannot be loaded successfuly ("..err..")!")
+    util.log.warning("Using default configuration.")
   else
     f()
   end
@@ -60,11 +60,11 @@ end
 
 -- Loading default configuration after.
 -- IMPORTANT: It will define just the undefined variables!
-require "tools.config"
+local config = require "tools.config"
 
 if valid_options then
   opt = tostring(opt)
-  print("[ CONSOLE ] Loading the assistant: ".. opt)
+  print("[CONSOLE] Loading the assistant: ".. opt)
   table.remove(arg,1)
   -- fixing the self-name of the script to be loaded
   arg[0] = opt
@@ -74,7 +74,7 @@ if valid_options then
     os.exit(1)
   end
   tools.run()
-  print("[ CONSOLE ] Assistant ".. opt .." finished.")
+  print("[CONSOLE] Assistant ".. opt .." finished.")
   os.exit(0)
 else
   print([[

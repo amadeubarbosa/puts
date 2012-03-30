@@ -1,21 +1,22 @@
-require "tools.config"
+local config = require "tools.config"
 local util = require "tools.util"
+local path = require "tools.path"
 
 -- Local scope
 local string = require "tools.split"
 local platforms = require "tools.platforms"
-local myplat = platforms[TEC_SYSNAME]
+local myplat = platforms[config.TEC_SYSNAME]
 
 module("tools.build.copy", package.seeall)
 
 function run(t,arguments,build_dir)
   local nameversion = util.nameversion(t)
   assert(type(t) == "table")
-  -- we assume a default build_dir pointing to PRODAPP
+  -- we assume a default build_dir pointing to config.PRODAPP
   if not build_dir then
-    build_dir = PRODAPP .."/".. nameversion
+    build_dir = path.pathname(config.PRODAPP,util.nameversion(t))
   end
-  print("[ INFO ] Using source directory '"..build_dir.."' for the package: ".. nameversion)
+  util.log.info("Copying files from the source directory '"..build_dir.."' ...")
 
   -- copying files described on packages table
   if t.install_files then
@@ -40,11 +41,11 @@ function run(t,arguments,build_dir)
   if t.conf_template then
     if arguments.compat then 
       local content = assert(io.open(t.conf_template,"r")):read("*a")
-      assert(io.open(PKGDIR.."/"..nameversion.."1.template","w")):write(content)
+      assert(io.open(config.PKGDIR.."/"..nameversion.."1.template","w")):write(content)
     else
       for i,templateName in ipairs(t.conf_template) do
         local content = assert(io.open(templateName,"r")):read("*a")
-        assert(io.open(PKGDIR.."/"..nameversion .. i ..".template", "w")):write(content)
+        assert(io.open(config.PKGDIR.."/"..nameversion .. i ..".template", "w")):write(content)
       end
     end
   end

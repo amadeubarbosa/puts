@@ -1,20 +1,20 @@
 -- Basic variables (global vars are in upper case)
-require "tools.config"
+local config = require "tools.config"
 local util = require "tools.util"
 local copy = require "tools.build.copy"
 
 -- Local scope
 local string = require "tools.split"
 local platforms = require "tools.platforms"
-local myplat = platforms[TEC_SYSNAME]
+local myplat = platforms[config.TEC_SYSNAME]
 
 module("tools.build.autotools",package.seeall)
 
 -- Ensure tempdirs for bogus ./configure
-os.execute(myplat.cmd.mkdir .. TMPDIR)
-os.execute(myplat.cmd.mkdir .. TMPDIR .."/bin")
-os.execute(myplat.cmd.mkdir .. TMPDIR .."/lib")
-os.execute(myplat.cmd.mkdir .. TMPDIR .."/include")
+os.execute(myplat.cmd.mkdir .. config.TMPDIR)
+os.execute(myplat.cmd.mkdir .. config.TMPDIR .."/bin")
+os.execute(myplat.cmd.mkdir .. config.TMPDIR .."/lib")
+os.execute(myplat.cmd.mkdir .. config.TMPDIR .."/include")
 
 -- Build dependencies check (originaly) to basesoft packages
 function check_external_deps(pkgtable)
@@ -40,12 +40,12 @@ end
 -- Function that implements the autotools building
 function run(t,arguments)
   local nameversion = util.nameversion(t)
-  print("[ INFO ] Verifying if needs to compile via autotools: "..nameversion)
-  local plat = TEC_UNAME
+  util.log.info("Verifying if needs to compile",nameversion,"using autotools driver.")
+  local plat = config.TEC_UNAME
   if not t.build[plat] then 
-    plat = TEC_SYSNAME
+    plat = config.TEC_SYSNAME
     if not (t.build[plat]) then
-      print("[ WARNING ] ".. nameversion..[[ has no build command provided for ']]..TEC_UNAME..[[' platforms. Skipping.]])
+      util.log.warning(nameversion..[[ has no build command provided for ']]..config.TEC_UNAME..[[' platforms. Skipping.]])
       return nil
     end
   end
@@ -53,16 +53,16 @@ function run(t,arguments)
   -- when '--force' is requested we will rebuild the soft or when any
   -- test library is missing on library path
   for _,lib in ipairs(t.build.test_libs) do
-    if arguments["force"] or not myplat:search_ldlibpath(lib) then
+    if arguments.force or arguments.rebuild or not myplat:search_ldlibpath(lib) then
       -- verifying if all build dependencies are ok, if don't we'll abort
       check_external_deps(t)
 
-      local build_dir = PRODAPP .."/".. nameversion
+      local build_dir = config.PRODAPP .."/".. nameversion
 
       -- running the build and install command
       local build_cmd = t.build[plat]
       -- prepend clean target to makefile if rebuild is setted
-      if arguments["rebuild"] then
+      if arguments.rebuild then
         build_cmd = "make distclean || make clean || "..
                    "gmake distclean || gmake clean; " .. build_cmd
       end
@@ -70,10 +70,10 @@ function run(t,arguments)
       -- prepend the command to enter on software directory
       build_cmd = "cd ".. build_dir .."; ".. build_cmd
 
-      print("[ INFO ] Compiling package via autotools: "..nameversion)
+      util.log.info("Building",nameversion,"using autotools driver.")
       local ret = os.execute(build_cmd)
       -- assert ensure that we could continue
-      assert(ret == 0,"ERROR compiling the software ".. nameversion .."")
+      assert(ret == 0,"ERROR compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
 
       -- re-using copy method to parse install_files, conf_files, dev_files
       copy.run(t,arguments,build_dir)

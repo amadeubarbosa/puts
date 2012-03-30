@@ -2,7 +2,7 @@
 package.path = "?.lua;../?.lua;" .. package.path
 
 -- Basic variables (global vars are in upper case)
-require "tools.config"
+local config = require "tools.config"
 local util = require "tools.util"
 
 CONFIG = "[ CONFIGURE ] "
@@ -131,7 +131,7 @@ end
 
 function parseTemplate(filename, config, path)
   if path == nil then
-    path = TMPDIR
+    path = config.TMPDIR
   end
   -- parses the template
   local tmpl_table = loadTemplate(filename)
@@ -149,13 +149,11 @@ function parseTemplate(filename, config, path)
 end
 
 function hookConfig(file)
-  local dump = assert(io.open(file,"r"),
-      "ERROR: Opening file '" .. file .."'."):read("*a")
+  local result = {}
+  local chunk = assert(loadfile(file),"ERROR: Opening file '" .. file .."'.") 
+  setfenv(chunk,result)
+  chunk()
 
-  assert(loadstring("fromconsole = "..dump), "ERROR: Invalid syntax of file")()
-  assert(type(fromconsole) == "table", "ERROR: Configuration should be a table")
-  local result = fromconsole
-  fromconsole = nil
   return result
 end
 

@@ -19,7 +19,8 @@ platforms = {
   pipe_stderr = " 2>/dev/null",
   dylibext = "so",
   cmd = { install = "cp -rf ", make = "make ", mkdir = "mkdir -p ", rm = "rm -rf ", ls = "ls ",
-    gunzip = "gunzip -c ", tar = "tar ", bunzip2 = "bunzip2 -c ", unzip = "unzip ",
+    gunzip = "gunzip -c ", tar = "tar ", bunzip2 = "bunzip2 -c ", unzip = "unzip ", pwd = "pwd ",
+    test = "test "
    },
   exec = function(cmd)
     local pipe = io.popen(cmd,"r")

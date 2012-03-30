@@ -1,5 +1,5 @@
 -- Basic variables (global vars are in upper case)
-require "tools.config"
+local config = require "tools.config"
 local util = require "tools.util"
 
 module("tools.fetch.svn", package.seeall)
@@ -27,7 +27,7 @@ function run(path, url)
   download_cmd = "svn up ".. path
   -- allowing the svn up returns errors like 'old working copy'
   if os.execute(download_cmd) ~= 0 then
-    print("[ WARNING ] Couldn't update the directory '" .. path ..
+    util.log.warning("Couldn't update the directory '" .. path ..
         "'. Your SVN client has returned an error during the update.")
   end
   return true, path
