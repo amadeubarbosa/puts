@@ -286,10 +286,24 @@ function run()
           "in order to proceed the processing of previous descriptor format.")
   end
 
-  if arguments["v"] then
+  if arguments["v"] or arguments["verbose"] then
     arguments["verbose"] = true
-    log._levels.debug = true
+    arguments["v"] = true
+    util.verbose(1)
   end
+
+  -- Creating the build environment
+  assert(os.execute(myplat.cmd.mkdir .. config.INSTALL.TOP) == 0)
+  assert(os.execute(myplat.cmd.mkdir .. config.INSTALL.LIB) == 0)
+  assert(os.execute(myplat.cmd.mkdir .. config.INSTALL.BIN) == 0)
+  assert(os.execute(myplat.cmd.mkdir .. config.INSTALL.INC) == 0)
+  assert(os.execute(myplat.cmd.mkdir .. config.PRODAPP)     == 0)
+  assert(os.execute(myplat.cmd.mkdir .. config.DOWNLOADDIR) == 0)
+  assert(os.execute(myplat.cmd.mkdir .. config.PKGDIR)      == 0)
+  assert(os.execute(myplat.cmd.mkdir .. config.TMPDIR)      == 0)
+
+  -- Cleaning the temp dir to execute install rules of autotools softwares
+  os.execute(myplat.cmd.rm .. config.TMPDIR .."/*")
 
   log.info("The packages will be compiled and copied to: ".. config.INSTALL.TOP)
   log.info("Temporary directory used: ".. config.TMPDIR)
@@ -440,19 +454,14 @@ function run()
   -- Listing packages when '--list' arguments
   if arguments["list"] then
     if #descriptors > 0 then
-      print "[ INFO ] Available package descriptors to compile:"
+      log.info("Available package descriptors to compile:")
       for _, t in ipairs(descriptors) do
-        print("\t"..util.nameversion(t))
+        log.info("\t"..util.nameversion(t))
       end
       return true
     else
       log.info("No descriptor was provided.")
     end
-  end
-
-  -- Setting verbose level if requested
-  if arguments["verbose"] then
-    util.verbose(1)
   end
   
   -- Checkpoint checks
@@ -473,19 +482,6 @@ function run()
     end
   end
 
-  -- Creating the build environment to create .tar.gz (later) from it
-  os.execute(myplat.cmd.mkdir .. config.INSTALL.TOP)
-  os.execute(myplat.cmd.mkdir .. config.INSTALL.LIB)
-  os.execute(myplat.cmd.mkdir .. config.INSTALL.BIN)
-  os.execute(myplat.cmd.mkdir .. config.INSTALL.INC)
-  os.execute(myplat.cmd.mkdir .. config.TMPDIR)
-  os.execute(myplat.cmd.mkdir .. config.PRODAPP)
-  os.execute(myplat.cmd.mkdir .. config.DOWNLOADDIR)
-  os.execute(myplat.cmd.mkdir .. config.PKGDIR)
-
-  -- Cleaning the temp dir to execute install rules of autotools softwares
-  os.execute(myplat.cmd.rm .. config.TMPDIR .."/*")
-
   if arguments.compat_v1_05 or arguments.compat_v1_04 then
     -- Parsing descriptions and proceed to compile & install procedures
     -- REMEMBER: parseDescriptions returns true/false and 
@@ -493,13 +489,13 @@ function run()
     if not ok then
       -- checkpoint
       assert(checkpoint:saveRecoverFile(descriptors, last))
-      print("[ ERROR ] Some errors were raised. In next time, the building will"..
+      log.error("Some errors were raised. In next time, the building will"..
         " continue from the '"..util.nameversion(descriptors[last]).."' package."..
         " You can delete the '"..checkpoint.filename.."' file to avoid this behaviour.")
     else
       -- Removing the checkpoint file when packages compiled fine
       assert(checkpoint:clean())
-      print "[ INFO ] Packages were compiled successfully !"
+      log.info("Packages were compiled successfully !")
       print "----------------------------------------------------------------------"
     end
   else

@@ -9,6 +9,65 @@ local io = io
 
 module("tools.util", package.seeall)
 
+--------------------------------------------------
+------------------------------- logging facilities
+log = {
+  -- levels configuration by default
+  _levels = {
+    debug = false,
+    info = true,
+    warning = true,
+    error = true,
+  },
+  _tags = {
+   info   ="[INFO   ] ",
+   debug  ="[DEBUG  ] ",
+   error  ="[ERROR  ] ",
+   warning="[WARNING] ",
+  },
+  _handlers = {
+    info = io.stdout,
+    debug = io.stdout,
+    warning = io.stdout,
+    error = io.stderr,
+  }
+}
+for level,_ in pairs(log._levels) do
+  log[level]=function(...)
+    if log._levels[level] then
+      log._handlers[level]:write(log._tags[level]..table.concat({...}," ").."\n")
+      log._handlers[level]:flush()
+    end
+  end
+end
+--------------------------- fileysystem facilities
+fs = {}
+function fs.is_dir(at)
+   return (at and (os.execute(myplat.cmd.test.." -d "..at) == 0))
+end
+
+function fs.list_dir(at)
+   assert(type(at) == "string" or not at)
+   if not at then
+      at, count = myplat.exec(myplat.cmd.pwd):gsub("\n","")
+      if count ~= 1 then
+        at = nil
+      end
+   end
+
+   if not fs.is_dir(at) then
+      return {}
+   end
+   local result = {}
+   local pipe = io.popen("cd "..at.." && ".. myplat.cmd.ls)
+   for file in pipe:lines() do
+      table.insert(result, file)
+   end
+   pipe:close()
+   return result
+end
+--------------------------------------------------
+
 function split_nameversion(nameversion)
   local name, version = nameversion:match("(.-)%-(%d+.*)$")
   if not name and not version then
@@ -27,6 +86,7 @@ function verbose(level)
   if not level or level <= 0 then
     os.execute = default_osexecute
   elseif level == 1 then
+    log._levels.debug = true
     os.execute = function(...)
       log.debug(...)
       return default_osexecute(...)
@@ -346,65 +406,3 @@ function deep_copy(table_orig, table_new)
   
   return table_new
 end
-
---------------------------------------------------
-------------------------------- logging facilities
-log = {
-  -- levels configuration by default
-  _levels = {
-    debug = false,
-    info = true,
-    warning = true,
-    error = true,
-  },
-  _tags = {
-   info   ="[INFO   ] ",
-   debug  ="[DEBUG  ] ",
-   error  ="[ERROR  ] ",
-   warning="[WARNING] ",
-  },
-  _handlers = {
-    info = io.stdout,
-    debug = io.stdout,
-    warning = io.stdout,
-    error = io.stderr,
-  }
-}
-for level,_ in pairs(log._levels) do
-  log[level]=function(...)
-    if log._levels[level] then
-      log._handlers[level]:write(log._tags[level]..table.concat({...}," ").."\n")
-      log._handlers[level]:flush()
-    end
-  end
-end
---------------------------------------------------
-
---------------------------------------------------
---------------------------- fileysystem facilities
-fs = {}
-function fs.is_dir(at)
-   return (at and (os.execute(myplat.cmd.test.." -d "..at) == 0))
-end
-
-function fs.list_dir(at)
-   assert(type(at) == "string" or not at)
-   if not at then
-      at, count = myplat.exec(myplat.cmd.pwd):gsub("\n","")
-      if count ~= 1 then
-        at = nil
-      end
-   end
-
-   if not fs.is_dir(at) then
-      return {}
-   end
-   local result = {}
-   local pipe = io.popen("cd "..at.." && ".. myplat.cmd.ls)
-   for file in pipe:lines() do
-      table.insert(result, file)
-   end
-   pipe:close()
-   return result
-end
---------------------------------------------------
