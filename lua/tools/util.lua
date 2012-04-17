@@ -292,8 +292,10 @@ end
 
 -- Closing install cache files
 function close_cache()
-  for p, file_cache in pairs(cache) do
-    if file_cache then file_cache:close() end
+  for p, t in pairs(cache) do
+    for _, file_cache in pairs(t) do
+      file_cache:close()
+    end
   end
 end
 
