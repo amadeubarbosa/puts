@@ -532,9 +532,7 @@ local function build_driver (spec, arguments)
                       "' for package: ".. nameversion)
 
   -- starting specific build methods in a protected way
-  --FOR TEST PURPOSE ONLY
-  --return pcall(build_type.run, spec, arguments, spec.directory)
-  return true
+  return pcall(build_type.run, spec, arguments, spec.directory)
 end
 
 local dependencies_cache = { --[[ pkg_nameversion = { dependencies list } ]] }
