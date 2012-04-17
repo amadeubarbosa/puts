@@ -532,12 +532,16 @@ local function build_driver (spec, arguments)
                       "' for package: ".. nameversion)
 
   -- starting specific build methods in a protected way
-  return pcall(build_type.run, spec, arguments, spec.directory)
+  --FOR TEST PURPOSE ONLY
+  --return pcall(build_type.run, spec, arguments, spec.directory)
+  return true
 end
+
+local dependencies_cache = { --[[ pkg_nameversion = { dependencies list } ]] }
 
 function processing (pkg, specfile, arguments)
     assert(pkg and type(pkg)=="table" or (pkg == nil and type(specfile)=="string"))
-
+    
     -- manifest loading
     local buildtree = config.PRODAPP
     local buildtree_manifest, err = manifest.load(buildtree)
@@ -561,30 +565,42 @@ function processing (pkg, specfile, arguments)
       assert(os.remove(tempfile))
     end
     
+    local nameversion = util.nameversion(desc)
     assert(buildtree_manifest)
     
-    log.info("Verifying dependencies of",util.nameversion(desc))
+    log.info("Verifying dependencies of",nameversion)
     
-    assert(deps.fulfill_dependencies(desc, config.SPEC_SERVERS, buildtree_manifest, processing, arguments))
+    local dependencies_resolved = {}
+    assert(deps.fulfill_dependencies(desc, config.SPEC_SERVERS, buildtree_manifest, 
+                                     processing, dependencies_resolved, arguments))
 
     if manifest.is_installed(buildtree_manifest, desc.name, desc.version) and
       not (arguments.force or arguments.update or arguments.rebuild) then
       log.info("Package",util.nameversion(desc),"is already compiled")
     else
       if desc.url then
-        log.info("Fetching sources for",util.nameversion(desc))
+        log.info("Fetching sources for",nameversion)
         local ok, err = pcall(
-           util.fetch_and_unpack, util.nameversion(desc), desc.url, desc.directory)
+           util.fetch_and_unpack, nameversion, desc.url, desc.directory)
         if not ok then
           return false, err
         end
       end
       
-      log.info("Initializing the compilation of",util.nameversion(desc))
+      log.info("Initializing the compilation of",nameversion)
       assert(build_driver(desc,arguments))
       
-      log.info("Updating manifest to include",util.nameversion(desc))
+      log.info("Updating manifest to include",nameversion)
       assert(manifest.update_manifest(desc.name, desc.version, buildtree, buildtree_manifest))
+    end
+    
+    -- persist resolved dependencies information (used in makepack assistent, for example)
+    if #dependencies_resolved > 0 then
+      local metadata = assert(io.open(config.PKGDIR.."/"..nameversion..".dependencies","w"))
+      for _, dep in ipairs(dependencies_resolved) do
+        metadata:write(dep.."\n")
+      end
+      metadata:close()
     end
 
     return true

@@ -189,8 +189,9 @@ function run()
   assert(arguments["config"] or arguments["template"],
       'ERROR: You need to set "--config" or "--template"')
 
-  -- Setting verbose level if requested
-  if arguments["verbose"] then
+  if arguments["v"] or arguments["verbose"] then
+    arguments["v"] = true
+    arguments["verbose"] = true
     util.verbose(1)
   end
 

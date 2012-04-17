@@ -49,8 +49,9 @@ function run()
     ]].. arg[0].. " --path=/mydir/openbus --package=myOpenBus.tar.gz" ..
     "--config=myPrevious.answers ")
 
-  -- Setting verbose level if requested
-  if arguments["verbose"] then
+  if arguments["v"] or arguments["verbose"] then
+    arguments["v"] = true
+    arguments["verbose"] = true
     util.verbose(1)
   end
 
@@ -123,7 +124,7 @@ function run()
       print(CONFIG, "Configuring the installation using package metadata...")
       -- Configure main step, using all .template contained in package metadata
       local files = myplat.exec(myplat.cmd.ls .. config.TMPDIR .."/".. metadataDirname)
-      local nexttmpl = files:gmatch("%S+.template")
+      local nexttmpl = files:gmatch("%S+.template%.?%d*")
       local tmplname, template
       tmplname = nexttmpl()
       -- For each template ...

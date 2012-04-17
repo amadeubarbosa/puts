@@ -4,6 +4,7 @@ package.path = "?.lua;../?.lua;" .. package.path
 -- Basic variables (global vars are in upper case)
 local config = require "tools.config"
 local util = require "tools.util"
+local log  = util.log
 
 -- Local scope
 local string = require "tools.split"
@@ -11,6 +12,8 @@ local platforms = require "tools.platforms"
 local myplat = platforms[config.TEC_SYSNAME]
 
 module("tools.makepack", package.seeall)
+
+local RELEASEINFO = nil
 
 --- Retrieves the release information
 function getrelease()
@@ -21,7 +24,7 @@ function getrelease()
     url = myplat.exec("cd "..config.SVNDIR.." && env LANG=C svn info |grep URL")
     -- Removing 'URL:' and '\n'.
     url = url:match("URL:%s*(.+)([%p%c%s]+)$")
-    util.log.debug("Generating release information: Parsing the URL '".. url .."'")
+    log.debug("Generating release information: Parsing the URL '".. url .."'")
   end
   -- 2. or if the config already provides it
   url = url or config.SVNURL
@@ -33,12 +36,12 @@ function getrelease()
     if rev then
       tag = "OB_HEAD_r"..rev
     end
-    util.log.debug("Generating release information: Parsing the Revision '".. rev.."'")
+    log.debug("Generating release information: Parsing the Revision '".. rev.."'")
   end
   -- when ...openbus/trunk ; url = ...openbus and tag = OB_r27387 ??
   -- when ...openbus/branches/OB_v1_10_2008_12_12 ; url = ...openbus/branches and tag = OB_v1_10..
 
-  util.log.warning("Using the following release information to create packages: "..tag)
+  log.info("Using the following release information to create packages: "..tag)
   return assert(tag)
 end
 
@@ -59,11 +62,11 @@ function pack(arch,profile)
     local name = filename:match("(.*).template")
     if name ~= nil then
       local i = 1
-      local filename = name .. i .. ".template"
+      local filename = name ..".template.".. i
       while io.open(filename,"r") do
         metadata_files = metadata_files .." ".. filename
         i = i + 1
-        filename = name .. i .. ".template"
+        filename = name ..".template."..i
       end
     elseif io.open(filename,"r") then
       metadata_files = metadata_files .." ".. filename
@@ -75,7 +78,7 @@ function pack(arch,profile)
   name = name:gsub(".profile","")           --deletes the suffix ".profile"
 
   print "----------------------------------------------------------------------"
-  util.log.info("Generating the tarball for arch:".. arch .." profile:".. name)
+  log.info("Generating the tarball for arch:".. arch .." profile:".. name)
   local file = assert(io.open(profile,"r") or
       io.open(name..".profile","r") or
       io.open(config.DEPLOYDIR .."/profiles/".. name,"r") or
@@ -85,20 +88,56 @@ function pack(arch,profile)
   -- Using 'tools.config.changePlatform' global function
   local pkgdir = config.changePlatform(arch)
 
-  -- Listing packages from profile description
-  local l = file:lines()
-  repeat
-    p = l()
-    if p then
-      addmetadata(pkgdir.."/"..p..".template")
-      addmetadata(pkgdir.."/"..p..".files")
-      addmetadata(pkgdir.."/"..p..".links")
-      -- including filenames inside of *.files
-      add(io.open(pkgdir.."/"..p..".files","r"))
-      -- including link's name inside of *.links
-      add(io.open(pkgdir.."/"..p..".links","r"))
-    end
-  until (p == nil)
+  -- Function to parse profile description and find metadata files to be used
+  local already_included = {} --avoid duplicates
+  local function include_on_package(profile_file, pkgdir, categories_cache)
+    assert(type(profile_file) == "userdata")
+    local iterator = profile_file:lines()
+    repeat
+      local line = iterator()
+      if line then
+        local m = line:gmatch("%S+")
+        local name = m() --first result is always the name-version of the package
+        local categories = categories_cache or {}
+        repeat
+          local cat = m()
+          if cat then
+            categories[cat] = true
+          end
+        until (cat == nil)
+      
+        if name and not already_included[name] then
+          if categories["+conf"] then
+            addmetadata(pkgdir.."/"..name..".template")   --gerado pelo conf_template
+            addmetadata(pkgdir.."/"..name..".conf.files") --gerado pelo conf_files
+            add(io.open(pkgdir.."/"..name..".conf.files"))
+          end
+          if categories["+dev"] then
+            addmetadata(pkgdir.."/"..name..".dev.files")  --gerado pelo conf_files          
+            add(io.open(pkgdir.."/"..name..".dev.files","r"))
+          end
+          local path = pkgdir.."/"..name..".dependencies"
+          if util.fs.is_file(path) then
+            addmetadata(path)
+            if categories["+dependencies"] then
+                -- recursively
+                local deps_file = assert(io.open(path,"r"))
+                include_on_package(deps_file, pkgdir, categories)
+            end
+          end
+          addmetadata(pkgdir.."/"..name..".files")      --gerado pelo install_files
+          add(io.open(pkgdir.."/"..name..".files","r"))
+          addmetadata(pkgdir.."/"..name..".links")      --gerado pelo simbolic_links
+          add(io.open(pkgdir.."/"..name..".links","r"))
+          already_included[name] = true
+        end
+      end
+    until (line == nil)
+    profile_file:close()
+  end
+
+  include_on_package(file, pkgdir)
+  already_included = nil
 
   -- Creates a metadata.tar.gz and include it in tarball_files
   -- Tip: the installation actually is inside of config.INSTALL.TOP !
@@ -116,13 +155,14 @@ function pack(arch,profile)
   local tar_cmd = "cd ".. config.INSTALL.TOP .." && "
   tar_cmd = tar_cmd .. "find . -name .svn -type d |sed \"s#^./##\" >"..excludefile.." && ".. myplat.cmd.tar .."cfX - "..excludefile.." "
   tar_cmd = tar_cmd .. tarball_files
-  tar_cmd = tar_cmd .. "|gzip > "..config.DOWNLOADDIR.."/".. config.PKGPREFIX .. release .."-"..name.."-".. arch .. ".tar.gz "
+  local tarball = config.DOWNLOADDIR.."/".. config.PKGPREFIX .. release .."-"..name.."-".. arch .. ".tar.gz"
+  tar_cmd = tar_cmd .. "|gzip > "..tarball
   assert(os.execute(tar_cmd) == 0, "Cannot execute the command \n"..tar_cmd..
                     "\n, ensure that 'tar' command has --exclude option!")
 
   -- Cleans the temporary excludefile
   os.remove(excludefile)
-  print "[ INFO ] Done!"
+  log.info("Package created! Check the file: "..tarball)
   print "----------------------------------------------------------------------"
 end
 
@@ -140,23 +180,25 @@ function run()
     --arch=tecmake_arch      : specifies the arch based on tecmake way. Use 'all'
                                to pack all supported architectures
     --svndir=/my/directory   : path to directory where are the source codes
-                               (helps to extract release information)
+                               (generates automatically the release information)
     --release=STRING_RELEASE : string to be used as release information
+                               (bypass manually the release information)
 
    NOTES:
     The prefix '--' is optional in all options.
     So '--help' or '-help' or yet 'help' all are the same option.]])
 
-  -- Overloading the os.execute to dummy verbose
-  if arguments["verbose"] then
+  if arguments["v"] or arguments["verbose"] then
+    arguments["v"] = true
+    arguments["verbose"] = true
     util.verbose(1)
   end
   if arguments["svndir"] then
     config.SVNDIR = arguments["svndir"]
   end
   if arguments["release"] then
-    print("[WARNING] You're overloading the 'release' information that should be extracted from the source directory!")
-    config.RELEASEINFO = arguments["release"]
+    log.warning("You're overloading the 'release' information that should be extracted from the source directory!")
+    RELEASEINFO = arguments["release"]
   end
 
   assert(arguments["profile"],"Missing argument --profile!")

@@ -35,7 +35,11 @@ log = {
 for level,_ in pairs(log._levels) do
   log[level]=function(...)
     if log._levels[level] then
-      log._handlers[level]:write(log._tags[level]..table.concat({...}," ").."\n")
+      local t = {}
+      for i,v in ipairs({...}) do
+        table.insert(t,tostring(v))
+      end
+      log._handlers[level]:write(log._tags[level]..table.concat(t," ").."\n")
       log._handlers[level]:flush()
     end
   end
@@ -44,6 +48,9 @@ end
 fs = {}
 function fs.is_dir(at)
    return (at and (os.execute(myplat.cmd.test.." -d "..at) == 0))
+end
+function fs.is_file(at)
+   return (at and (os.execute(myplat.cmd.test.." -f "..at) == 0))
 end
 
 function fs.list_dir(at)
@@ -98,7 +105,7 @@ end
 -- look: debug.getinfo ([thread,] function [, what])
 
 -- Temporary table to register all install calls for a package
-local cache = { --[[ { ['name'] = { files = {}, links = {} } } ]] }
+local cache = { --[[ ['name'] = { files = {}, links = {} } ]] }
 
 -- Install method registering what is installing on file 'config.BASEDIR/pkg_name.files'
 function install(package, orig, dest)
@@ -285,8 +292,8 @@ end
 
 -- Closing install cache files
 function close_cache()
-  for _,p in ipairs(cache) do
-    if p then p:close() end
+  for p, file_cache in pairs(cache) do
+    if file_cache then file_cache:close() end
   end
 end
 

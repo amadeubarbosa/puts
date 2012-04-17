@@ -33,19 +33,26 @@ function run(t,arguments,build_dir)
       local dir = build_dir
       -- if absolute path we assume that you know where get the files
       if orig:match("^/") then dir = "" end
-      util.install(nameversion.."-conf", dir.."/"..orig, dest)
+      util.install(nameversion..".conf", dir.."/"..orig, dest)
     end
   end
-  -- temp behaviour, future: each package as a <name>.desc and <name>.template
   -- important for configuration procedure in installation time
   if t.conf_template then
-    if arguments.compat then 
-      local content = assert(io.open(t.conf_template,"r")):read("*a")
-      assert(io.open(config.PKGDIR.."/"..nameversion.."1.template","w")):write(content)
+    if arguments.compat_v1_04 then
+      local file = assert(io.open(t.conf_template,"r"))
+      local content = file:read("*a")
+      file:close()
+      file = assert(io.open(config.PKGDIR.."/"..nameversion..".template","w"))
+      file:write(content)
+      file:close()
     else
       for i,templateName in ipairs(t.conf_template) do
-        local content = assert(io.open(templateName,"r")):read("*a")
-        assert(io.open(config.PKGDIR.."/"..nameversion .. i ..".template", "w")):write(content)
+        local file = assert(io.open(templateName,"r"))
+        local content = file:read("*a")
+        file:close()
+        file = assert(io.open(config.PKGDIR.."/"..nameversion ..".template."..i, "w"))
+        file:write(content)
+        file:close()
       end
     end
   end
@@ -55,7 +62,7 @@ function run(t,arguments,build_dir)
       local dir = build_dir
       -- if absolute path we assume that you know where get the files
       if orig:match("^/") then dir = "" end
-      util.install(nameversion.."-dev", dir.."/"..orig, dest)
+      util.install(nameversion..".dev", dir.."/"..orig, dest)
     end
   end
   -- linking files described on packages table

@@ -229,8 +229,12 @@ function show_dep(dep, internal)
    assert(type(internal) == "boolean" or not internal)
    
    local pretty = {}
-   for _, c in ipairs(dep.constraints) do
-      table.insert(pretty, c.op .. " " .. show_version(c.version, internal))
+   if dep.constraints then
+     for _, c in ipairs(dep.constraints) do
+        table.insert(pretty, c.op .. " " .. show_version(c.version, internal))
+     end
+   else
+     table.insert(pretty, "== " .. dep.version)
    end
    return dep.name.." "..table.concat(pretty, ", ")
 end
@@ -344,11 +348,14 @@ local function values_set(tbl)
    return set
 end
 
-function fulfill_dependencies(spec, servers, local_manifest, hook, ...)
+function fulfill_dependencies(spec, servers, local_manifest, hook, memoized, ... )
    assert(type(spec)=="table")
    assert(type(servers)=="table")
    assert(type(local_manifest)=="table")
-   assert(type(hook)=="function")
+   assert(not hook or type(hook)=="function")
+   assert(not memoized or type(memoized) == "table")
+
+   local nameversion = util.nameversion(spec)
 
    spec = platform_overrides(spec)
 
@@ -366,14 +373,20 @@ function fulfill_dependencies(spec, servers, local_manifest, hook, ...)
       end
       if supported == false then
          local plats = table.concat(MY_PLATFORMS, ", ")
-         return nil, "This spec for "..spec.name.." does not support "..plats.." platforms."
+         return nil, "The descriptor of "..nameversion.." does not support "..plats.." platforms."
       end
    end
 
    local matched, missing, no_upgrade = match_deps(spec, nil, local_manifest)
 
+   if next(matched) and memoized then
+      for _, dep in pairs(matched) do
+         table.insert(memoized,util.nameversion(dep))
+      end
+   end
+
    if next(no_upgrade) then
-      log.error("Missing dependencies for "..spec.name.." "..spec.version..":")
+      log.error("Missing dependencies for "..nameversion..":")
       for _, dep in pairs(no_upgrade) do
          log.error("\t",show_dep(dep))
       end
@@ -400,16 +413,22 @@ function fulfill_dependencies(spec, servers, local_manifest, hook, ...)
          -- Double-check in case dependency was filled by recursion.
          if not match_dep(dep, nil, local_manifest) then
             local search = require "tools.search"
-            local results, err = search.find_suitable_rock(dep, servers)
+            local results, found_name, found_version = search.find_suitable_rock(dep, servers)
             
             if not results then
-              return false, "Missing dependency "..show_dep(dep)
+              -- when search.find_suitable_rock returns nil, second result can be an error message
+              local raised_err = (found_name and " ("..tostring(found_name)..")") or ""
+              return nil, "Missing dependency "..show_dep(dep).."."..raised_err
             elseif (type(results) == "table") then
-                log.error("Multiple packages available to ",show_dep(dep),". Please specify one in ",spec.name," descriptor.")
-                return false
+              return nil, "Multiple packages available for "..show_dep(dep)..". The descriptor of "..nameversion.." must specify one of these."
             elseif (type(results) == "string") then
               log.info("The following dependency was found at servers but it isn't installed", show_dep(dep))
-              assert(hook(nil,results,...))
+              if hook then 
+                assert(hook(nil,results,...))
+              end
+              if memoized then
+                table.insert(memoized,found_name.."-"..found_version)
+              end
             end
          end
       end

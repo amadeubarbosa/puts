@@ -7,7 +7,9 @@ setmetatable(Identity,{
   __call = function(self,force) 
     for id,command in pairs(self.commands) do
       if not self[id] or force then
-        self[id] = io.popen(command):read("*l")
+        local out = io.popen(command)
+        self[id] = out:read("*l")
+        out:close()
       end
     end
   end,

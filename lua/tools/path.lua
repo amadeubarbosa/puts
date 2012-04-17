@@ -24,20 +24,13 @@ function make_url(parent, name, version, arch)
 
    local filename = name.."-"..version
    if arch == "installed" then
-      filename = pathname(name, version, filename..".spec")
+      filename = pathname(name, version, filename..".desc")
    elseif arch == "desc" then
       filename = filename..".desc"
    else
       filename = filename.."."..arch..".pkg"
    end
    return pathname(parent, filename):gsub(FILE_SEPARATOR,"/") --fix because use of FILE_SEPARATOR in pathname
-end
-
-function spec_file(name, version, repo)
-   assert(type(name) == "string")
-   assert(type(version) == "string")
-   assert(type(repo) == "string")
-   return pathname(repo, name, version, name.."-"..version..".spec") --FIXME: problem when http:// or similar is used as 'repo'
 end
 
 function split_url(url)
