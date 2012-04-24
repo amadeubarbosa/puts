@@ -3,8 +3,6 @@ package.path = "?.lua;../?.lua;" .. package.path
 
 local assistants = { "compile" , "makepack" , "installer" , "hook" }
 
-local util = require "tools.util"
-
 module("tools.console", package.seeall)
 
 --------------------------------------------------------------------------------
@@ -23,7 +21,7 @@ if arg[1] then
     if type(value) == "string" and value ~= "" then
       reconfigure = value
     else
-      util.log.error("Invalid syntax. The '--config' option must have some value.")
+      io.stderr:write("[ERROR  ] Invalid syntax. The '--config' option must have some value.\n")
       os.exit(1)
     end
     -- removing '--config' from command line arguments table
@@ -41,7 +39,7 @@ if arg[1] then
     for _,assistant in ipairs(assistants) do
       if opt == assistant then
         if value and value ~= "" then
-          util.log.error("Invalid syntax. The '--"..assistant.."' subcommand must have no value.")
+          io.stderr:write("[ERROR  ] Invalid syntax. The '--"..assistant.."' subcommand must have no value.\n")
           os.exit(1)
         end
         valid_options = true
@@ -49,7 +47,7 @@ if arg[1] then
       end
     end
     if valid_options == false then
-      util.log.error("Requesting the execution of an unknown assistant: ".. tostring(opt))
+      io.stderr:write("Requesting the execution of an unknown assistant: ".. tostring(opt) .."\n")
       os.exit(1)
     end
   end
@@ -59,8 +57,8 @@ if reconfigure then
   print("[CONSOLE] Overriding the default configuration with: ",reconfigure)
   local f,err = loadfile(reconfigure)
   if not f then
-    util.log.warning("The file '"..reconfigure.."' cannot be loaded successfuly ("..err..")!")
-    util.log.warning("Using default configuration.")
+    print("[WARNING ] The file '"..reconfigure.."' cannot be loaded successfuly ("..err..")!")
+    print("[WARNING ] Using default configuration.")
   else
     f()
   end
@@ -78,7 +76,7 @@ if valid_options then
   arg[0] = opt
   local tools = require ("tools.".. opt)
   if tools == nil then
-    util.log.error("module tools." .. opt .." not found.")
+    print("[ERROR   ] module tools." .. opt .." not found.")
     os.exit(1)
   end
   local okay = tools.run()
