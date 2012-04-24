@@ -1,7 +1,9 @@
 #!/usr/bin/env lua5.1
 package.path = "?.lua;../?.lua;" .. package.path
 
-local assistant = { "compile" , "makepack" , "installer" , "hook" }
+local assistants = { "compile" , "makepack" , "installer" , "hook" }
+
+local util = require "tools.util"
 
 module("tools.console", package.seeall)
 
@@ -18,10 +20,11 @@ local opt,_,value
 if arg[1] then
   opt,_,value = arg[1]:match(patt)
   if opt == "config" then
-    if type(value) == "string" then
+    if type(value) == "string" and value ~= "" then
       reconfigure = value
     else
-      print("[ ERROR ] The '--config' option must some value.")
+      util.log.error("Invalid syntax. The '--config' option must have some value.")
+      os.exit(1)
     end
     -- removing '--config' from command line arguments table
     table.remove(arg,1)
@@ -35,14 +38,19 @@ if arg[1] then
   end
   -- If the actual argument is not '--help', it should be one of:
   if opt ~= "h" and opt ~= "help" then
-    for _,assist in ipairs(assistant) do
-      if opt == assist then
+    for _,assistant in ipairs(assistants) do
+      if opt == assistant then
+        if value and value ~= "" then
+          util.log.error("Invalid syntax. The '--"..assistant.."' subcommand must have no value.")
+          os.exit(1)
+        end
         valid_options = true
         break
       end
     end
     if valid_options == false then
-      print("[ ERROR ] Requesting the load of an unknown assistant: ".. tostring(opt))
+      util.log.error("Requesting the execution of an unknown assistant: ".. tostring(opt))
+      os.exit(1)
     end
   end
 end
@@ -70,12 +78,16 @@ if valid_options then
   arg[0] = opt
   local tools = require ("tools.".. opt)
   if tools == nil then
-    print("ERROR: module tools." .. opt .." not found.")
+    util.log.error("module tools." .. opt .." not found.")
     os.exit(1)
   end
-  tools.run()
+  local okay = tools.run()
   print("[CONSOLE] Assistant ".. opt .." finished.")
-  os.exit(0)
+  if not okay then
+    os.exit(1)
+  else
+    os.exit(0)
+  end
 else
   print([[
  Usage: ]]..arg[0]..[[ OPTIONS SUBCOMMANDS
@@ -106,5 +118,5 @@ else
   4) How to use the hook?
   ]]..arg[0]..[[ --hook --help ]])
   
-  os.exit(1)
+  os.exit(0)
 end

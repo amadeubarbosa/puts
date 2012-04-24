@@ -2,10 +2,10 @@
 package.path = "?.lua;../?.lua;" .. package.path
 
 -- Basic variables (global vars are in upper case)
-local config = require "tools.config"
+local tools_cfg = require "tools.config"
 local util = require "tools.util"
 
-CONFIG = "[ CONFIGURE ] "
+CONFIG = "[CONFIGURE] "
 
 module("tools.hook", package.seeall)
 
@@ -129,23 +129,23 @@ function loadTemplate(tmplname)
   return template
 end
 
-function parseTemplate(filename, config, path)
+function parseTemplate(filename, configuration, path)
   if path == nil then
-    path = config.TMPDIR
+    path = tools_cfg.TMPDIR
   end
   -- parses the template
   local tmpl_table = loadTemplate(filename)
   -- launch the wizard to ask what it needs to user
-  local config = launchWizard(tmpl_table, config)
+  local configuration = launchWizard(tmpl_table, configuration)
   -- if all right then take a custom action (if exists)
   if not tmpl_table.configure_action then
     print(CONFIG, "WARNING: Template '"..filename.."' has no action.")
   else
     -- Takes the action planned by developer
-    assert(tmpl_table.configure_action(config, path, util), "ERROR: Custom action"..
+    assert(tmpl_table.configure_action(configuration, path, util), "ERROR: Custom action"..
         " from template '"..filename.."' has failed!")
   end
-  return config
+  return configuration
 end
 
 function hookConfig(file)
@@ -157,12 +157,12 @@ function hookConfig(file)
   return result
 end
 
-function hookTemplate(template,config,path)
-  config = parseTemplate(template,config,path)
-  if config == nil then
-    print("ERROR: Failed parsing template '"..template.."'.")
+function hookTemplate(template,configuration,path)
+  configuration = parseTemplate(template,configuration,path)
+  if configuration == nil then
+    util.log.error("Failed parsing template '"..template.."'.")
   end
-  return config
+  return configuration
 end
 
 --------------------------------------------------------------------------------
@@ -200,14 +200,16 @@ function run()
   assert(path,'ERROR: You need to set "--path" or $OPENBUS_HOME')
 
   -- Cache variables
-  local template, config
+  local template, configuration
 
   if arguments.config then
-    config = hookConfig(arguments.config)
+    configuration = hookConfig(arguments.config)
   end
 
   -- Loading configuration from template file provided or from default
   if arguments.template then
-    config = hookTemplate(arguments.template,config,path)
+    configuration = hookTemplate(arguments.template,configuration,path)
   end
+  
+  return true
 end

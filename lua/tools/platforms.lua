@@ -72,9 +72,15 @@ platforms.Linux = {
   -- libcrypto.so.0.9.9 => not found
   -- libdl.so.2 => /lib/tls/i686/cmov/libdl.so.2 (0xb7ebb000)
   missing_libraries = function(self,file)
+    if os.execute("test -f ".. file) ~= 0 then
+      return false
+    end
     -- testing if it's a script
     if self.exec("file ".. file):match("text") then
       return false
+    end
+    if not self.exec("file ".. file):match("ELF") and not file:match("%.a$") then
+      return false, "it isn't a ELF file"
     end
     local str = self.exec("ldd ".. file)
     local miss = {}
@@ -138,9 +144,15 @@ platforms.IRIX = {
     return platforms.search_ldlibpath(self,file,libpath)
   end,
   missing_libraries = function(self,file)
+    if os.execute("test -f ".. file) ~= 0 then
+      return false
+    end
     -- testing if it's a script
     if self.exec("file ".. file):match("text") then
       return false
+    end
+    if not self.exec("file ".. file):match("ELF") and not file:match("%.a$") then
+      return false, "it isn't a ELF file"
     end
     local str = self.exec("elfdump -Dl ".. file)
     local miss = {}
@@ -176,9 +188,15 @@ platforms.Darwin = {
     return platforms.search_ldlibpath(self,file,libpath,"DYLD_LIBRARY_PATH")
   end,
   missing_libraries = function(self,file)
+    if os.execute("test -f ".. file) ~= 0 then
+      return false
+    end
     -- testing if it's a script
     if self.exec("file ".. file):match("text") then
       return false
+    end
+    if not self.exec("file ".. file):match("Mach%-O") and not file:match("%.a$") then
+      return false, "isn't a Mach-O file"
     end
     local str = self.exec("otool -L ".. file)
     local miss = {}

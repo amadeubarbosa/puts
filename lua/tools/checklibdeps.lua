@@ -8,6 +8,8 @@ local config = require "tools.config"
 local string = require "tools.split"
 local platforms = require "tools.platforms"
 local util = require "tools.util"
+local log  = util.log
+local path = require "tools.path"
 
 module("tools.checklibdeps",package.seeall)
 
@@ -15,7 +17,7 @@ local checker = {}
 
 -- Checks libraries dependencies in an OpenBus installation
 function checker:libraries_deps(openbus_home)
-  assert(type(openbus_home) == "string", "ERROR: Check libraries function receives a nil parameter.")
+  assert(type(openbus_home) == "string", "ERROR: Check libraries function received a nil parameter.")
   local myplat = platforms[config.TEC_SYSNAME]
   assert(type(myplat.dylibext) == "string", "ERROR: Missing dynamic libraries extension information on 'platforms'.")
   
@@ -25,7 +27,6 @@ function checker:libraries_deps(openbus_home)
     package.cpath = package_cpath
   end
   
-  local msg = "[ checker:libraries_deps ] "
   local check_paths = { 
     -- since OPENBUS-653
     openbus_home.."/lib",
@@ -35,10 +36,7 @@ function checker:libraries_deps(openbus_home)
     openbus_home.."/bin/"..config.TEC_UNAME,
     openbus_home.."/core/bin/"..config.TEC_UNAME,
   }
-  
-  print(msg.."assuming that libraries has '"..myplat.dylibext.."' extension.")
-  print(msg.."assuming OpenBus installation: "..openbus_home)
-  print(msg.."assuming additional path for libs: "..check_paths[1])
+
   package.cpath = package.cpath .. ";"..
     -- posix module uses an unusual lua_open name!
     check_paths[1] .."/libl?."..myplat.dylibext..";"..
@@ -46,8 +44,9 @@ function checker:libraries_deps(openbus_home)
     check_paths[1] .."/lib?."..myplat.dylibext..";"
 
   local misses = {}
-  for _, path in ipairs(check_paths) do
-    local files = {myplat.exec(myplat.cmd.ls..path..myplat.pipe_stderr):split("[^%s]+")}
+  local incompatibles = {}
+  for _, path_to_check in ipairs(check_paths) do
+    local files = util.fs.list_dir(path_to_check)
     if #files == 0 then
       -- TODO:
       -- quando o pacote nÃo tem bin/${TEC_UNAME} ou
@@ -60,18 +59,21 @@ function checker:libraries_deps(openbus_home)
     end
     -- testing all dynamic library files
     for _,file in ipairs(files) do
-      local fullname = path.."/"..file
+      local fullname = path.pathname(path_to_check,file)
       --print("DEBUG: looking for "..file.." dynamic dependencies")
       -- returns a table containing the misses
-      local miss = myplat:missing_libraries(fullname)
+      local miss, misstype = myplat:missing_libraries(fullname)
       -- parse plat format to represent the unknown symbols
       -- good for more information about the miss library
 
       -- print("DEBUG: all unknown symbols:")
       -- s = platforms[myplat]:unknown_symbols(fullname)
       -- print(s)
-
-      if miss then
+      if not miss then
+        if type(misstype) == "string" then
+          table.insert(incompatibles, { file = fullname:sub(openbus_home:len()+2), cause = misstype })
+        end
+      else
         -- maybe the openbus package will provide the miss libraries
         -- if not then we will report a system_misses list!
         local system_misses = {name = file, miss = {}}
@@ -98,11 +100,13 @@ function checker:libraries_deps(openbus_home)
   rollback()
   -- return nil if we got misses
   if #misses > 0 then
-    return nil, misses, "ERROR: Check your system variable that contains dynamic "..
-                        "libraries paths."
+    return nil, misses, "Check your system variable that contains dynamic libraries paths."
   else
-    print(msg.."done!")
-    return true
+    if #incompatibles > 0 then
+      return nil, incompatibles, "Some binary files are NOT compatibles with this platform."
+    else
+      return true
+    end
   end
 end
 
@@ -111,17 +115,22 @@ function checker:start(openbus_home)
   -- Call the checker
   local ok, misses, errmsg = self:libraries_deps(openbus_home)
 
-  -- Presents the results
+  -- Show the results
   if not ok then
     for i,t in ipairs(misses) do
-      if #t.miss > 0 then
-        print("   ERROR: "..util.nameversion(t).." depends on:")
-        for _,libname in ipairs(t.miss) do print(libname) end
+      if t.miss and #t.miss > 0 then
+        local filelist = ""
+        for _,libname in ipairs(t.miss) do 
+          filelist = filelist..libname.." "
+        end
+        log.error(util.nameversion(t).." depends of:",filelist)
+      else
+        log.error("File '"..t.file.."'",t.cause)
       end
      end
     return nil, errmsg
   else
-    return true, "Library dependencies check DONE."
+    return true
   end
 end
 

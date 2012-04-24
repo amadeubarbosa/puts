@@ -19,30 +19,39 @@ local RELEASEINFO = nil
 function getrelease()
   -- Identifying the release by 2 ways:
   -- 1. if the svn command is available
-  local url,tag
-  if os.execute("which svn >/dev/null") == 0 then
+  local url
+  local svnCommandExists = os.execute("which svn >/dev/null") == 0
+  local svnDirectoryExists = os.execute("test -d "..config.SVNDIR) == 0
+  if svnCommandExists then
+    if not svnDirectoryExists then
+      return false, string.format("Configuration problem, directory %s doesn't exist. Check the PUTS configuration file or use the argument --svndir.",config.SVNDIR)
+    end 
     url = myplat.exec("cd "..config.SVNDIR.." && env LANG=C svn info |grep URL")
     -- Removing 'URL:' and '\n'.
     url = url:match("URL:%s*(.+)([%p%c%s]+)$")
-    log.debug("Generating release information: Parsing the URL '".. url .."'")
   end
   -- 2. or if the config already provides it
   url = url or config.SVNURL
+  log.debug("Generating release information: Parsing the URL",url)
 
-  url,tag = url:match("(.+)/(.+)$")
-  if tag and tag == "trunk" and os.execute("which svn >/dev/null") == 0 then
+  local _,tag = url:match("(.+)/(.+)$")
+  if tag and tag == "trunk" and svnCommandExists then
     local rev = myplat.exec("cd "..config.SVNDIR.." && env LANG=C svn info|grep Rev:")
     rev = rev:match(".*Rev:%s*(%w+).*$")
     if rev then
       tag = "OB_HEAD_r"..rev
+      log.debug("Generating release information: Revision mark",rev)
     end
-    log.debug("Generating release information: Parsing the Revision '".. rev.."'")
   end
   -- when ...openbus/trunk ; url = ...openbus and tag = OB_r27387 ??
   -- when ...openbus/branches/OB_v1_10_2008_12_12 ; url = ...openbus/branches and tag = OB_v1_10..
 
-  log.info("Using the following release information to create packages: "..tag)
-  return assert(tag)
+  if not tag then
+    return false, "Couldn't identify the release information automatically (URL: "..url..")."
+  else
+    log.info("Using the following release information to create packages:",tag)
+    return tag
+  end
 end
 
 --- Packs in a tarball named by profile
@@ -141,7 +150,17 @@ function pack(arch,profile)
 
   -- Creates a metadata.tar.gz and include it in tarball_files
   -- Tip: the installation actually is inside of config.INSTALL.TOP !
-  local release = RELEASEINFO or getrelease()
+  local release
+  if RELEASEINFO then
+    release = RELEASEINFO
+  else
+    release, msgInvalidRelease = getrelease()
+    if not release then
+      log.error(msgInvalidRelease)
+      return false
+    end
+  end
+  
   local metadata_dirname = "metadata-"..release.."-"..name
   assert(os.execute(myplat.cmd.mkdir .. config.TMPDIR .."/"..metadata_dirname) == 0)
   assert(os.execute(myplat.cmd.install .. metadata_files .." "..config.TMPDIR.."/"..metadata_dirname) == 0)
@@ -164,6 +183,7 @@ function pack(arch,profile)
   os.remove(excludefile)
   log.info("Package created! Check the file: "..tarball)
   print "----------------------------------------------------------------------"
+  return true
 end
 
 --------------------------------------------------------------------------------
@@ -206,12 +226,17 @@ function run()
   arguments["arch"] = arguments["arch"] or config.TEC_UNAME
 
   if arguments["arch"] ~= "all" then
-    pack(arguments["arch"],arguments["profile"])
+    return pack(arguments["arch"],arguments["profile"])
   else
     -- making for all
+    log.info("Creating multiples packages ...")
     for _,arch in ipairs(config.SUPPORTED_ARCH) do
-      pack(arch,arguments["profile"])
+      local ok = pack(arch,arguments["profile"])
+      if not ok then
+        return false
+      end
     end
   end
 
+  return true
 end
