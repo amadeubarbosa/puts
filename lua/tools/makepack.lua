@@ -87,7 +87,7 @@ function pack(arch,profile)
   name = name:gsub(".profile","")           --deletes the suffix ".profile"
 
   print "----------------------------------------------------------------------"
-  log.info("Generating the tarball for arch:".. arch .." profile:".. name)
+  log.info("Generating the tarball for arch",arch,"using profile",name)
   local file = assert(io.open(profile,"r") or
       io.open(name..".profile","r") or
       io.open(config.DEPLOYDIR .."/profiles/".. name,"r") or
@@ -95,7 +95,12 @@ function pack(arch,profile)
 
   -- Overwriting some global variables with arch values
   -- Using 'tools.config.changePlatform' global function
-  local pkgdir = config.changePlatform(arch)
+  local pkgdir
+  if arch == "all" then
+    pkgdir = config.changePlatform(config.TEC_UNAME)
+  else
+    pkgdir = config.changePlatform(arch)
+  end
 
   -- Function to parse profile description and find metadata files to be used
   local already_included = {} --avoid duplicates
@@ -197,8 +202,8 @@ function run()
     --verbose                : turn ON the VERBOSE mode (show the system commands)
     --profile=filename       : use the 'filename' as input for profile with the
                                list of packages to packaging
-    --arch=tecmake_arch      : specifies the arch based on tecmake way. Use 'all'
-                               to pack all supported architectures
+    --arch=STRING_ARCH       : specifies the Tecmake-based architecture identification 
+                               or 'all' for platform-independent packages
     --svndir=/my/directory   : path to directory where are the source codes
                                (generates automatically the release information)
     --release=STRING_RELEASE : string to be used as release information
@@ -225,18 +230,5 @@ function run()
   assert(arguments["arch"] or config.TEC_UNAME,"Missing argument --arch and not found TEC_UNAME env!")
   arguments["arch"] = arguments["arch"] or config.TEC_UNAME
 
-  if arguments["arch"] ~= "all" then
-    return pack(arguments["arch"],arguments["profile"])
-  else
-    -- making for all
-    log.info("Creating multiples packages ...")
-    for _,arch in ipairs(config.SUPPORTED_ARCH) do
-      local ok = pack(arch,arguments["profile"])
-      if not ok then
-        return false
-      end
-    end
-  end
-
-  return true
+  return pack(arguments["arch"],arguments["profile"])
 end

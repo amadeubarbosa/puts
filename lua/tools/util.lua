@@ -35,11 +35,11 @@ log = {
 for level,_ in pairs(log._levels) do
   log[level]=function(...)
     if log._levels[level] then
-      local t = {}
-      for i,v in ipairs({...}) do
-        table.insert(t,tostring(v))
+      local args = {...}
+      for i=1,#args do
+        args[i] = tostring(args[i])
       end
-      log._handlers[level]:write(log._tags[level]..table.concat(t," ").."\n")
+      log._handlers[level]:write(log._tags[level]..table.concat(args," ").."\n")
       log._handlers[level]:flush()
     end
   end

@@ -73,21 +73,16 @@ function run()
 
   -- When no package is given assumes reconfiguration
   if arguments.package then
-    local msgInvalidFilename = "'".. arguments.package .."' isn't a valid package "..
-          "filename! You MUST provide something like '<release>-<profile>-<plat>.tar.gz'"..
-          " and <release> information can be <prefix>-<version> or only <version>."
+    local msgInvalidFilename = "'".. arguments.package .."' isn't a valid package filename!"..
+          " You MUST provide a package named like '<prefix>-<version>-<profile>-<plat>.tar.gz'."
     if arguments.package:match(".*tar.gz$") then
       -- Parsing the package filename to extract some informations
-      local _str,version,profile,arch
-      _str,arch = arguments.package:match("(.+)%-(.+).tar.gz$")
-      _str,profile = _str:match("(.+)%-(.+)")
-      -- When filenames has no prefix we could accept them also
-      if _str:match("%-") then
-        _str,version = _str:match("(.+)%-(.+)")
-      else
-        version = _str
+      local packageFilename = util.base_name(arguments.package)
+      local _,version,profile,arch = packageFilename:match("(.+)%-(.+)%-(.+)%-(.+).tar.gz$")
+      if not (version and profile and arch) then
+        log.error(msgInvalidFilename)
+        return false
       end
-      assert(version and profile and arch, "ERROR: "..msgInvalidFilename)
       local myplat = platforms[tools_cfg.TEC_SYSNAME]
       -- Starting the extraction of the package
       log.info("Using the temporary directory ", tools_cfg.TMPDIR)

@@ -19,7 +19,7 @@ local checker = {}
 function checker:libraries_deps(openbus_home)
   assert(type(openbus_home) == "string", "ERROR: Check libraries function received a nil parameter.")
   local myplat = platforms[config.TEC_SYSNAME]
-  assert(type(myplat.dylibext) == "string", "ERROR: Missing dynamic libraries extension information on 'platforms'.")
+  assert(type(myplat.dylibext) == "table", "ERROR: Missing dynamic libraries extension information on 'platforms'.")
   
   local function rollback()
     -- Recovering important variables to LuaVM
@@ -37,11 +37,17 @@ function checker:libraries_deps(openbus_home)
     openbus_home.."/core/bin/"..config.TEC_UNAME,
   }
 
-  package.cpath = package.cpath .. ";"..
-    -- posix module uses an unusual lua_open name!
-    check_paths[1] .."/libl?."..myplat.dylibext..";"..
-    -- others openbus libs uses lib<name>.<dylibext>
-    check_paths[1] .."/lib?."..myplat.dylibext..";"
+  for i,extension in ipairs(myplat.dylibext) do
+    package.cpath = package.cpath .. ";"..
+      -- posix module uses an unusual lua_open name!
+      check_paths[1] .."/libl?."..extension..";"..
+      -- others openbus libs uses lib<name>.<dylibext>
+      check_paths[1] .."/lib?."..extension
+  end
+  -- LUA_CPATH must end with ';'
+  if #myplat.dylibext > 0 then
+    package.cpath = package.cpath ..";"
+  end
 
   local misses = {}
   local incompatibles = {}
