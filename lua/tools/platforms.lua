@@ -71,7 +71,7 @@ platforms = {
     if testFileCmdOut:match("text") or testFileCmdOut:match("script") then
       return false
     end
-    if os.execute("ldd ".. file .." "..self.pipe_stderr) ~= 0 then
+    if os.execute("ldd ".. file .." 1>/dev/null 2>/dev/null") ~= 0 then
       return false, "isn't a ELF file"
     end
     --- Okay.. let's analyze ldd output
@@ -170,7 +170,7 @@ platforms.IRIX = {
     if testFileCmdOut:match("text") or testFileCmdOut:match("script") then
       return false
     end
-    if os.execute("elfdump -Dl ".. file .." "..self.pipe_stderr) ~= 0 then
+    if os.execute("elfdump -Dl ".. file .." 1>/dev/null 2>/dev/null") ~= 0 then
       return false, "isn't a ELF file"
     end
     --- Okay.. let's analyze ldd output
@@ -223,7 +223,8 @@ platforms.Darwin = {
     if testFileCmdOut:match("text") or testFileCmdOut:match("script") then
       return false
     end
-    if os.execute("otool -L ".. file .." "..self.pipe_stderr) ~= 0 or self.exec("otool -L "..file):match("is not an object file") then
+    if os.execute("otool -L ".. file .." 1> /dev/null 2>/dev/null") ~= 0 
+      or self.exec("otool -L "..file):match("is not an object file") then
       return false, "isn't a Mach-O file"
     end
     --- Okay.. let's analyze otool output
