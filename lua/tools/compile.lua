@@ -493,8 +493,6 @@ function run()
         " continue from the '"..util.nameversion(descriptors[last]).."' package."..
         " You can delete the '"..checkpoint.filename.."' file to avoid this behaviour.")
     else
-      -- Removing the checkpoint file when packages compiled fine
-      assert(checkpoint:clean())
       log.info("Packages were compiled successfully !")
       print "----------------------------------------------------------------------"
     end
@@ -503,6 +501,9 @@ function run()
       assert(processing(selection,nil,arguments))
     end
   end
+
+  -- Removing the checkpoint file when packages compiled fine
+  assert(checkpoint:clean())
 
   -- Cleaning environment
   os.execute(myplat.cmd.rm .. config.TMPDIR)
