@@ -210,7 +210,7 @@ local compat = {
 
           assert(t.build.type, "ERROR: build.type is missing for package: "..nameversion)
           -- loading specific build methods
-          ok, build_type = pcall(require, "tools.build." .. t.build.type)
+          local ok, build_type = pcall(require, "tools.build." .. t.build.type)
           assert(ok and type(build_type) == "table","ERROR: failed initializing "..
                               "build back-end for build type: '".. t.build.type ..
                               "' for package: ".. nameversion)
@@ -475,7 +475,7 @@ function run()
     checkpoint:loadRecoverFile()
     if arguments.select and arguments.rebuild then
       local selected = arguments.select
-      okays = checkpoint:getCorrectlyCompiled(arguments.select)
+      local okays = checkpoint:getCorrectlyCompiled(arguments.select)
       for i, pkgname in ipairs(okays) do
         checkpoint.packages[pkgname] = nil
       end
@@ -513,11 +513,8 @@ function run()
 
   -- Closing install log files
   util.close_cache()
-
-  -- After the environment cleaning, we throw the lua error
-  if not ok then
-    error(err)
-  end
+  
+  return true
 end
 
 local function build_driver (spec, arguments)
