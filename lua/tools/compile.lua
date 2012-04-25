@@ -415,7 +415,7 @@ function run()
           local spec_url = results
           _put_on(filteredDescriptorsTable, item, spec_url)
         else
-          log.warning("Package '"..pkg.."' wasn't found in remote repositories, skipping its compilation.")
+          log.warning("Package",item,"wasn't found in remote repositories, skipping its compilation.")
         end
       end
     end
