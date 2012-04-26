@@ -9,6 +9,7 @@ local log  = util.log
 local manifest   = require "tools.manifest"
 local descriptor = require "tools.descriptor"
 local search     = require "tools.search"
+local deps       = require "tools.deps"
 -- Local scope
 local string = require "tools.split"
 local platforms = require "tools.platforms"
@@ -37,19 +38,30 @@ local function mergeTables (t1, t2)
   end
   return t1
 end
--- Selects all .desc from a directory
-local function loadDescriptorsFromDir(dir, list)
-  assert(type(dir) == "string" and type(list) == "table","directory must be a string and list must be a table")
-  local files = myplat.exec(myplat.cmd.ls.." "..dir.."/*.desc "..myplat.pipe_stderr)
-  -- foreach filename...
-  local nextFile = files:gmatch("[^\n]+")
-  local filename = nextFile()
-  while (filename) do
-    log.info("Descriptor '".. filename .."' found automatically")
-    table.insert(list,filename)
-    filename = nextFile()
+-- Usefull for back-compatibility mode in descriptors that need the PUTS variables
+local function importAllConfigToGlobals()
+  for k,v in pairs(config) do
+    _G[k] = v
   end
-  return list
+end
+-- Reused in both back-compatibility and current compilation process
+local function build_driver (spec, arguments)
+  local nameversion = util.nameversion(spec)
+  if not spec.build then
+    spec.build = { type = "copy" }
+  end
+  -- loading specific build methods
+  local ok, build_type = pcall(require, "tools.build." .. spec.build.type)
+  assert(ok and type(build_type) == "table","[ERROR] failed initializing "..
+                      "build back-end for build type: '".. spec.build.type ..
+                      "' for package: ".. nameversion)
+
+  -- starting specific build methods in a protected way
+  local ok, err = pcall(build_type.run, spec, arguments, spec.directory)
+  if ok then
+    log.info("Package",nameversion,"compiled successfully.")
+  end
+  return ok, err
 end
 
 --------------------------------------------------------------------------------
@@ -138,21 +150,27 @@ local compat = {
         -- Loading basesoft description table
         local f, err = loadfile(filepath)
         if not f then
-          io.stdout:write("[ ERROR ] "); io.stdout:flush()
-          error("The file '".. filepath .. "' cannot be opened or hasn't a valid syntax!")
+          log.error(err)
+          return nil
         end
         f()
-        assert(type(basesoft)=="table","invalid 'basesoft' table, probably failed on loading "..filepath.." descriptor")
+        if (type(basesoft) ~= "table") then 
+          log.error("Invalid 'basesoft' table, file",filepath,"has an invalid syntax!")
+          return nil
+        end
 
         -- Loading packages description table
         filepath = arguments["packages"] or oldDirectory.."/packages.desc"
         local f, err = loadfile(filepath)
         if not f then
-          io.stdout:write("[ ERROR ] "); io.stdout:flush()
-          error("The file '".. filepath .. "' cannot be opened or hasn't a valid syntax!")
+          log.error(err)
+          return nil
         end
         f()
-        assert(type(packages)=="table","invalid 'packages' table, probably failed on loading "..filepath.." descriptor")
+        if (type(packages) ~= "table") then
+          log.error("Invalid 'packages' table, file",filepath,"has an invalid syntax!")
+          return nil
+        end
 
         local descriptors = indexByName(mergeTables(basesoft,packages))
         basesoft = nil
@@ -183,6 +201,20 @@ local compat = {
       end,
     },
     v1_05 = {
+      -- Utility to selects all .desc from a directory
+      loadDescriptorsFromDir = function (dir, list)
+        assert(type(dir) == "string" and type(list) == "table","directory must be a string and list must be a table")
+        local files = myplat.exec(myplat.cmd.ls.." "..dir.."/*.desc "..myplat.pipe_stderr)
+        -- foreach filename...
+        local nextFile = files:gmatch("[^\n]+")
+        local filename = nextFile()
+        while (filename) do
+          log.info("Descriptor '".. filename .."' found automatically")
+          table.insert(list,filename)
+          filename = nextFile()
+        end
+        return list
+      end,
       -- Parses package description and delegates to tools.build.<method>.run
       parseDescriptions = function (desc, arguments)
         ------------------------------------------------------------------------------
@@ -190,12 +222,6 @@ local compat = {
         ------------------------------------------------------------------------------
         local function compile(t)
           local nameversion = util.nameversion(t)
-          print "----------------------------------------------------------------------"
-          -- hack when no build is provided, to _always_ copy install_files , dev_files
-          if not t.build then
-            t.build = { type = "copy" }
-          end
-
           -- Back-compatibility to support the old Openbus (=< 1.4.2) package descriptions
           if arguments.compat_v1_04 and t.source then
             t.url = t.source
@@ -208,15 +234,7 @@ local compat = {
             end
           end
 
-          assert(t.build.type, "ERROR: build.type is missing for package: "..nameversion)
-          -- loading specific build methods
-          local ok, build_type = pcall(require, "tools.build." .. t.build.type)
-          assert(ok and type(build_type) == "table","ERROR: failed initializing "..
-                              "build back-end for build type: '".. t.build.type ..
-                              "' for package: ".. nameversion)
-
-          -- starting specific build methods in a protected way
-          return pcall(build_type.run, t, arguments, t.directory)
+          return build_driver(t, arguments)
         end
 
         for i, t in ipairs(desc) do
@@ -251,10 +269,8 @@ function run()
                                already, very common for debug and devel purposes)
     --list                   : list all package names from description files. When
                                '--select' is used, it'll help you to validate your choose.
-    --select="pkg1 pkg2 ..."        : chooses which packages to compile
-    --profile="file1 file2 ..."     : uses a list of profile files which shoud have a list
-                                      of package names inside (implicit --select usage)
-    --exclude="pkg1 pkg2 ..."       : list of package names to exclude of the compile process
+    --select="pkg1 pkg2 ..."    : chooses which packages to compile
+    --exclude="pkg1 pkg2 ..."   : list of package names to exclude of the compile process
     --update                 : updates source codes from the repositories
 
    BACK-COMPATIBILITY OPTIONS:
@@ -262,6 +278,8 @@ function run()
                                support the format used until the OpenBus 1.4.2
     --compat_v1_05           : changes the processing of the package descriptions to
                                support the format used until the OpenBus 1.5.3
+    --profile="file1 file2 ..."     : uses a list of profile files which shoud have a list of
+                                      package names inside (requires --compat_v1_05 or --compat_v1_04)
     --descriptors="file1 file2 ..." : uses filenames as input for package descriptors (requires --compat_v1_05)
 
    NOTES:
@@ -308,16 +326,27 @@ function run()
   log.info("The packages will be compiled and copied to: ".. config.INSTALL.TOP)
   log.info("Temporary directory used: ".. config.TMPDIR)
 
-  -- Loading description files provided
+  -- [back-compatibility] Loading of description files
   local descriptors = {}
   if arguments.compat_v1_04 then
+    importAllConfigToGlobals()
     -- Back-compatibility to load both old basesoft.desc and packages.desc files
     descriptors = compat.v1_04.loadDescriptors(arguments)
+    if not descriptors then
+      return false
+    end
+    -- Back-compatibility option to adapt the old package description format
+    -- See the implementation of the parseDescriptions() function also.
+    compat.v1_04.adaptDescriptorsToNewParser(descriptors)
   elseif arguments.compat_v1_05 then
+    importAllConfigToGlobals()
     -- Inserting automatically all .desc files into DEPLOYDIR directory
     if not arguments.descriptors then
       arguments.descriptors = {}
-      loadDescriptorsFromDir(config.DEPLOYDIR,arguments.descriptors)
+      arguments.descriptors = compat.v1_05.loadDescriptorsFromDir(config.DEPLOYDIR,{})
+      if not ok then
+        return false
+      end
     end
     for _,descriptorFile in ipairs(arguments["descriptors"]) do
       local tempTable = {}
@@ -332,10 +361,14 @@ function run()
       log.info("Loading descriptor named '".. descriptorFile .."'")
       local f, err = loadfile(descriptorFile)
       if not f then
-        error("The file '".. descriptorFile .. "' cannot be opened or isn't a valid descriptor file!")
+        log.error(err)
+        return false
       end
       setfenv(f,tempTable); f()
-      assert(tempTable.descriptors,"'descriptors' table not defined in '"..descriptorFile.."'")
+      if not tempTable.descriptors then
+        log.error("Invalid 'descriptors' table, file",descriptorFile,"has an invalid syntax!")
+        return false
+      end
       -- ATTENTION: 
       -- current descriptor file format CONSIDER a 'descriptors' table inside
       descriptors = mergeTables(descriptors,tempTable.descriptors)
@@ -343,8 +376,8 @@ function run()
     descriptors = indexByName(descriptors)
   end
 
-  -- Including package names (using select semantics) from a profile
-  if arguments["profile"] then
+  -- [back-compatibility] Selection using --profile files
+  if (arguments.compat_v1_05 or arguments.compat_v1_04) and arguments["profile"] then
     assert(type(arguments.profile) == "table")
     for _,profile in ipairs(arguments["profile"]) do 
     local _,name = profile:match("(.*)/(.*)") --extracts name "dir/name.profile"
@@ -375,7 +408,7 @@ function run()
     end
   end
 
-  -- Applying --select filter provided by user
+  -- Applying --select filter
   if arguments["select"] then
     assert(type(arguments.select) == "table")
     local filteredDescriptorsTable = {}
@@ -397,10 +430,13 @@ function run()
 
         local function _put_on(descriptorList, pkg, spec_url)
           assert(spec_url)
-          local _, filename = assert(util.download(pkg,spec_url,config.TMPDIR))
-          local desc = assert(descriptor.load(filename))
-          table.insert(descriptorList, desc)
-          assert(os.remove(filename))
+          if not descriptorList[pkg] then
+            local _, filename = assert(util.download(pkg,spec_url,config.TMPDIR))
+            local desc = assert(descriptor.load(filename))
+            table.insert(descriptorList, desc)
+            descriptorList[pkg] = desc
+            assert(os.remove(filename))
+          end
         end
 
         if type(results) == "table" then
@@ -423,7 +459,7 @@ function run()
     descriptors = filteredDescriptorsTable
   end
 
-  -- Applying --exclude filter provided by user
+  -- Applying --exclude filter
   if arguments["exclude"] then
     assert(type(arguments.exclude) == "table")
     -- hack to manipulate in that form: if arguments.exclude[name] then ...
@@ -438,99 +474,86 @@ function run()
        table.insert(filteredDescriptorsTable,pkgdesc)
        filteredDescriptorsTable[nameversion] = pkgdesc
      else
-       log.info("Excluding the package named: ", nameversion)
+       log.info("Excluding the package named:", nameversion)
      end
     end
     -- always updates the references
     descriptors = filteredDescriptorsTable
   end
 
-  -- Back-compatibility option to adapt the old package description format
-  -- See the implementation of the parseDescriptions() function also.
-  if arguments.compat_v1_04 then
-    compat.v1_04.adaptDescriptorsToNewParser(descriptors)
-  end
-
-  -- Listing packages when '--list' arguments
+  -- Listing package selection only
   if arguments["list"] then
     if #descriptors > 0 then
       log.info("Available package descriptors to compile:")
       for _, t in ipairs(descriptors) do
         log.info("\t"..util.nameversion(t))
+        if t.dependencies then
+          for i, dep in ipairs(t.dependencies) do
+            local dep_spec_url = search.find_suitable_rock( dep, config.SPEC_SERVERS, false )
+            local nameversion = util.base_name(dep_spec_url):gsub("(%.desc)","")
+            if arguments.exclude and arguments.exclude[nameversion] then
+              -- nothing
+            else
+              log.info("\t  |--> "..nameversion)
+            end
+          end
+        end        
       end
       return true
     else
-      log.info("No descriptor was provided.")
-    end
-  end
-  
-  -- Checkpoint checks
-  if arguments.force then
-    -- Removing the checkpoint file when --force is passed
-    -- Assumption: the user wants to control manually
-    assert(checkpoint:clean())
-  else
-    -- Recovering from the last package that was built successfully
-    -- but only if the last compilation failed
-    checkpoint:loadRecoverFile()
-    if arguments.select and arguments.rebuild then
-      local selected = arguments.select
-      local okays = checkpoint:getCorrectlyCompiled(arguments.select)
-      for i, pkgname in ipairs(okays) do
-        checkpoint.packages[pkgname] = nil
-      end
+      log.error("No descriptor was provided.")
+      return false
     end
   end
 
+  -- Compilations
   if arguments.compat_v1_05 or arguments.compat_v1_04 then
+    -- Back-compatibility behaviour...
+    -- Checkpoint checks
+    if arguments.force then
+      -- Removing the checkpoint file when --force is passed
+      -- Assumption: the user wants to control manually
+      assert(checkpoint:clean())
+    else
+      -- Recovering from the last package that was built successfully
+      -- but only if the last compilation failed
+      checkpoint:loadRecoverFile()
+      if arguments.select and arguments.rebuild then
+        local selected = arguments.select
+        local okays = checkpoint:getCorrectlyCompiled(arguments.select)
+        for i, pkgname in ipairs(okays) do
+          checkpoint.packages[pkgname] = nil
+        end
+      end
+    end
     -- Parsing descriptions and proceed to compile & install procedures
-    -- REMEMBER: parseDescriptions returns true/false and 
     local ok, err, last = compat.v1_05.parseDescriptions(descriptors, arguments)
     if not ok then
-      -- checkpoint
+      -- Checkpoint
       assert(checkpoint:saveRecoverFile(descriptors, last))
-      log.error("Some errors were raised. In next time, the building will"..
+      log.error("Some errors were raised in compilation process. In next time, the building will"..
         " continue from the '"..util.nameversion(descriptors[last]).."' package."..
         " You can delete the '"..checkpoint.filename.."' file to avoid this behaviour.")
-    else
-      log.info("Packages were compiled successfully !")
-      print "----------------------------------------------------------------------"
+      -- Closing metadata files used
+      util.close_cache()
+      return false
     end
+    -- Removing the checkpoint file when packages compiled fine
+    assert(checkpoint:clean())
   else
+    -- Most updated behaviour
     for i, selection in ipairs(descriptors) do
       assert(processing(selection,nil,arguments))
     end
   end
 
-  -- Removing the checkpoint file when packages compiled fine
-  assert(checkpoint:clean())
-
   -- Cleaning environment
   os.execute(myplat.cmd.rm .. config.TMPDIR)
-  --~ I shouldn't need this!!
-  --~ os.execute("cd ".. config.INSTALL.TOP.. "; unlink lib/lib")
-  --~ os.execute("cd ".. config.INSTALL.TOP.. "; unlink include/include")
-  --~ os.execute("cd ".. config.INSTALL.TOP.. "; unlink core/services/services")
 
-  -- Closing install log files
+  -- Closing metadata files used
   util.close_cache()
   
   return true
-end
-
-local function build_driver (spec, arguments)
-  local nameversion = util.nameversion(spec)
-  if not spec.build then
-    spec.build = { type = "copy" }
-  end
-  -- loading specific build methods
-  local ok, build_type = pcall(require, "tools.build." .. spec.build.type)
-  assert(ok and type(build_type) == "table","[ERROR] failed initializing "..
-                      "build back-end for build type: '".. spec.build.type ..
-                      "' for package: ".. nameversion)
-
-  -- starting specific build methods in a protected way
-  return pcall(build_type.run, spec, arguments, spec.directory)
 end
 
 local dependencies_cache = { --[[ pkg_nameversion = { dependencies list } ]] }
@@ -572,7 +595,7 @@ function processing (pkg, specfile, arguments)
 
     if manifest.is_installed(buildtree_manifest, desc.name, desc.version) and
       not (arguments.force or arguments.update or arguments.rebuild) then
-      log.info("Package",util.nameversion(desc),"is already compiled")
+      log.info("Package",nameversion,"is already compiled")
     else
       if desc.url then
         log.info("Fetching sources for",nameversion)
