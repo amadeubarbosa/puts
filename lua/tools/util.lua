@@ -367,7 +367,7 @@ function serialize_table(filename,t,name)
           elseif k:match("%p") then
             f:write(" [\""..tostring(k).."\"] = ")
           else
-            f:write(" "..k.." = ")
+            f:write(" [\""..k.."\"] = ")
           end
           serialize(v)
           f:write(",\n")
