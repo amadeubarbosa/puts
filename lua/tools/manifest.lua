@@ -123,7 +123,10 @@ function load(repo_url)
    end
 
    local manifest = local_loader(pathname)
-   os.remove(pathname)
+
+   if protocol ~= "file" then
+     os.remove(pathname)
+   end
    
    return manifest
 end
