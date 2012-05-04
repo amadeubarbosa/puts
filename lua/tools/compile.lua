@@ -485,6 +485,7 @@ function run()
   if arguments["list"] then
     if #descriptors > 0 then
       log.info("Available package descriptors to compile:")
+      search.enable_cache()
       for _, t in ipairs(descriptors) do
         log.info("\t"..util.nameversion(t))
         if t.dependencies then
@@ -497,8 +498,9 @@ function run()
               log.info("\t  |--> "..nameversion)
             end
           end
-        end        
+        end
       end
+      search.disable_cache()
       return true
     else
       log.error("No descriptor was provided.")
@@ -542,6 +544,7 @@ function run()
     assert(checkpoint:clean())
   else
     -- Most updated behaviour
+    search.enable_cache()
     for i, selection in ipairs(descriptors) do
       local ok, err = pcall(processing,selection,nil,arguments)
       if not ok then
@@ -552,6 +555,7 @@ function run()
         return false
       end
     end
+    search.disable_cache()
   end
 
   -- Cleaning environment
@@ -597,7 +601,6 @@ function processing (pkg, specfile, arguments)
     log.info("Verifying dependencies of",nameversion)
 
     local dependencies_resolved = {}
-    search.enable_cache()
     assert(deps.fulfill_dependencies(desc, config.SPEC_SERVERS, buildtree_manifest, 
                                      processing, dependencies_resolved, arguments))
 
@@ -629,8 +632,6 @@ function processing (pkg, specfile, arguments)
       end
       metadata:close()
     end
-
-    search.disable_cache()
 
     return true
 end
