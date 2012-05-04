@@ -412,6 +412,7 @@ function run()
   if arguments["select"] then
     assert(type(arguments.select) == "table")
     local filteredDescriptorsTable = {}
+    search.enable_cache()
     for _,item in ipairs(arguments["select"]) do
       if arguments.compat_v1_05 or arguments.compat_v1_04 then
         -- cloning the references in a new table
@@ -455,6 +456,7 @@ function run()
         end
       end
     end
+    search.disable_cache()
     -- always updates the references
     descriptors = filteredDescriptorsTable
   end
