@@ -122,7 +122,10 @@ function load(repo_url)
       pathname = file
    end
 
-   return local_loader(pathname)
+   local manifest = local_loader(pathname)
+   os.remove(pathname)
+   
+   return manifest
 end
 
 --- Scan a repository and output a manifest file.

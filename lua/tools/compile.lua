@@ -543,7 +543,14 @@ function run()
   else
     -- Most updated behaviour
     for i, selection in ipairs(descriptors) do
-      assert(processing(selection,nil,arguments))
+      local ok, err = pcall(processing,selection,nil,arguments)
+      if not ok then
+        log.error("Failure on compilation of",util.nameversion(selection),"software.")
+        log.error(err)
+        os.execute(myplat.cmd.rm .. config.TMPDIR)
+        util.close_cache()
+        return false
+      end
     end
   end
 
@@ -588,8 +595,9 @@ function processing (pkg, specfile, arguments)
     assert(buildtree_manifest)
     
     log.info("Verifying dependencies of",nameversion)
-    
+
     local dependencies_resolved = {}
+    search.enable_cache()
     assert(deps.fulfill_dependencies(desc, config.SPEC_SERVERS, buildtree_manifest, 
                                      processing, dependencies_resolved, arguments))
 
@@ -621,6 +629,8 @@ function processing (pkg, specfile, arguments)
       end
       metadata:close()
     end
+
+    search.disable_cache()
 
     return true
 end

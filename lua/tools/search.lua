@@ -10,6 +10,8 @@ module("tools.search",package.seeall)
 -------------------------------------------------------------------------------
 -- local functions
 -------------------------------------------------------------------------------
+local manifest_cache
+
 local function pick_latest_version(name, versions)
    assert(type(name) == "string")
    assert(type(versions) == "table")
@@ -97,7 +99,20 @@ local function manifest_search(results, repo, query)
    assert(type(query) == "table")
    
    query_arch_as_table(query)
-   local manifest_table, err = manifest.load(repo)
+   local manifest_table, err
+
+   if type(manifest_cache) == "table" then
+     if not manifest_cache[repo] then
+        manifest_table, err = manifest.load(repo)
+        if manifest_table then
+          manifest_cache[repo] = manifest_table
+        end
+      else
+        manifest_table = manifest_cache[repo]
+      end
+   else
+     manifest_table, err = manifest.load(repo)
+   end
 
    if not manifest_table then
       return nil, "Failed loading manifest: "..err
@@ -118,6 +133,14 @@ end
 -------------------------------------------------------------------------------
 -- public functions
 -------------------------------------------------------------------------------
+function enable_cache()
+  manifest_cache = {}
+end
+
+function disable_cache()
+  manifest_cache = nil
+end
+
 function search_repos(query, servers)
    assert(type(query) == "table")
 

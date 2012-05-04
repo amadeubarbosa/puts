@@ -69,7 +69,8 @@ local operators = {
 }
 
 local deltas = {
-  --TODO: snapshot,scm,cvs garantem comparação correta contra números até 99999
+   --IMPORTANTE: 
+   --snapshot,scm,cvs garantem comparação correta contra números até 99999
    snapshot = 100000,
    scm =    100000,
    cvs =    100000,
