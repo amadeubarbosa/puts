@@ -52,11 +52,12 @@ VERSION_ID="OB_HEAD"
 ####sanity checks
 if [ -n "$1" ]; then
 	is_tag_or_branch=$( echo $1 |egrep -e "tags|branches|core/trunk" )
-	[ "$?" != "0" ] && die "[ ERROR ] I just know to handle tags and branches.\
- Do you want to use the trunk? Use no arguments!"
+	[ "$?" != "0" ] && die "[ ERROR ] This script just know to handle tags, branches or core/trunk.\
+ If you want to use the trunk, use no arguments!"
 	VERSION="$1"
-	VERSION_ID=$( echo $VERSION|cut -d/ -f2 )
-	echo "[ INFO ] Using the following subversion path: $SVN_PROJECTURL"
+	VERSION_ID=$( echo $VERSION|sed 's#.*tags/##'|sed 's#.*branches/##'|sed 's#.*core/trunk#OB_CORE_HEAD#' )
+	[ -z "$VERSION" -o -z "$VERSION_ID" ] && die "[ ERROR ] Failed to understand $1 argument.\
+ Parsing results: VERSION=$VERSION VERSION_ID=$VERSION_ID"
 fi
 
 WORKSPACE=${WORKSPACE:-"/local/openbus"}
