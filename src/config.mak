@@ -17,6 +17,7 @@ PRELOAD_FLAGS= -p PUTS_API -o putspreloaded -d ${PRECMP_DIR}
 PUTS_MODULES=$(addprefix tools., \
 	platformid \
 	config \
+	build.cmake \
 	build.tecmake \
 	build.copy \
 	build.autotools \
@@ -24,12 +25,18 @@ PUTS_MODULES=$(addprefix tools., \
 	build.mavenimport \
 	build.ant \
 	build.command \
+	fetch.file \
 	fetch.http \
 	fetch.svn \
 	checklibdeps \
 	platforms \
 	split \
 	util \
+	manifest \
+	path \
+	search \
+	deps \
+	descriptor \
 	compile \
 	installer \
 	makepack \
