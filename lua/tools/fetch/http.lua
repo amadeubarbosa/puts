@@ -14,7 +14,7 @@ function run(path, url)
   elseif os.execute("which curl >/dev/null 2>/dev/null") == 0 then
     download_cmd = "curl -o "..filename.." "..url
   end
-  assert(download_cmd, "ERROR: HTTP client unavailable (tried wget,curl).")
+  assert(download_cmd, "HTTP client unavailable (tried wget,curl).")
   download_cmd = "cd "..path.." && ".. download_cmd
   return (os.execute(download_cmd) == 0), path.."/"..filename
 end

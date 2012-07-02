@@ -349,11 +349,25 @@ local function values_set(tbl)
    return set
 end
 
+--- Check dependencies of a package descriptor and execute a custom hook.
+-- @param spec Package description which dependencies will be resolved
+-- @param servers List of URLs pointing to package description servers
+-- @param local_manifest Local manifest of available packages
+-- @param hook Lua function to be called when some dependency is missing
+-- @param memoized List of package names already resolved recursively
+-- @param ... Parameteres application-specific forwarded to the hook function
+-- @return boolean or (nil, string) True if no errors occurred, or 
+-- nil and an error message otherwise
 function fulfill_dependencies(spec, servers, local_manifest, hook, memoized, ... )
    assert(type(spec)=="table")
    assert(type(servers)=="table")
    assert(type(local_manifest)=="table")
    assert(not hook or type(hook)=="function")
+   -- Specification of the hook function:
+   -- function hook (first, second, ...)
+   -- first  : table with the package descriptor
+   -- second : string with the specfile location
+   -- ...    : any application-specific
    assert(not memoized or type(memoized) == "table")
 
    local nameversion = util.nameversion(spec)
@@ -406,11 +420,11 @@ function fulfill_dependencies(spec, servers, local_manifest, hook, memoized, ...
 
    if next(missing) then
       log.info("Missing dependencies for "..spec.name..":")
-      for _, dep in pairs(missing) do
+      for _, dep in util.sortedpairs(missing) do
          log.info("\t",show_dep(dep))
       end
 
-      for _, dep in pairs(missing) do
+      for _, dep in util.sortedpairs(missing) do
          -- Double-check in case dependency was filled by recursion.
          if not match_dep(dep, nil, local_manifest) then
             local search = require "tools.search"

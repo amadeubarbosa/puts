@@ -170,7 +170,7 @@ function update_manifest(name, version, repo, manifest)
    assert(type(version) == "string")
    assert(type(repo) == "string")
 
-   local manifest, err = load(repo)
+   local manifest, err = manifest or load(repo)
    if not manifest then
       log.error("No existing manifest. Attempting to rebuild...")
       local ok, err = rebuild_manifest(repo)
@@ -187,5 +187,12 @@ function update_manifest(name, version, repo, manifest)
 
    local ok, err = store_results(results, manifest)
    if not ok then return nil, err end
-   return util.serialize_table(path.pathname(repo, "manifest"), manifest)
+
+   local ok, err = util.serialize_table(path.pathname(repo, "manifest"), manifest)
+   if not ok then
+     return nil, err
+   end
+   
+   search.update_cache()
+   return true
 end

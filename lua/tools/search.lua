@@ -115,7 +115,7 @@ local function manifest_search(results, repo, query)
    end
 
    if not manifest_table then
-      return nil, "Failed loading manifest: "..err
+      return nil, "Failed loading manifest: "..tostring(err)
    end
    for name, versions in pairs(manifest_table.repository) do
       for version, items in pairs(versions) do
@@ -139,6 +139,13 @@ end
 
 function disable_cache()
   manifest_cache = nil
+end
+
+function update_cache()
+  for repo, outdated_manifest in pairs(manifest_cache) do
+    log.warning("Updating the cache of manifest about the repository "..repo)
+    manifest_cache[repo] = manifest.load(repo)
+  end
 end
 
 function search_repos(query, servers)

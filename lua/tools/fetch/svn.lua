@@ -10,7 +10,7 @@ function run(path, url)
 
   local info = util.execute("svn info ".. path)
   if os.execute("which svn >/dev/null 2>/dev/null") ~= 0 then
-    error("[ ERROR ] SVN client unavailable (tried svn).")
+    error("SVN client unavailable (tried svn).")
   end
   if os.execute("test -d " .. path) ~= 0 then
     download_cmd = "svn co ".. url .." ".. path
@@ -20,7 +20,7 @@ function run(path, url)
   url = url:match("(.+)/$") or url
   if info:find(url,1,true) == nil then
     local actualRepository = info:match("URL: ([%w%c%p]*)\n") or "?"
-    error(string.format("[ ERROR ] A different SVN URL (%s) has been used in '%s' directory. " ..
+    error(string.format("A different SVN URL (%s) has been used in '%s' directory. " ..
         "Remove '%s' directory if you need to use '%s' in this directory.", actualRepository, path, path, url))
   end
 

@@ -295,13 +295,15 @@ function run()
   end
 
   if (arguments.basesoft or arguments.packages) and not arguments.compat_v1_04 then
-    error("The arguments --packages and --basesoft are deprecated. "..
+    log.error("The arguments --packages and --basesoft are deprecated. "..
           "Try --descriptors option. You must use --compat if you need "..
           "back-compatibility support for older formats.")
+    return false
   end
   if (arguments.descriptors and not arguments.compat_v1_05) then
-    error("The argument --descriptors requires the usage of --compat_v1_05 parameter "..
+    log.error("The argument --descriptors requires the usage of --compat_v1_05 parameter "..
           "in order to proceed the processing of previous descriptor format.")
+    return false
   end
 
   if arguments["v"] or arguments["verbose"] then
@@ -535,6 +537,7 @@ function run()
     if not ok then
       -- Checkpoint
       assert(checkpoint:saveRecoverFile(descriptors, last))
+      if err then log.error(tostring(err)) end
       log.error("Some errors were raised in compilation process. In next time, the building will"..
         " continue from the '"..util.nameversion(descriptors[last]).."' package."..
         " You can delete the '"..checkpoint.filename.."' file to avoid this behaviour.")
@@ -605,6 +608,8 @@ function processing (pkg, specfile, arguments)
     local dependencies_resolved = {}
     assert(deps.fulfill_dependencies(desc, config.SPEC_SERVERS, buildtree_manifest, 
                                      processing, dependencies_resolved, arguments))
+
+    buildtree_manifest = assert(manifest.load(buildtree))
 
     if manifest.is_installed(buildtree_manifest, desc.name, desc.version) and
       not (arguments.force or arguments.update or arguments.rebuild) then

@@ -304,7 +304,7 @@ local patt="%-?%-?([%w%_]+)(=?)(.*)"
 
 -- Parsing arguments and returns a 'table[option]=value'
 function parse_args(arg, usage_msg, allowempty)
-  assert(type(arg)=="table","ERROR: Missing arguments! This program should be loaded from console.")
+  assert(type(arg)=="table","[ERROR  ] Missing arguments! This program should be loaded from console.")
   assert(usage_msg)
   local arguments = {}
   -- concatenates with the custom usage_msg
@@ -338,55 +338,64 @@ function parse_args(arg, usage_msg, allowempty)
 end
 
 -- Serializing table to file (original: http://lua.org/pil)
-function serialize_table(filename,t,name)
-  local f = assert(io.open(filename,"w"))
-  -- if we got a named table
-  if type(name) == "string" then
-    f:write(name.." = ")
-  end
-
-  local function serialize(o,firsttime)
-    if type(o) == "number" then
-      f:write(o)
-    elseif type(o) == "boolean" then
-      f:write(tostring(o))
-    elseif type(o) == "string" then
-      f:write(string.format("%q",o))
-    elseif type(o) == "table" then
+function serialize_table(filename,tbl,name)
+  local indent = 0
+  local tabchar = "  "
+  local function serialize(f,var,firsttime)
+    if type(var) == "number" then
+      f:write(var)
+    elseif type(var) == "boolean" then
+      f:write(tostring(var))
+    elseif type(var) == "string" then
+      f:write(string.format("%q",var))
+    elseif type(var) == "table" then
       if firsttime then
-        for k,v in pairs(o) do
+        for k,v in sortedpairs(var) do
           assert(type(k)=="string")
-          f:write(" "..k.." = ")
-          serialize(v)
+          f:write(k.." = ")
+          serialize(f,v)
         end
       else
         f:write("{\n")
-        for k,v in pairs(o) do
+        indent = indent + 1
+        for k,v in sortedpairs(var) do
+          for _=1,indent do f:write(tabchar) end
           if type(k) == "number" then
-            f:write(" ["..tostring(k).."] = ")
+            f:write("["..tostring(k).."] = ")
           elseif k:match("%p") then
-            f:write(" [\""..tostring(k).."\"] = ")
+            f:write("[\""..tostring(k).."\"] = ")
           else
-            f:write(" [\""..k.."\"] = ")
+            f:write("[\""..k.."\"] = ")
           end
-          serialize(v)
-          f:write(",\n")
+          serialize(f,v)
+          if type(v) == "table" then
+            for _=1,indent do f:write(tabchar) end
+            f:write(",\n")
+          else
+            f:write(",\n")
+          end
         end
+        indent = indent - 1
+        for _=1,indent do f:write(tabchar) end
         f:write("}\n")
       end
     else
       f:close()
       os.remove(filename)
-      error("Cannot serialize types like "..type(o))
+      error("Cannot serialize types like "..type(var))
     end
   end
 
+  local f = assert(io.open(filename,"w"))
   if name then
-    serialize(t)
+    assert(type(name)=="string")
+    f:write(name.." = ")
+    serialize(f,tbl)
   else
-    serialize(t,true)
+    serialize(f,tbl,true)
   end
   f:close()
+
   return true
 end
 
@@ -414,4 +423,52 @@ function deep_copy(table_orig, table_new)
   end
   
   return table_new
+end
+
+--- Return an array of keys of a table.
+-- @param tbl table: The input table.
+-- @return table: The array of keys.
+function keys(tbl)
+   local ks = {}
+   for k,_ in pairs(tbl) do
+      table.insert(ks, k)
+   end
+   return ks
+end
+
+local function default_sort(a, b)
+   local ta = type(a)
+   local tb = type(b)
+   if ta == "number" and tb == "number" then
+      return a < b
+   elseif ta == "number" then
+      return true
+   elseif tb == "number" then
+      return false
+   else
+      return tostring(a) < tostring(b)
+   end
+end
+
+-- The iterator function used internally by util.sortedpairs.
+-- @param tbl table: The table to be iterated.
+-- @param sort_function function or nil: An optional comparison function
+-- to be used by table.sort when sorting keys.
+-- @see sortedpairs
+local function sortedpairs_iterator(tbl, sort_function)
+   local ks = keys(tbl)
+   table.sort(ks, sort_function or default_sort)
+   for _, k in ipairs(ks) do
+      coroutine.yield(k, tbl[k])
+   end
+end
+
+--- A table iterator generator that returns elements sorted by key,
+-- to be used in "for" loops.
+-- @param tbl table: The table to be iterated.
+-- @param sort_function function or nil: An optional comparison function
+-- to be used by table.sort when sorting keys.
+-- @return function: the iterator function.
+function sortedpairs(tbl, sort_function)
+   return coroutine.wrap(function() sortedpairs_iterator(tbl, sort_function) end)
 end
