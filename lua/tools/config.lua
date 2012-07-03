@@ -26,7 +26,7 @@ local id = require "tools.platformid"
 
 module("tools.config", package.seeall)
 
-SPEC_SERVERS = {
+SPEC_SERVERS = SPEC_SERVERS or {
 "http://www.tecgraf.puc-rio.br/ftp_pub/openbus/repository/specs",
 --  "file:///Users/amadeu/Work/Tecgraf/SVN/openbus/puts/trunk/files/converted",
 }
