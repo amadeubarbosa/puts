@@ -28,7 +28,7 @@ function run()
   
   NOTES:
     The prefix '--' is optional in all options.
-    So '--help' or '-help' or yet 'help' all are the same option.]],true)
+    So '--help' or '-help' or yet 'help' all are the same option.]],false)
 
   if arguments.installed then
     log.info("Packages installed on "..config.PRODAPP)
