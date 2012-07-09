@@ -177,20 +177,6 @@ function base_name(pathname)
    return base or pathname
 end
 
--- URLs should be in the "protocol://path" format.
--- For local pathnames, "file" is returned as the protocol.
--- @param url string: an URL or a local pathname.
--- @return string, string: the protocol, and the absolute pathname without the protocol.
-function split_url(url)
-  assert(type(url) == "string")
-  local protocol, pathname = url:match("^([^:]*)://(.*)")
-  if not protocol then
-    protocol = "file"
-    pathname = url
-  end
-  return protocol, pathname
-end
-
 --- Unpack an archive.
 -- Extract the contents of an archive, detecting its format by
 -- filename extension.

@@ -27,8 +27,8 @@ local id = require "tools.platformid"
 module("tools.config", package.seeall)
 
 SPEC_SERVERS = SPEC_SERVERS or {
-"http://www.tecgraf.puc-rio.br/ftp_pub/openbus/repository/specs",
---  "file:///Users/amadeu/Work/Tecgraf/SVN/openbus/puts/trunk/files/converted",
+  "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/puts/repository",
+  "http://www.tecgraf.puc-rio.br/ftp_pub/openbus/repository/specs",
 }
 
 TEC_UNAME = TEC_UNAME or os.getenv("TEC_UNAME") or id.TEC_UNAME

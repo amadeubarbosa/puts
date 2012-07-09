@@ -30,9 +30,13 @@ function make_url(parent, name, version, arch)
    else
       filename = filename.."."..arch..".pkg"
    end
-   return pathname(parent, filename):gsub(FILE_SEPARATOR,"/") --fix because use of FILE_SEPARATOR in pathname
+   return parent.."/"..filename
 end
 
+-- URLs should be in the "protocol://path" format.
+-- For local pathnames, "file" is returned as the protocol.
+-- @param url string: an URL or a local pathname.
+-- @return string, string: the protocol, and the absolute pathname without the protocol.
 function split_url(url)
    assert(type(url) == "string")
    

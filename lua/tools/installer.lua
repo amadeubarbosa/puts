@@ -31,6 +31,7 @@ function run()
   -- Parsing arguments
   local arguments = util.parse_args(arg,[[
     --help                   : show this help
+    --verbose                : turn ON the VERBOSE mode (show the system commands)
     --config=filename        : use 'filename' to import a previous configuration
     --package=filename       : package 'filename' to unpack, configure and install
     --template=filename      : use 'filename' as input for answers
