@@ -1,11 +1,10 @@
-local config = require "tools.config"
-
--- Local scope
-local string = require "tools.split"
-local platforms = require "tools.platforms"
-local myplat = platforms[config.TEC_SYSNAME]
+local config            = require "tools.config"
+local string            = require "tools.split"
+local platforms         = require "tools.platforms"
+local path              = require "tools.path"
+local myplat            = platforms[config.TEC_SYSNAME]
 local default_osexecute = os.execute
-local io = io
+local io                = io
 
 module("tools.util", package.seeall)
 
@@ -207,7 +206,7 @@ end
 -- Downloading
 function download(pkgname, from, targetdir)
   assert(type(pkgname) == "string" and type(from) == "string")
-  local proto, url = split_url(from)
+  local proto, url = path.split_url(from)
 
   local handler
   if proto == "http" or proto == "https" or proto == "ftp" then
