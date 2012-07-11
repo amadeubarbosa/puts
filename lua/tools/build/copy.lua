@@ -14,7 +14,7 @@ function run(t,arguments,build_dir)
   assert(type(t) == "table")
   -- we assume a default build_dir pointing to config.PRODAPP
   if not build_dir then
-    build_dir = path.pathname(config.PRODAPP,util.nameversion(t))
+    build_dir = path.pathname(config.PRODAPP,nameversion)
   end
   util.log.info("Copying files from the source directory '"..build_dir.."' ...")
 

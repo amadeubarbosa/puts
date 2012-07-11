@@ -10,7 +10,7 @@ module("tools.build.mavenimport", package.seeall)
 function run(t, arguments)
   local nameversion = util.nameversion(t)
   util.log.info("Building",nameversion,"using mavenimport driver.")
-  local build_dir = t.build.src or path.pathname(config.PRODAPP,util.nameversion(t))
+  local build_dir = t.build.src or path.pathname(config.PRODAPP,nameversion)
 
   -- Making command
   local maven_cmd =  "mvn "
@@ -39,7 +39,7 @@ function run(t, arguments)
       maven_args .. repoinstall
     local ret = os.execute(build_cmd)
     -- assert ensure that we could continue
-    assert(ret == 0,"ERROR compiling the software ".. nameversion ..
+    assert(ret == 0,"error compiling the software ".. nameversion ..
       " when it tried to install the file: ".. file .. 
       " in the maven repository.")
   end

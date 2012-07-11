@@ -73,7 +73,7 @@ function run(t,arguments)
       util.log.info("Building",nameversion,"using autotools driver.")
       local ret = os.execute(build_cmd)
       -- assert ensure that we could continue
-      assert(ret == 0,"ERROR compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
+      assert(ret == 0,"error compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
 
       -- re-using copy method to parse install_files, conf_files, dev_files
       copy.run(t,arguments,build_dir)

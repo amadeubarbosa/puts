@@ -9,10 +9,10 @@ local string = require "tools.split"
 
 module("tools.build.tecmake", package.seeall)
 
-function run(t, arguments)
+function run(t, arguments, dir)
   local nameversion = util.nameversion(t)
   util.log.info("Building",nameversion,"using tecmake driver.")
-  local build_dir = t.build.src or path.pathname(config.PRODAPP,util.nameversion(t),"src")
+  local build_dir = t.build.src or (dir and dir.."/src") or path.pathname(config.PRODAPP,nameversion,"src")
   util.log.debug("Tecmake source directory is configured to "..build_dir)
 
   -- using per-platform tables to take the specific build actions
@@ -23,7 +23,7 @@ function run(t, arguments)
     if arguments["rebuild"] then build_cmd = build_cmd .. " rebuild" end
     build_cmd = build_cmd .. " MF=".. mf
     local ret = os.execute(build_cmd)
-    assert(ret == 0,"ERROR compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
+    assert(ret == 0,"error compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
   end
 
   -- installing software compiled previously

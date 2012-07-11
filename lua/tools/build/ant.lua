@@ -9,7 +9,7 @@ module("tools.build.ant", package.seeall)
 function run(t, arguments)
   local nameversion = util.nameversion(t)
   util.log.info("Building",nameversion,"using ant driver.")
-  local build_dir = t.build.src or path.pathname(config.PRODAPP,util.nameversion(t))
+  local build_dir = t.build.src or path.pathname(config.PRODAPP,nameversion)
 
   -- Making command
   local ant_cmd =  "ant "
@@ -28,7 +28,7 @@ function run(t, arguments)
 
   local ret = os.execute(build_cmd)
   -- assert ensure that we could continue
-  assert(ret == 0,"ERROR compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
+  assert(ret == 0,"error compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
 
   -- re-using copy method to parse install_files, conf_files, dev_files
   copy.run(t,arguments,build_dir)

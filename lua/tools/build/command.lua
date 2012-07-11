@@ -10,7 +10,7 @@ function run(t, arguments)
   local nameversion = util.nameversion(t)
   
   util.log.info("Building",nameversion,"using command driver.")
-  local build_dir = t.build.src or path.pathname(config.PRODAPP,util.nameversion(t))
+  local build_dir = t.build.src or path.pathname(config.PRODAPP,nameversion)
   local build_table = t.build[config.TEC_UNAME] or t.build[config.TEC_SYSNAME] or t.build
 
   if not build_table.cmd then
@@ -36,7 +36,7 @@ function run(t, arguments)
   build_cmd = "cd " .. build_dir .. " && " .. command
 
   local ret = os.execute(build_cmd)
-  assert(ret == 0,"ERROR compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
+  assert(ret == 0,"error compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
 
   -- re-using copy method to parse install_files, conf_files, dev_files
   copy.run(t,arguments,build_dir)

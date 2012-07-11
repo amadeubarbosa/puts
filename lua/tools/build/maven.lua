@@ -9,7 +9,7 @@ module("tools.build.maven", package.seeall)
 function run(t, arguments)
   local nameversion = util.nameversion(t)
   util.log.info("Building",nameversion,"using maven driver.")
-  local build_dir = t.build.src or path.pathname(config.PRODAPP,util.nameversion(t))
+  local build_dir = t.build.src or path.pathname(config.PRODAPP,nameversion)
 
   -- Making command
   local maven_cmd =  "mvn "
@@ -28,7 +28,7 @@ function run(t, arguments)
 
   local ret = os.execute(build_cmd)
   -- assert ensure that we could continue
-  assert(ret == 0,"ERROR compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
+  assert(ret == 0,"error compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
   
   -- re-using copy method to parse install_files, conf_files, dev_files
   copyDependence(t,arguments,build_dir)
@@ -36,6 +36,7 @@ function run(t, arguments)
 end
 
 function copyDependence(t,arguments,build_dir)
+  local nameversion = util.nameversion(t)
   local maven_cmd = "mvn "
   maven_cmd = maven_cmd .. "dependency:copy-dependencies "
   maven_args = "-DincludeScope=runtime"
@@ -48,5 +49,5 @@ function copyDependence(t,arguments,build_dir)
   build_cmd = "cd " .. build_dir .. " && " .. maven_cmd .. maven_args
 
   local ret = os.execute(build_cmd)
-  assert(ret == 0, "ERRO copying-dependencies" .. nameversion)
+  assert(ret == 0, "error on mvn dependency:copy-dependencies of " .. nameversion)
 end 
