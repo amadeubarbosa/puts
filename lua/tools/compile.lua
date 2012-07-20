@@ -145,7 +145,7 @@ local compat = {
         -- Earlier we used config.DEPLOYDIR = config.SVNDIR.."/tools"
         -- Hack needed to convert from SVNDIR.."/specs" to old name
         local oldDirectory = config.DEPLOYDIR:gsub("specs$","tools")
-        local filepath = arguments["basesoft"] or oldDirectory.."/basesoft.desc"
+        local filepath = arguments.basesoft or oldDirectory.."/basesoft.desc"
 
         -- Loading basesoft description table
         local f, err = loadfile(filepath)
@@ -160,7 +160,7 @@ local compat = {
         end
 
         -- Loading packages description table
-        filepath = arguments["packages"] or oldDirectory.."/packages.desc"
+        filepath = arguments.packages or oldDirectory.."/packages.desc"
         local f, err = loadfile(filepath)
         if not f then
           log.error(err)
@@ -227,7 +227,7 @@ local compat = {
             t.url = t.source
           end
           -- fetching and unpacking
-          if t.url and arguments["update"] then
+          if t.url and arguments.update then
             local ok, err = pcall(util.fetch_and_unpack, nameversion, t.url, t.directory)
             if not ok then
               return false, err
@@ -306,9 +306,9 @@ function run()
     return false
   end
 
-  if arguments["v"] or arguments["verbose"] then
-    arguments["verbose"] = true
-    arguments["v"] = true
+  if arguments.v or arguments.verbose then
+    arguments.verbose = true
+    arguments.v = true
     util.verbose(1)
   end
 
@@ -350,7 +350,7 @@ function run()
         return false
       end
     end
-    for _,descriptorFile in ipairs(arguments["descriptors"]) do
+    for _,descriptorFile in ipairs(arguments.descriptors) do
       local tempTable = {}
       setmetatable(tempTable,{
         __index = function (t,name)
@@ -379,9 +379,9 @@ function run()
   end
 
   -- [back-compatibility] Selection using --profile files
-  if (arguments.compat_v1_05 or arguments.compat_v1_04) and arguments["profile"] then
+  if (arguments.compat_v1_05 or arguments.compat_v1_04) and arguments.profile then
     assert(type(arguments.profile) == "table")
-    for _,profile in ipairs(arguments["profile"]) do 
+    for _,profile in ipairs(arguments.profile) do 
     local _,name = profile:match("(.*)/(.*)") --extracts name "dir/name.profile"
     name = name or profile                    --could nil only if "name.profile"
     name = name:gsub(".profile","")           --deletes the suffix ".profile"
@@ -411,11 +411,11 @@ function run()
   end
 
   -- Applying --select filter
-  if arguments["select"] then
+  if arguments.select then
     assert(type(arguments.select) == "table")
     local filteredDescriptorsTable = {}
     search.enable_cache()
-    for _,item in ipairs(arguments["select"]) do
+    for _,item in ipairs(arguments.select) do
       if arguments.compat_v1_05 or arguments.compat_v1_04 then
         -- cloning the references in a new table
         if descriptors[item] and not filteredDescriptorsTable[item] then
@@ -464,7 +464,7 @@ function run()
   end
 
   -- Applying --exclude filter
-  if arguments["exclude"] then
+  if arguments.exclude then
     assert(type(arguments.exclude) == "table")
     -- hack to manipulate in that form: if arguments.exclude[name] then ...
     for i,pkgname in ipairs(arguments.exclude) do
@@ -486,7 +486,7 @@ function run()
   end
 
   -- Listing package selection only
-  if arguments["list"] then
+  if arguments.list then
     if #descriptors > 0 then
       log.info("Available package descriptors to compile:")
       search.enable_cache()
