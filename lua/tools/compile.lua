@@ -260,18 +260,18 @@ local compat = {
 function run()  
   -- Parsing arguments
   local arguments = util.parse_args(arg,[[
-    --help                   : show this help
-    --verbose                : turn ON the VERBOSE mode (show the system commands)
-    --rebuild                : changes the default rule to rebuild the packages if
-                               they're already compiled
-    --force                  : forces the compile and install (i.e: you want
-                               re-generate some library even it's installed
-                               already, very common for debug and devel purposes)
-    --list                   : list all package names from description files. When
-                               '--select' is used, it'll help you to validate your choose.
+    --help                      : show this help
+    --verbose                   : turn ON the VERBOSE mode (show the system commands)
+    --force                     : forces the compile and install (i.e: you want
+                                  re-generate some library even it's installed
+                                  already, very common for debug and devel purposes)
+    --update                    : updates source codes from the repositories
+    --rebuild                   : changes the default rule to rebuild the packages if
+                                  they're already compiled
+    --dependencies              : applies the same semantics of update, rebuild and force to all dependencies
+    --list                      : list all package names to be compiled by your selection.
     --select="pkg1 pkg2 ..."    : chooses which packages to compile
     --exclude="pkg1 pkg2 ..."   : list of package names to exclude of the compile process
-    --update                 : updates source codes from the repositories
 
    BACK-COMPATIBILITY OPTIONS:
     --compat_v1_04           : changes the parsing of the package descriptions to
@@ -572,7 +572,7 @@ function run()
   return true
 end
 
-local dependencies_cache = { --[[ pkg_nameversion = { dependencies list } ]] }
+local forced_reprocessing_cache = {}
 
 function processing (pkg, specfile, arguments)
     assert(pkg and type(pkg)=="table" or (pkg == nil and type(specfile)=="string"))
@@ -605,17 +605,12 @@ function processing (pkg, specfile, arguments)
     
     log.info("Verifying dependencies of",nameversion)
 
-    local dependencies_resolved = {}
-    assert(deps.fulfill_dependencies(desc, config.SPEC_SERVERS, buildtree_manifest, 
-                                     processing, dependencies_resolved, arguments))
-
-    buildtree_manifest = assert(manifest.load(buildtree))
-
-    if manifest.is_installed(buildtree_manifest, desc.name, desc.version) and
-      not (arguments.force or arguments.update or arguments.rebuild) then
-      log.info("Package",nameversion,"is already compiled")
-    else
-      if desc.url then
+    local function update_and_compile (desc, directory, directory_manifest)
+      -- variables used here but from outside this local scope:
+      -- build_driver function
+      -- arguments table
+      local nameversion = util.nameversion(desc)
+      if desc.url and (arguments.update) then
         log.info("Fetching sources for",nameversion)
         local ok, err = pcall(
            util.fetch_and_unpack, nameversion, desc.url, desc.directory)
@@ -628,7 +623,60 @@ function processing (pkg, specfile, arguments)
       assert(build_driver(desc,arguments))
       
       log.info("Updating manifest to include",nameversion)
-      assert(manifest.update_manifest(desc.name, desc.version, buildtree, buildtree_manifest))
+      assert(manifest.update_manifest(desc.name, desc.version, directory, directory_manifest))
+      return true
+    end
+
+    local function forced_reprocessing (pkg, ...)
+      -- variables used here but from outside this local scope:
+      -- forced_reprocessing_cache table
+      local nameversion = util.nameversion(assert(pkg))
+
+      if not forced_reprocessing_cache[nameversion] then
+        forced_reprocessing_cache[nameversion] = true
+        local query= search.make_query(pkg.name, pkg.version)
+        local specfile = search.find_suitable_rock(query, config.SPEC_SERVERS)
+        assert(type(specfile) == 'string') -- fixme: unique result
+
+        local ok, tempfile = util.download(util.base_name(specfile),specfile,config.TMPDIR)
+        assert(ok)
+        local desc = assert(descriptor.load(tempfile))
+        assert(desc.name and desc.version)
+        assert(os.remove(tempfile))
+
+        for _, dep_query in ipairs(desc.dependencies) do
+          assert(#dep_query.constraints == 1) -- fixme: only works with == operator
+          local dep = { name = dep_query.name,
+                        version = dep_query.constraints[1].version.string
+                      }
+          assert(forced_reprocessing(dep, ...))
+        end
+
+        return update_and_compile(desc, buildtree, buildtree_manifest)
+      end
+      return true
+    end
+
+    -- force_dependencies_reprocessing is nil or a function to force compilation
+    local force_dependencies_reprocessing =
+      arguments.dependencies
+      and (arguments.force or arguments.update or arguments.rebuild)
+      and forced_reprocessing
+    
+    local dependencies_resolved = {}
+
+    assert(deps.fulfill_dependencies(
+        desc, config.SPEC_SERVERS, buildtree_manifest, processing,
+        force_dependencies_reprocessing, dependencies_resolved, arguments))
+
+    buildtree_manifest = assert(manifest.load(buildtree))
+
+    if not manifest.is_installed(buildtree_manifest, desc.name, desc.version) then
+      update_and_compile(desc, buildtree, buildtree_manifest,true)
+    elseif --[[but]] arguments.force or arguments.rebuild then
+      update_and_compile(desc, buildtree, buildtree_manifest,arguments.update)
+    else
+      log.info("Package",nameversion,"is already compiled")
     end
     
     -- persist resolved dependencies information (used in makepack assistent, for example)

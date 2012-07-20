@@ -12,7 +12,15 @@ module("tools.build.tecmake", package.seeall)
 function run(t, arguments, dir)
   local nameversion = util.nameversion(t)
   util.log.info("Building",nameversion,"using tecmake driver.")
-  local build_dir = t.build.src or (dir and dir.."/src") or path.pathname(config.PRODAPP,nameversion,"src")
+  -- guessing the directory with *.mak files
+  local build_dir = nil
+  local guess1 = dir and path.pathname(dir,"src") -- dir/src
+  local guess2 = path.pathname(config.PRODAPP,nameversion,"src") -- PRODAPP/name-version/src
+  if t.build.src and not t.build.src:match("^/") then -- is a relative directory
+    build_dir = path.pathname(guess1 or guess2, t.build.src)
+  else
+    build_dir = t.build.src or guess1 or guess2
+  end
   util.log.debug("Tecmake source directory is configured to "..build_dir)
 
   -- using per-platform tables to take the specific build actions

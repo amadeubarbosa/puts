@@ -316,6 +316,15 @@ local function match_dep(dep, blacklist, manifest)
    end
 end
 
+--- Attempt to match dependencies of a spec to installed.
+-- @param spec table: The descriptor loaded as a table.
+-- @param blacklist table or nil: Program versions to not use as valid matches.
+-- Table where keys are program names and values are tables where keys
+-- are program versions and values are 'true'.
+-- @return table, table, table: A table where keys are dependencies parsed
+-- in table format and values are tables containing fields 'name' and
+-- version' representing matches, other table of missing dependencies
+-- parsed as tables, and a table of dependencies marked with no_upgrade.
 function match_deps(spec, blacklist, manifest)
    assert(type(spec) == "table")
    assert(type(blacklist) == "table" or not blacklist)
@@ -353,17 +362,19 @@ end
 -- @param spec Package description which dependencies will be resolved
 -- @param servers List of URLs pointing to package description servers
 -- @param local_manifest Local manifest of available packages
--- @param hook Lua function to be called when some dependency is missing
+-- @param missing_hook Lua function to be called when some dependency is missing
+-- @param matched_hook Lua function to be called when some dependency is present
 -- @param memoized List of package names already resolved recursively
 -- @param ... Parameteres application-specific forwarded to the hook function
 -- @return boolean or (nil, string) True if no errors occurred, or 
 -- nil and an error message otherwise
-function fulfill_dependencies(spec, servers, local_manifest, hook, memoized, ... )
+function fulfill_dependencies(spec, servers, local_manifest, missing_hook, matched_hook, memoized, ... )
    assert(type(spec)=="table")
    assert(type(servers)=="table")
    assert(type(local_manifest)=="table")
-   assert(not hook or type(hook)=="function")
-   -- Specification of the hook function:
+   assert(not missing_hook or type(missing_hook)=="function")
+   assert(not matched_hook or type(matched_hook)=="function")
+   -- Specification of the hook functions:
    -- function hook (first, second, ...)
    -- first  : table with the package descriptor
    -- second : string with the specfile location
@@ -394,9 +405,15 @@ function fulfill_dependencies(spec, servers, local_manifest, hook, memoized, ...
 
    local matched, missing, no_upgrade = match_deps(spec, nil, local_manifest)
 
-   if next(matched) and memoized then
-      for _, dep in pairs(matched) do
-         table.insert(memoized,util.nameversion(dep))
+   if next(matched) then
+      for _, dep in util.sortedpairs(matched) do
+         if memoized then 
+           table.insert(memoized, util.nameversion(dep))
+           memoized[util.nameversion(dep)] = true
+         end
+         if matched_hook then 
+           assert(matched_hook(dep, ...))
+         end
       end
    end
 
@@ -438,8 +455,8 @@ function fulfill_dependencies(spec, servers, local_manifest, hook, memoized, ...
               return nil, "Multiple packages available for "..show_dep(dep)..". The descriptor of "..nameversion.." must specify one of these."
             elseif (type(results) == "string") then
               log.info("The following dependency was found at servers but it isn't installed", show_dep(dep))
-              if hook then 
-                assert(hook(nil,results,...))
+              if missing_hook then 
+                assert(missing_hook(nil,results,...))
               end
               if memoized then
                 table.insert(memoized,found_name.."-"..found_version)
