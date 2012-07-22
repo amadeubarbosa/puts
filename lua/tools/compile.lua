@@ -605,12 +605,12 @@ function processing (pkg, specfile, arguments)
     
     log.info("Verifying dependencies of",nameversion)
 
-    local function update_and_compile (desc, directory, directory_manifest)
+    local function update_and_compile (desc, directory, directory_manifest, source_update)
       -- variables used here but from outside this local scope:
       -- build_driver function
       -- arguments table
       local nameversion = util.nameversion(desc)
-      if desc.url and (arguments.update) then
+      if desc.url and source_update then
         log.info("Fetching sources for",nameversion)
         local ok, err = pcall(
            util.fetch_and_unpack, nameversion, desc.url, desc.directory)
@@ -630,6 +630,7 @@ function processing (pkg, specfile, arguments)
     local function forced_reprocessing (pkg, ...)
       -- variables used here but from outside this local scope:
       -- forced_reprocessing_cache table
+      -- arguments table
       local nameversion = util.nameversion(assert(pkg))
 
       if not forced_reprocessing_cache[nameversion] then
@@ -652,7 +653,7 @@ function processing (pkg, specfile, arguments)
           assert(forced_reprocessing(dep, ...))
         end
 
-        return update_and_compile(desc, buildtree, buildtree_manifest)
+        return update_and_compile(desc, buildtree, buildtree_manifest, arguments.update)
       end
       return true
     end
