@@ -38,10 +38,10 @@ function run(t,arguments,build_dir)
   end
   -- important for configuration procedure in installation time
   if t.conf_template then
-    if not path.is_absolute(t.conf_template) then 
-      t.conf_template = path.pathname(build_dir,t.conf_template)
-    end
     if arguments.compat_v1_04 then
+      if not path.is_absolute(t.conf_template) then 
+        t.conf_template = path.pathname(build_dir,t.conf_template)
+      end
       local file = assert(io.open(t.conf_template,"r"))
       local content = file:read("*a")
       file:close()
