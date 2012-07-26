@@ -53,17 +53,31 @@ local function build_driver (spec, arguments, dependencies_resolved)
 
   -- parsing our simple dependency query language
   if spec.build.variables then
+    local pattern = "%$%((.-)%)%.?(.*)"
     for dep, meta in pairs(dependencies_resolved) do
       if type(dep) == "table" then
         for var, value in pairs(spec.build.variables) do
           -- currently we only support queries about 'directory', 'arch' and 'repo' fields
-          local query_pkgname, query_pkgfield = value:match("%$%((.-)%)%.?(.*)")
-          if (query_pkgname == dep.name) and query_pkgfield then
+          local query_pkgname, query_pkgfield = value:match(pattern)
+          if (query_pkgname == dep.name) and query_pkgfield and meta[1][query_pkgfield] then
             spec.build.variables[var] = meta[1][query_pkgfield]
             break
           end
         end
       end
+    end
+    -- giving a good error message if any variable couldn't be translated
+    local not_translated = ""
+    for var, value in pairs(spec.build.variables) do
+      if value:match(pattern) then
+        not_translated = not_translated.." "..var.."="..value
+      end
+    end
+    if #not_translated > 0 then
+      return nil, "aborting compilation of "..nameversion..
+        " because some build variables couldn't be translated:"..
+        not_translated..". Check "..nameversion.." descriptor. "..
+        "All names used in build.variables queries must be listed as dependencies."
     end
   end
 
