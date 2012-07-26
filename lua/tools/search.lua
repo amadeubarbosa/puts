@@ -44,11 +44,12 @@ local function store_result(results, name, version, arch, repo)
    
    if not results[name] then results[name] = {} end
    if not results[name][version] then results[name][version] = {} end
+
+   local nameversion = util.nameversion({name=name,version=version})
    table.insert(results[name][version], {
       arch = arch,
       repo = repo,
-      name = name,
-      version = version,
+      directory = path.pathname(config.PRODAPP, nameversion),
    })
 end
 
