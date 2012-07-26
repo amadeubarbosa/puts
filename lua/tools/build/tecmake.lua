@@ -11,25 +11,33 @@ module("tools.build.tecmake", package.seeall)
 
 function run(t, arguments, dir)
   local nameversion = util.nameversion(t)
-  util.log.info("Building",nameversion,"using tecmake driver.")
-  -- guessing the directory with *.mak files
+
   local build_dir = nil
-  local guess1 = dir and path.pathname(dir,"src") -- dir/src
-  local guess2 = path.pathname(config.PRODAPP,nameversion,"src") -- PRODAPP/name-version/src
-  if t.build.src and not t.build.src:match("^/") then -- is a relative directory
-    build_dir = path.pathname(guess1 or guess2, t.build.src)
+  local default_location = path.pathname(config.PRODAPP, nameversion)
+
+  if path.is_absolute(t.build.src) then
+    build_dir = t.build.src
   else
-    build_dir = t.build.src or guess1 or guess2
+    build_dir = path.pathname(dir or default_location, t.build.src or "src")
   end
+
   util.log.debug("Tecmake source directory is configured to "..build_dir)
 
   -- using per-platform tables to take the specific build actions
   local build = t.build[config.TEC_UNAME] or t.build[config.TEC_SYSNAME] or t.build
+  -- tecmake variables per descriptor definitions (could be declared on its dependencies)
+  local variables = ""
+  if t.build.variables then
+    for k, v in pairs(t.build.variables) do
+      variables = variables.." "..k.."="..v
+    end
+  end
+  -- tecmake compilation rules
   for _, mf in ipairs(build.mf) do
     -- compiling all targets
     local build_cmd = "cd ".. build_dir .. " && ".. "tecmake"
     if arguments["rebuild"] then build_cmd = build_cmd .. " rebuild" end
-    build_cmd = build_cmd .. " MF=".. mf
+    build_cmd = build_cmd .. " MF=".. mf .. variables
     local ret = os.execute(build_cmd)
     assert(ret == 0,"error compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
   end

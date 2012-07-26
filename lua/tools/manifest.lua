@@ -45,7 +45,9 @@ local function store_results(results, manifest)
          local versiontable = {}
          for _, entry in ipairs(entries) do
             local entrytable = {}
-            entrytable.arch = entry.arch
+            for k, v in pairs(entry) do
+              entrytable[k] = v
+            end
             table.insert(versiontable, entrytable)
          end
          pkgtable[version] = versiontable
@@ -90,6 +92,20 @@ function is_installed(manifest_table, name, version)
     end 
   end
   return false
+end
+
+function get_metadata(manifest, name, version)
+  assert(manifest)
+  assert(name)
+  if not (manifest.repository and manifest.repository[name]) then
+    return nil
+  end
+
+  for v, metadata in pairs(manifest.repository[name]) do
+    if version and version == v then
+      return metadata
+    end
+  end
 end
 
 function get_versions(manifest, name)
@@ -160,14 +176,13 @@ end
 -- information with regard to the given name and version.
 -- A file called 'manifest' will be written in the root of the given
 -- repository directory.
--- @param name string: Name of a package from the repository.
--- @param version string: Version of a package from the repository.
+-- @param desc table: Package descriptor
 -- @param repo string : Pathname of a local repository.
 -- @return boolean or (nil, string): True if manifest was generated,
 -- or nil and an error message.
-function update_manifest(name, version, repo, manifest)
-   assert(type(name) == "string")
-   assert(type(version) == "string")
+function update_manifest(spec, repo, manifest)
+   assert(type(spec) == "table")
+   assert(type(spec.name) == "string" and type(spec.version) == "string")
    assert(type(repo) == "string")
 
    local manifest, err = manifest or load(repo)
@@ -183,7 +198,12 @@ function update_manifest(name, version, repo, manifest)
       end
    end
 
-   local results = {[name] = {[version] = {{arch = "installed", repo = repo}}}}
+   local nameversion = util.nameversion(spec)
+   local metadata = { 
+      arch = "installed", repo = repo, 
+      directory = spec.directory or path.pathname(config.PRODAPP, nameversion)
+   }
+   local results = {[spec.name] = {[spec.version] = { metadata }}}
 
    local ok, err = store_results(results, manifest)
    if not ok then return nil, err end

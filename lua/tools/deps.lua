@@ -26,7 +26,7 @@ local function platform_overrides(pkg)
    if not pkg then return nil end
    
    overrides = {
-     "build",
+     -- "build",
      "dependencies",
    }
    
@@ -358,7 +358,7 @@ local function values_set(tbl)
    return set
 end
 
---- Check dependencies of a package descriptor and execute a custom hook.
+--- Check dependencies of a package descriptor and execute custom hooks.
 -- @param spec Package description which dependencies will be resolved
 -- @param servers List of URLs pointing to package description servers
 -- @param local_manifest Local manifest of available packages
@@ -368,16 +368,19 @@ end
 -- @param ... Parameteres application-specific forwarded to the hook function
 -- @return boolean or (nil, string) True if no errors occurred, or 
 -- nil and an error message otherwise
-function fulfill_dependencies(spec, servers, local_manifest, missing_hook, matched_hook, memoized, ... )
+function fulfill_dependencies(spec, servers, buildtree, local_manifest, missing_hook, matched_hook, memoized, ... )
    assert(type(spec)=="table")
    assert(type(servers)=="table")
    assert(type(local_manifest)=="table")
    assert(not missing_hook or type(missing_hook)=="function")
    assert(not matched_hook or type(matched_hook)=="function")
    -- Specification of the hook functions:
-   -- function hook (first, second, ...)
+   -- function missing_hook (first, second, ...)
    -- first  : table with the package descriptor
    -- second : string with the specfile location
+   -- ...    : any application-specific
+   -- function matched_hook(first, ...)
+   -- first  : table with the dependency information
    -- ...    : any application-specific
    assert(not memoized or type(memoized) == "table")
 
@@ -409,10 +412,10 @@ function fulfill_dependencies(spec, servers, local_manifest, missing_hook, match
       for _, dep in util.sortedpairs(matched) do
          if memoized then 
            table.insert(memoized, util.nameversion(dep))
-           memoized[util.nameversion(dep)] = true
+           memoized[dep] = manifest.get_metadata(local_manifest, dep.name, dep.version)
          end
          if matched_hook then 
-           assert(matched_hook(dep, ...))
+           assert(matched_hook(dep, memoized, ...))
          end
       end
    end
@@ -445,11 +448,10 @@ function fulfill_dependencies(spec, servers, local_manifest, missing_hook, match
          -- Double-check in case dependency was filled by recursion.
          if not match_dep(dep, nil, local_manifest) then
             local search = require "tools.search"
-            local results, found_name, found_version = search.find_suitable_rock(dep, servers)
-            
+            local results, name, version = search.find_suitable_rock(dep, servers)
             if not results then
               -- when search.find_suitable_rock returns nil, second result can be an error message
-              local raised_err = (found_name and " ("..tostring(found_name)..")") or ""
+              local raised_err = (name and " ("..tostring(name)..")") or ""
               return nil, "Missing dependency "..show_dep(dep).."."..raised_err
             elseif (type(results) == "table") then
               return nil, "Multiple packages available for "..show_dep(dep)..". The descriptor of "..nameversion.." must specify one of these."
@@ -459,7 +461,10 @@ function fulfill_dependencies(spec, servers, local_manifest, missing_hook, match
                 assert(missing_hook(nil,results,...))
               end
               if memoized then
-                table.insert(memoized,found_name.."-"..found_version)
+                local pkg = {name=name,version=version}
+                table.insert(memoized, util.nameversion(pkg))
+                local_manifest = manifest.load(buildtree)
+                memoized[pkg] = manifest.get_metadata(local_manifest, pkg.name, pkg.version)
               end
             end
          end

@@ -26,8 +26,7 @@ local function pick_latest_version(name, versions)
    if items then
       local pick = 1
       for i, item in ipairs(items) do
-         if (item.arch == 'desc' and items[pick].arch == 'desc') then 
-         -- TODO: não entendi bem essa comparação Tue Mar 27 13:27:40 BRT 2012
+         if item.arch == 'desc' then
             pick = i
          end
       end
@@ -143,7 +142,7 @@ end
 
 function update_cache()
   for repo, outdated_manifest in pairs(manifest_cache) do
-    log.warning("Updating the cache of manifest about the repository "..repo)
+    log.debug("Updating the cache of manifest about the repository",repo)
     manifest_cache[repo] = manifest.load(repo)
   end
 end
@@ -230,7 +229,7 @@ function search_buildtree(buildtree, query, results)
       if (package_type == "desc" or package_type == "installed" ) and name and version then
         store_if_match(results, buildtree, name, version, package_type, query)
       else
-        log.warning("It wasn't possible recognize which type of package '"..item.."' is. Skipping...")
+        log.error("It wasn't possible recognize which type of package '"..item.."' is. Skipping...")
       end
    end
    return results

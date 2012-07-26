@@ -2,6 +2,11 @@ local FILE_SEPARATOR = package.config:match("%p") --platform independent cheat
 
 module("tools.path",package.seeall)
 
+function is_absolute(dir)
+   return (dir and (type(dir) == "string") and 
+      (dir:match("^/") or dir:match("^%a:\\")))
+end
+
 function pathname(...)
    local items = {...}
    local i = 1

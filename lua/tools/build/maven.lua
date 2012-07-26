@@ -8,8 +8,15 @@ module("tools.build.maven", package.seeall)
 
 function run(t, arguments)
   local nameversion = util.nameversion(t)
-  util.log.info("Building",nameversion,"using maven driver.")
-  local build_dir = t.build.src or path.pathname(config.PRODAPP,nameversion)
+
+  local build_dir = nil
+  local default_location = path.pathname(config.PRODAPP, nameversion)
+
+  if path.is_absolute(t.build.src) then
+    build_dir = t.build.src
+  else
+    build_dir = path.pathname(t.directory or default_location, t.build.src or "")
+  end
 
   -- Making command
   local maven_cmd =  "mvn "

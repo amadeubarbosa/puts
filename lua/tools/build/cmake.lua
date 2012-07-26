@@ -10,7 +10,6 @@ module("tools.build.cmake", package.seeall)
 
 function run(t, arguments)
   local nameversion = util.nameversion(t)
-  util.log.info("Building",nameversion,"using cmake driver.")
   util.log.info("Creating Makefiles with CMake for: ".. nameversion)
 
   os.execute(plat.cmd.mkdir .. config.TMPDIR)

@@ -239,7 +239,7 @@ function download(pkgname, from, targetdir)
       error("ERROR: Unknown protocol '"..proto.."'. The URL was '"..from.."'.")
     end
   end
-  log.debug("Downloading ",pkgname,"using the protocol",proto)
+  log.debug("Downloading",pkgname,"using the protocol",proto)
   return handler.run(targetdir,from)
 end
 

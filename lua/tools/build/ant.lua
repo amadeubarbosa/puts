@@ -8,7 +8,6 @@ module("tools.build.ant", package.seeall)
 
 function run(t, arguments)
   local nameversion = util.nameversion(t)
-  util.log.info("Building",nameversion,"using ant driver.")
   local build_dir = t.build.src or path.pathname(config.PRODAPP,nameversion)
 
   -- Making command

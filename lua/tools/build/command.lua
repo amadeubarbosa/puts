@@ -9,12 +9,20 @@ module("tools.build.command", package.seeall)
 function run(t, arguments)
   local nameversion = util.nameversion(t)
   
-  util.log.info("Building",nameversion,"using command driver.")
-  local build_dir = t.build.src or path.pathname(config.PRODAPP,nameversion)
+  local build_dir = nil
+  local default_location = path.pathname(config.PRODAPP, nameversion)
+
+  if path.is_absolute(t.build.src) then
+    build_dir = t.build.src
+  else
+    build_dir = path.pathname(t.directory or default_location, t.build.src or "")
+  end
+
   local build_table = t.build[config.TEC_UNAME] or t.build[config.TEC_SYSNAME] or t.build
 
   if not build_table.cmd then
-    util.log.warning(nameversion..[[ has no build command provided for ']]..config.TEC_UNAME..[[' platforms. Skipping.]])
+    util.log.error("No build command provided to compile", nameversion,
+      "in", config.TEC_UNAME, "or", config.TEC_SYSNAME, "platforms.")
     return nil
   end
 

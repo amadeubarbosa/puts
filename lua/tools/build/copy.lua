@@ -16,15 +16,15 @@ function run(t,arguments,build_dir)
   if not build_dir then
     build_dir = path.pathname(config.PRODAPP,nameversion)
   end
-  util.log.info("Copying files from the source directory '"..build_dir.."' ...")
+  util.log.debug("Copying files from the directory",build_dir)
 
   -- copying files described on packages table
   if t.install_files then
     for orig, dest in pairs(t.install_files) do
       local dir = build_dir
       -- if absolute path we assume that you know where get the files
-      if orig:match("^/") then dir = "" end
-      util.install(nameversion, dir.."/"..orig, dest)
+      if path.is_absolute(orig) then dir = "" end
+      util.install(nameversion, path.pathname(dir,orig), dest)
     end
   end
   -- copying files related to configuration with '-conf' suffix
@@ -32,12 +32,15 @@ function run(t,arguments,build_dir)
     for orig, dest in pairs(t.conf_files) do
       local dir = build_dir
       -- if absolute path we assume that you know where get the files
-      if orig:match("^/") then dir = "" end
-      util.install(nameversion..".conf", dir.."/"..orig, dest)
+      if path.is_absolute(orig) then dir = "" end
+      util.install(nameversion..".conf", path.pathname(dir,orig), dest)
     end
   end
   -- important for configuration procedure in installation time
   if t.conf_template then
+    if not path.is_absolute(t.conf_template) then 
+      t.conf_template = path.pathname(build_dir,t.conf_template)
+    end
     if arguments.compat_v1_04 then
       local file = assert(io.open(t.conf_template,"r"))
       local content = file:read("*a")
@@ -47,6 +50,9 @@ function run(t,arguments,build_dir)
       file:close()
     else
       for i,templateName in ipairs(t.conf_template) do
+        if not path.is_absolute(templateName) then 
+          templateName = path.pathname(build_dir,templateName)
+        end
         local file = assert(io.open(templateName,"r"))
         local content = file:read("*a")
         file:close()
@@ -61,8 +67,8 @@ function run(t,arguments,build_dir)
     for orig, dest in pairs(t.dev_files) do
       local dir = build_dir
       -- if absolute path we assume that you know where get the files
-      if orig:match("^/") then dir = "" end
-      util.install(nameversion..".dev", dir.."/"..orig, dest)
+      if path.is_absolute(orig) then dir = "" end
+      util.install(nameversion..".dev", path.pathname(dir,orig), dest)
     end
   end
   -- linking files described on packages table

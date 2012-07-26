@@ -45,21 +45,39 @@ local function importAllConfigToGlobals()
   end
 end
 -- Reused in both back-compatibility and current compilation process
-local function build_driver (spec, arguments)
+local function build_driver (spec, arguments, dependencies_resolved)
   local nameversion = util.nameversion(spec)
   if not spec.build then
     spec.build = { type = "copy" }
   end
+
+  -- parsing our simple dependency query language
+  if spec.build.variables then
+    for dep, meta in pairs(dependencies_resolved) do
+      if type(dep) == "table" then
+        for var, value in pairs(spec.build.variables) do
+          -- currently we only support queries about 'directory', 'arch' and 'repo' fields
+          local query_pkgname, query_pkgfield = value:match("%$%((.-)%)%.?(.*)")
+          if (query_pkgname == dep.name) and query_pkgfield then
+            spec.build.variables[var] = meta[1][query_pkgfield]
+            break
+          end
+        end
+      end
+    end
+  end
+
   -- loading specific build methods
   local ok, build_type = pcall(require, "tools.build." .. spec.build.type)
-  assert(ok and type(build_type) == "table","[ERROR] failed initializing "..
-                      "build back-end for build type: '".. spec.build.type ..
-                      "' for package: ".. nameversion)
+  assert(ok and type(build_type) == "table","failed initializing "..
+                      "build backend ".. spec.build.type .." "..
+                      "to compile the package ".. nameversion)
 
+  log.info("Building",nameversion,"using",spec.build.type,"driver")
   -- starting specific build methods in a protected way
   local ok, err = pcall(build_type.run, spec, arguments, spec.directory)
   if ok then
-    log.info("Package",nameversion,"compiled successfully.")
+    log.info("Package",nameversion,"compiled successfully")
   end
   return ok, err
 end
@@ -550,10 +568,10 @@ function run()
   else
     -- Most updated behaviour
     search.enable_cache()
-    for i, selection in ipairs(descriptors) do
-      local ok, err = pcall(processing,selection,nil,arguments)
+    for i, pkg in ipairs(descriptors) do
+      local ok, err = pcall(processing,pkg,nil,arguments)
       if not ok then
-        log.error("Failure on compilation of",util.nameversion(selection),"software.")
+        log.error("Failure on compilation of",util.nameversion(pkg),"software.")
         log.error(err)
         os.execute(myplat.cmd.rm .. config.TMPDIR)
         util.close_cache()
@@ -575,6 +593,7 @@ end
 local forced_reprocessing_cache = {}
 
 function processing (pkg, specfile, arguments)
+    assert(arguments)
     assert(pkg and type(pkg)=="table" or (pkg == nil and type(specfile)=="string"))
     
     -- manifest loading
@@ -601,36 +620,33 @@ function processing (pkg, specfile, arguments)
     end
     
     local nameversion = util.nameversion(desc)
-    assert(buildtree_manifest)
     
     log.info("Verifying dependencies of",nameversion)
 
-    local function update_and_compile (desc, directory, directory_manifest, source_update)
+    local function update_and_compile (desc, repository, repository_manifest, source_update, memoized)
       -- variables used here but from outside this local scope:
       -- build_driver function
       -- arguments table
       local nameversion = util.nameversion(desc)
       if desc.url and source_update then
-        log.info("Fetching sources for",nameversion)
+        log.info("Fetching source code for",nameversion)
         local ok, err = pcall(
            util.fetch_and_unpack, nameversion, desc.url, desc.directory)
         if not ok then
           return false, err
         end
       end
+
+      assert(build_driver(desc,arguments,memoized))
       
-      log.info("Initializing the compilation of",nameversion)
-      assert(build_driver(desc,arguments))
-      
-      log.info("Updating manifest to include",nameversion)
-      assert(manifest.update_manifest(desc.name, desc.version, directory, directory_manifest))
+      log.debug("Updating manifest to include",nameversion)
+      assert(manifest.update_manifest(desc, repository, repository_manifest))
       return true
     end
 
-    local function forced_reprocessing (pkg, ...)
+    local function forced_reprocessing (pkg, memoized, arguments)
       -- variables used here but from outside this local scope:
       -- forced_reprocessing_cache table
-      -- arguments table
       local nameversion = util.nameversion(assert(pkg))
 
       if not forced_reprocessing_cache[nameversion] then
@@ -650,10 +666,11 @@ function processing (pkg, specfile, arguments)
           local dep = { name = dep_query.name,
                         version = dep_query.constraints[1].version.string
                       }
-          assert(forced_reprocessing(dep, ...))
+          memoized[dep] = manifest.get_metadata(buildtree_manifest, dep.name, dep.version)
+          assert(forced_reprocessing(dep, memoized, arguments))
         end
 
-        return update_and_compile(desc, buildtree, buildtree_manifest, arguments.update)
+        return update_and_compile(desc, buildtree, buildtree_manifest, arguments.update, memoized)
       end
       return true
     end
@@ -667,15 +684,18 @@ function processing (pkg, specfile, arguments)
     local dependencies_resolved = {}
 
     assert(deps.fulfill_dependencies(
-        desc, config.SPEC_SERVERS, buildtree_manifest, processing,
+        desc, config.SPEC_SERVERS, buildtree, buildtree_manifest, processing,
         force_dependencies_reprocessing, dependencies_resolved, arguments))
 
     buildtree_manifest = assert(manifest.load(buildtree))
 
     if not manifest.is_installed(buildtree_manifest, desc.name, desc.version) then
-      update_and_compile(desc, buildtree, buildtree_manifest,true)
-    elseif --[[but]] arguments.force or arguments.rebuild then
-      update_and_compile(desc, buildtree, buildtree_manifest,arguments.update)
+      dependencies_resolved[desc] = {{arch="installing", repo=buildtree, 
+        directory=desc.directory or path.pathname(config.PRODAPP, nameversion)}}
+      update_and_compile(desc, buildtree, buildtree_manifest, true, dependencies_resolved)
+    elseif --[[but]] arguments.force or arguments.update or arguments.rebuild then
+      dependencies_resolved[desc] = manifest.get_metadata(buildtree_manifest, desc.name, desc.version)
+      update_and_compile(desc, buildtree, buildtree_manifest, arguments.update, dependencies_resolved)
     else
       log.info("Package",nameversion,"is already compiled")
     end
