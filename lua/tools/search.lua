@@ -46,11 +46,15 @@ local function store_result(results, name, version, arch, repo)
    if not results[name][version] then results[name][version] = {} end
 
    local nameversion = util.nameversion({name=name,version=version})
-   table.insert(results[name][version], {
+   local meta = {
       arch = arch,
       repo = repo,
-      directory = path.pathname(config.PRODAPP, nameversion),
-   })
+   }
+   if arch == "installed" then
+      meta.directory = path.pathname(config.PRODAPP, nameversion)
+   end
+   
+   table.insert(results[name][version], meta)
 end
 
 local function match_name(query, name)
