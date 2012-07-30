@@ -45,7 +45,7 @@ local function importAllConfigToGlobals()
   end
 end
 -- Reused in both back-compatibility and current compilation process
-local function build_driver (spec, arguments, dependencies_resolved)
+local function build_driver (spec, arguments, memoized)
   local nameversion = util.nameversion(spec)
   if not spec.build then
     spec.build = { type = "copy" }
@@ -54,7 +54,7 @@ local function build_driver (spec, arguments, dependencies_resolved)
   -- parsing our simple dependency query language
   if spec.build.variables then
     local pattern = "%$%((.-)%)%.?(.*)"
-    for dep, meta in pairs(dependencies_resolved) do
+    for dep, meta in pairs(memoized) do
       if type(dep) == "table" then
         for var, value in pairs(spec.build.variables) do
           -- currently we only support queries about 'directory', 'arch' and 'repo' fields
@@ -622,8 +622,18 @@ function processing (pkg, specfile, arguments)
     local desc
     if pkg and type(pkg) == "table" then
       desc = pkg
-      specfile =  config.SPEC_SERVERS[1].."/"..util.nameversion(pkg)..".desc"
+      local nameversion = util.nameversion(pkg)
+      if arguments.exclude and arguments.exclude[nameversion] then
+        log.info("Excluding the package named:", nameversion)
+        return true
+      end
+      specfile =  config.SPEC_SERVERS[1].."/"..nameversion..".desc"
     elseif specfile ~= nil and type(specfile) == "string" then
+      local nameversion = util.base_name(specfile):gsub(".desc$","")
+      if arguments.exclude and arguments.exclude[nameversion] then
+        log.info("Excluding the package named:", nameversion)
+        return true
+      end
       log.info("Fetching descriptor",specfile)
 
       local ok, tempfile = util.download(util.base_name(specfile),specfile,config.TMPDIR)
@@ -662,6 +672,11 @@ function processing (pkg, specfile, arguments)
       -- variables used here but from outside this local scope:
       -- forced_reprocessing_cache table
       local nameversion = util.nameversion(assert(pkg))
+
+      if arguments.exclude and arguments.exclude[nameversion] then
+        log.info("Excluding the package named:", nameversion)
+        return true
+      end
 
       if not forced_reprocessing_cache[nameversion] then
         forced_reprocessing_cache[nameversion] = true
