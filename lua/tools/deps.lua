@@ -467,6 +467,15 @@ function fulfill_dependencies(spec, servers, buildtree, local_manifest, missing_
                 memoized[pkg] = manifest.get_metadata(local_manifest, pkg.name, pkg.version)
               end
             end
+         else
+            if memoized then
+               local pkg = { name = dep.name,
+                        version = dep.constraints[1].version.string
+                      }
+               assert(pkg.name and pkg.version)
+               table.insert(memoized, util.nameversion(pkg))
+               memoized[pkg] = manifest.get_metadata(local_manifest, pkg.name, pkg.version)
+            end
          end
       end
    end
