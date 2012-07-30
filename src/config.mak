@@ -17,6 +17,7 @@ PRELOAD_FLAGS= -p PUTS_API -o putspreloaded -d ${PRECMP_DIR}
 PUTS_MODULES=$(addprefix tools., \
 	platformid \
 	config \
+	build.bjam \
 	build.tecmake \
 	build.copy \
 	build.autotools \
