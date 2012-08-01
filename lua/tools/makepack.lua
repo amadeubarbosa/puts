@@ -213,22 +213,22 @@ function run()
     The prefix '--' is optional in all options.
     So '--help' or '-help' or yet 'help' all are the same option.]])
 
-  if arguments["v"] or arguments["verbose"] then
-    arguments["v"] = true
-    arguments["verbose"] = true
+  if arguments.v or arguments.verbose then
+    arguments.v = true
+    arguments.verbose = true
     util.verbose(1)
   end
-  if arguments["svndir"] then
-    config.SVNDIR = arguments["svndir"]
+  if arguments.svndir then
+    config.SVNDIR = arguments.svndir
   end
-  if arguments["release"] then
+  if arguments.release then
     log.warning("You're overloading the 'release' information that should be extracted from the source directory!")
-    RELEASEINFO = arguments["release"]
+    RELEASEINFO = arguments.release
   end
 
-  assert(arguments["profile"],"Missing argument --profile!")
-  assert(arguments["arch"] or config.TEC_UNAME,"Missing argument --arch and not found TEC_UNAME env!")
-  arguments["arch"] = arguments["arch"] or config.TEC_UNAME
+  assert(arguments.profile,"Missing argument --profile!")
+  assert(arguments.arch or config.TEC_UNAME,"Missing argument --arch and not found TEC_UNAME env!")
+  arguments.arch = arguments.arch or config.TEC_UNAME
 
-  return pack(arguments["arch"],arguments["profile"])
+  return pack(arguments.arch,arguments.profile)
 end
