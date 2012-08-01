@@ -53,6 +53,9 @@ function load( filename )
     if not spec.directory then
       spec.directory = parent_spec.directory or path.pathname(config.PRODAPP, util.nameversion(parent_spec))
     end
+    if not spec.url and parent_spec.url then
+      spec.url = parent_spec.url
+    end
   end
   
   -- parsing dependencies  
