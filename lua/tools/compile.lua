@@ -290,8 +290,7 @@ local compat = {
 --------------------------------------------------------------------------------
 
 function run()  
-  -- Parsing arguments
-  local arguments = util.parse_args(arg,[[
+  local help_msg = [[
     --help                      : show this help
     --verbose                   : turn ON the VERBOSE mode (show the system commands)
     --force                     : forces the compile and install (i.e: you want
@@ -301,9 +300,9 @@ function run()
     --rebuild                   : changes the default rule to rebuild the packages if
                                   they're already compiled
     --dependencies              : applies the same semantics of update, rebuild and force to all dependencies
-    --list                      : list all package names to be compiled by your selection.
     --select="pkg1 pkg2 ..."    : chooses which packages to compile
     --exclude="pkg1 pkg2 ..."   : list of package names to exclude of the compile process
+    --list                      : list all package names to be compiled by your selection.
 
    BACK-COMPATIBILITY OPTIONS:
     --compat_v1_04           : changes the parsing of the package descriptions to
@@ -316,7 +315,17 @@ function run()
 
    NOTES:
     The prefix '--' is optional in all options.
-    So '--help' or '-help' or yet 'help' all are the same option.]],true)
+    So '--help' or '-help' or yet 'help' all are the same option.]]
+  -- Parsing arguments
+  local arguments = util.parse_args(arg, help_msg, true)
+
+  -- show help instructions when no package was selected and we aren't in compatibility mode
+  if not arguments.compat_v1_05 and not arguments.compat_v1_04 and not arguments.select then
+    log.error("No package selected informed, missing option --select!")
+    table.insert(arg,"help")
+    util.parse_args(arg, help_msg)
+    return false
+  end
 
   -- support to multiple values in these following options
   for _,parameterName in ipairs{"descriptors","select","profile","exclude"} do
@@ -539,7 +548,7 @@ function run()
       search.disable_cache()
       return true
     else
-      log.error("No descriptor was provided.")
+      log.error("No package descriptor available.")
       return false
     end
   end
@@ -691,7 +700,9 @@ function processing (pkg, specfile, arguments)
         assert(os.remove(tempfile))
 
         for _, dep_query in ipairs(desc.dependencies) do
-          assert(#dep_query.constraints == 1) -- fixme: only works with == operator
+          assert(#dep_query.constraints == 1)
+          --TODO: usar manifest_search(buildtree_manifest, dep_query)
+          --FIXME: only works with operator '=='
           local dep = { name = dep_query.name,
                         version = dep_query.constraints[1].version.string
                       }
