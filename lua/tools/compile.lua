@@ -240,8 +240,13 @@ local compat = {
         -- foreach filename...
         local nextFile = files:gmatch("[^\n]+")
         local filename = nextFile()
+
+        if not filename then
+          log.error("Package descriptors not found in",dir)
+        end
+
         while (filename) do
-          log.info("Descriptor '".. filename .."' found automatically")
+          log.info("Descriptor",filename,"found automatically")
           table.insert(list,filename)
           filename = nextFile()
         end
@@ -385,9 +390,10 @@ function run()
     importAllConfigToGlobals()
     -- Inserting automatically all .desc files into DEPLOYDIR directory
     if not arguments.descriptors then
+      log.info("Loading descriptors from:",config.DEPLOYDIR)
       arguments.descriptors = {}
-      arguments.descriptors = compat.v1_05.loadDescriptorsFromDir(config.DEPLOYDIR,{})
-      if not ok then
+      compat.v1_05.loadDescriptorsFromDir(config.DEPLOYDIR, arguments.descriptors)
+      if #(arguments.descriptors) == 0 then
         return false
       end
     end
@@ -401,7 +407,7 @@ function run()
             return t[name]
           end
         end})
-      log.info("Loading descriptor named '".. descriptorFile .."'")
+      log.info("Loading descriptor",descriptorFile)
       local f, err = loadfile(descriptorFile)
       if not f then
         log.error(err)
@@ -519,7 +525,7 @@ function run()
        table.insert(filteredDescriptorsTable,pkgdesc)
        filteredDescriptorsTable[nameversion] = pkgdesc
      else
-       log.info("Excluding the package named:", nameversion)
+       log.info("Excluding the package:", nameversion)
      end
     end
     -- always updates the references
@@ -548,7 +554,7 @@ function run()
       search.disable_cache()
       return true
     else
-      log.error("No package descriptor available.")
+      log.error("Package descriptors not found.")
       return false
     end
   end
@@ -633,14 +639,14 @@ function processing (pkg, specfile, arguments)
       desc = pkg
       local nameversion = util.nameversion(pkg)
       if arguments.exclude and arguments.exclude[nameversion] then
-        log.info("Excluding the package named:", nameversion)
+        log.info("Excluding the package:", nameversion)
         return true
       end
       specfile =  config.SPEC_SERVERS[1].."/"..nameversion..".desc"
     elseif specfile ~= nil and type(specfile) == "string" then
       local nameversion = util.base_name(specfile):gsub(".desc$","")
       if arguments.exclude and arguments.exclude[nameversion] then
-        log.info("Excluding the package named:", nameversion)
+        log.info("Excluding the package:", nameversion)
         return true
       end
       log.info("Fetching descriptor",specfile)
@@ -683,7 +689,7 @@ function processing (pkg, specfile, arguments)
       local nameversion = util.nameversion(assert(pkg))
 
       if arguments.exclude and arguments.exclude[nameversion] then
-        log.info("Excluding the package named:", nameversion)
+        log.info("Excluding the package:", nameversion)
         return true
       end
 
