@@ -11,21 +11,21 @@ module("tools.build.cmake", package.seeall)
 function run(t, arguments, dir)
   local nameversion = util.nameversion(t)
   util.log.info("Creating Makefiles with CMake for: ".. nameversion)
-
-  os.execute(plat.cmd.mkdir .. config.TMPDIR)
   
-  local build_dir = config.TMPDIR
   local src_dir = nil
   local default_location = path.pathname(config.PRODAPP, nameversion)
 
-  if path.is_absolute(t.build.src) then
+  if t.build.src and path.is_absolute(t.build.src) then
     src_dir = t.build.src
   else
-    src_dir = path.pathname(dir or default_location, t.build.src or "src")
+    src_dir = path.pathname(dir or default_location, t.build.src or "")
   end
 
+  local build_dir = path.pathname(src_dir,"build")
+  os.execute(plat.cmd.mkdir .. build_dir)
+
   -- Making command
-  local cmake_cmd = "cd " .. build_dir .. " && " .. "cmake " .. src_dir
+  local cmake_cmd = "cd " .. build_dir .. " && " .. "cmake .."
 
   local build = t.build[config.TEC_UNAME] or t.build[config.TEC_SYSNAME] or t.build
   for n,v in pairs(build.definitions or {}) do

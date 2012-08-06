@@ -49,7 +49,9 @@ function fs.is_dir(at)
    return (at and (os.execute(myplat.cmd.test.." -d "..at) == 0))
 end
 function fs.is_file(at)
-   return (at and (os.execute(myplat.cmd.test.." -f "..at) == 0))
+   return (at and ((os.execute(myplat.cmd.test.." -f "..at) == 0) or 
+                   (os.execute(myplat.cmd.test.." -e "..at) == 0) or
+                   (os.execute(myplat.cmd.test.." -L "..at) == 0)))
 end
 
 function fs.list_dir(at)
@@ -141,12 +143,14 @@ function link(package, orig, linkpath)
     if not cache[package] then cache[package] = { } end
     cache[package].links = assert(io.open(config.PKGDIR.."/"..package..".links", "w"))
   end
-  cache[package].links:write(linkpath.."\n")
   local dir,name = linkpath:gmatch("(.*%/+)(.+)")()
   dir = dir or "."
-  os.execute("cd "..config.INSTALL.TOP .."; ".. myplat.cmd.mkdir .. dir)
-  -- ... and real link to destination
-  os.execute("ln -sf "..orig.." "..config.INSTALL.TOP.."/"..linkpath)
+  if fs.is_file(path.pathname(config.INSTALL.TOP,orig)) then
+    os.execute("cd "..config.INSTALL.TOP .."; ".. myplat.cmd.mkdir .. dir)
+    -- ... and real link to destination
+    os.execute("ln -sf "..orig.." "..config.INSTALL.TOP.."/"..linkpath)
+    cache[package].links:write(linkpath.."\n")
+  end
 end
 
 ---

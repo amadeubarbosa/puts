@@ -73,7 +73,7 @@ function run(t,arguments,build_dir)
   end
   -- linking files described on packages table
   if t.symbolic_links then
-    for orig, linkpath in pairs(t.symbolic_links) do
+    for orig, linkpath in util.sortedpairs(t.symbolic_links) do
       util.link(nameversion, orig, linkpath)
     end
   end
