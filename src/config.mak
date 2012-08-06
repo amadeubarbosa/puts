@@ -18,6 +18,7 @@ PUTS_MODULES=$(addprefix tools., \
 	platformid \
 	config \
 	build.cmake \
+	build.bjam \
 	build.tecmake \
 	build.copy \
 	build.autotools \
