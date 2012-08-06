@@ -143,12 +143,18 @@ function link(package, orig, linkpath)
     if not cache[package] then cache[package] = { } end
     cache[package].links = assert(io.open(config.PKGDIR.."/"..package..".links", "w"))
   end
-  local dir,name = linkpath:gmatch("(.*%/+)(.+)")()
-  dir = dir or "."
-  if fs.is_file(path.pathname(config.INSTALL.TOP,orig)) then
-    os.execute("cd "..config.INSTALL.TOP .."; ".. myplat.cmd.mkdir .. dir)
+  local dir, name = linkpath:match("(.*%/+)(.+)")
+  if not dir then
+    dir = config.INSTALL.TOP
+  else
+    dir = path.pathname(config.INSTALL.TOP,dir)
+  end
+  if not fs.is_dir(dir) then
+    os.execute(myplat.cmd.mkdir .. dir)
+  end
+  if fs.is_file(path.pathname(dir,orig)) then  
     -- ... and real link to destination
-    os.execute("ln -sf "..orig.." "..config.INSTALL.TOP.."/"..linkpath)
+    os.execute("cd "..dir.."; ln -sf "..orig.." "..(name or linkpath))
     cache[package].links:write(linkpath.."\n")
   end
 end

@@ -1,6 +1,6 @@
-local FILE_SEPARATOR = package.config:match("%p") --platform independent cheat
-
 module("tools.path",package.seeall)
+
+FILE_SEPARATOR = package.config:match("%p") --platform independent cheat
 
 function is_absolute(dir)
    return (dir and (type(dir) == "string") and 
