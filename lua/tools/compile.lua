@@ -83,9 +83,11 @@ local function build_driver (spec, arguments, memoized)
 
   -- loading specific build methods
   local ok, build_type = pcall(require, "tools.build." .. spec.build.type)
-  assert(ok and type(build_type) == "table","failed initializing "..
-                      "build backend ".. spec.build.type .." "..
-                      "to compile the package ".. nameversion)
+  if not (ok and type(build_type) == "table") then
+    log.error(build_type)
+    error("failed initializing build backend ".. spec.build.type .." "..
+          "to compile the package ".. nameversion)
+  end
 
   log.info("Building",nameversion,"using",spec.build.type,"driver")
   -- starting specific build methods in a protected way

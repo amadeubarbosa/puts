@@ -1,6 +1,7 @@
 -- Basic variables (global vars are in upper case)
 local config = require "tools.config"
 local util = require "tools.util"
+local path = require "tools.path"
 local copy = require "tools.build.copy"
 
 local platforms = require "tools.platforms"
