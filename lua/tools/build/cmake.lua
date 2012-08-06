@@ -8,23 +8,31 @@ local plat = platforms[config.TEC_SYSNAME]
 
 module("tools.build.cmake", package.seeall)
 
-function run(t, arguments)
+function run(t, arguments, dir)
   local nameversion = util.nameversion(t)
   util.log.info("Creating Makefiles with CMake for: ".. nameversion)
 
   os.execute(plat.cmd.mkdir .. config.TMPDIR)
   
   local build_dir = config.TMPDIR
+  local src_dir = nil
+  local default_location = path.pathname(config.PRODAPP, nameversion)
+
+  if path.is_absolute(t.build.src) then
+    src_dir = t.build.src
+  else
+    src_dir = path.pathname(dir or default_location, t.build.src or "src")
+  end
 
   -- Making command
-  local cmake_cmd = "cd " .. build_dir .. " && " .. "cmake " .. t.build.src
+  local cmake_cmd = "cd " .. build_dir .. " && " .. "cmake " .. src_dir
 
   local build = t.build[config.TEC_UNAME] or t.build[config.TEC_SYSNAME] or t.build
-  for n,v in pairs(build.definitions) do
+  for n,v in pairs(build.definitions or {}) do
      cmake_cmd = cmake_cmd.." -D"..n.."="..v
   end
 
-  print(t.build.src)
+  print(src_dir)
 
   if arguments["rebuild"] then
      util.log.info("Rebuild selected - removing content from: ".. build_dir)
