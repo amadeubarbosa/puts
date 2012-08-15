@@ -41,6 +41,7 @@ PUTS_MODULES=$(addprefix tools., \
 	compile \
 	installer \
 	makepack \
+	remove \
 	list \
 	hook \
 	console )

@@ -1,7 +1,7 @@
 #!/usr/bin/env lua5.1
 package.path = "?.lua;../?.lua;" .. package.path
 
-local assistants = { "compile" , "makepack" , "installer" , "hook" , "list" }
+local assistants = { "compile" , "makepack" , "installer" , "hook" , "list", "remove" }
 
 module("tools.console", package.seeall)
 

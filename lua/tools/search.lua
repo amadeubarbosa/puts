@@ -146,9 +146,11 @@ function disable_cache()
 end
 
 function update_cache()
-  for repo, outdated_manifest in pairs(manifest_cache) do
-    log.debug("Updating the cache of manifest about the repository",repo)
-    manifest_cache[repo] = manifest.load(repo)
+  if manifest_cache then
+    for repo, outdated_manifest in pairs(manifest_cache) do
+      log.debug("Updating the cache of manifest about the repository",repo)
+      manifest_cache[repo] = manifest.load(repo)
+    end
   end
 end
 
