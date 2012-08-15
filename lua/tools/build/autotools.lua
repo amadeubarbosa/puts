@@ -118,7 +118,7 @@ function old_run(t,arguments)
 
   -- when '--force' is requested we will rebuild the soft or when any
   -- test library is missing on library path
-  for _,lib in ipairs(t.build.test_libs) do
+  for _,lib in ipairs(t.build.test_libs or {"no_test_lib"}) do
     if arguments.force or arguments.rebuild or not myplat:search_ldlibpath(lib) then
       -- verifying if all build dependencies are ok, if don't we'll abort
       check_external_deps(t)
