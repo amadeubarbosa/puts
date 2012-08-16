@@ -26,21 +26,22 @@ function delete_version(name, version, local_repo, manifest, force)
     local dependents = {}
     for installed_name, installed_versions in pairs(installed) do
       for installed_version, metadata in pairs(installed_versions) do
-          local spec_url = search.find_suitable_rock( search.make_query(installed_name, installed_version), config.SPEC_SERVERS, false)
-          if spec_url then
-            local ok, tempfile = util.download(util.base_name(spec_url), spec_url, config.TMPDIR)
-            assert(ok)
-            -- dowloading the descriptor of the package
-            local spec = descriptor.load(tempfile)
-            assert(os.remove(tempfile))
+        local spec_url = search.find_suitable_rock( search.make_query(installed_name, installed_version), config.SPEC_SERVERS, false)
+        if spec_url and type(spec_url) == "string" then
+          local ok, tempfile = util.download(util.base_name(spec_url), spec_url, config.TMPDIR)
+          assert(ok, "failed to download the "..spec_url.." from remote repositories")
+          -- dowloading the descriptor of the package
+          local spec = descriptor.load(tempfile)
+          assert(os.remove(tempfile))
 
-            local _, missing = deps.match_deps(spec, blacklist, manifest)
-            if missing[checkName] then
-              table.insert(dependents, {name = installed_name, version = installed_version})
-            end
-          else
-            return nil, "couldn't download the descriptor of the package "..checkName.."-"..checkVersion..", aborting the removal."
+          local _, missing = deps.match_deps(spec, blacklist, manifest)
+          if missing[checkName] then
+            table.insert(dependents, {name = installed_name, version = installed_version})
           end
+        else
+          log.debug("Search results was:",spec_url)
+          log.warning("Descriptor of the package "..installed_name.."-"..installed_version.." is unavailable on remote repositories.")
+        end
       end
     end
     return dependents
