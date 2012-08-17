@@ -17,7 +17,6 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
-#include "putspreloaded.h"
 #include "puts.h"
 //#include "compile.h"
 //#include "installer.h"
@@ -352,7 +351,7 @@ static int pmain (lua_State *L) {
   // arguments treatment to create the luatable named 'arg'
   getargs(L, argv, 0);  /* collect arguments */
   lua_setglobal(L, "arg");
-  luapreload_putspreloaded(L);
+  luapreload_puts(L);
   lua_gc(L, LUA_GCRESTART, 0);
   // loading console.lua precompiled as library
   luaopen_tools_console(L);

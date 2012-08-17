@@ -7,12 +7,8 @@ LUASRC_DIR= ../lua
 OPENBUSLIB= ${OPENBUS_HOME}/lib
 LUA_FLAGS= -e "package.path='${OPENBUS_HOME}/lib/lua/5.1/?.lua;'..package.path"
 
-PRECMP_DIR= ../obj/${TEC_UNAME}
-PRECMP_LUA= ../lua/precompiler.lua
-PRECMP_FLAGS= -p PUTS_API -o puts -l "$(LUASRC_DIR)/?.lua" -d $(PRECMP_DIR) -n
-
+PRELOAD_DIR= ../obj/${TEC_UNAME}
 PRELOAD_LUA= ../lua/preloader.lua
-PRELOAD_FLAGS= -p PUTS_API -o putspreloaded -d ${PRECMP_DIR}
 
 PUTS_MODULES=$(addprefix tools., \
 	platformid \
@@ -51,18 +47,19 @@ $(addprefix $(LUASRC_DIR)/, \
   $(addsuffix .lua, \
     $(subst .,/, $(PUTS_MODULES))))
 
-${PRECMP_DIR}/puts.c: $(PUTS_LUA) 
-	$(LUABIN) $(LUA_FLAGS) $(PRECMP_LUA)   $(PRECMP_FLAGS) $(PUTS_MODULES) 
-
-${PRECMP_DIR}/putspreloaded.c: ${PRECMP_DIR}/puts.c
-	$(LUABIN) $(LUA_FLAGS) $(PRELOAD_LUA)  $(PRELOAD_FLAGS) -i ${PRECMP_DIR} puts.h
+${PRELOAD_DIR}/puts.c ${PRELOAD_DIR}/puts.h: $(PRELOAD_LUA) $(PUTS_LUA)
+	$(LUABIN) $(LUA_FLAGS) $(PRELOAD_LUA) -m \
+		-l "$(LUASRC_DIR)/?.lua" -d $(PRELOAD_DIR) \
+		-h puts.h \
+		-o puts.c \
+		$(PUTS_LUA)
 
 #Descomente a linha abaixo caso deseje ativar o VERBOSE
 #DEFINES=VERBOSE
 
-SRC= ${PRECMP_DIR}/puts.c ${PRECMP_DIR}/putspreloaded.c lua.c
+SRC= ${PRELOAD_DIR}/puts.c lua.c
 
-INCLUDES= . ${PRECMP_DIR}
+INCLUDES= . ${PRELOAD_DIR}
 LDIR += ${OPENBUSLIB}
 
 USE_LUA51=YES
@@ -81,5 +78,5 @@ endif
 
 .PHONY: clean-custom-obj
 clean-custom-obj:
-	rm -f ${PRECMP_DIR}/*.c
-	rm -f ${PRECMP_DIR}/*.h
+	rm -f ${PRELOAD_DIR}/*.c
+	rm -f ${PRELOAD_DIR}/*.h
