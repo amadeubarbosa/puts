@@ -50,18 +50,16 @@ function run(t,arguments)
 
   if t.build.test_libs then
     util.log.info("Verifying if needs to compile",nameversion,"using autotools driver.")
-  end
-
-  local missing = {}
-  for _,lib in ipairs(t.build.test_libs) do
-    if not myplat:search_ldlibpath(lib) or arguments.force or arguments.rebuild then
-      table.insert(missing, lib)
+    local missing = {}
+    for _,lib in ipairs(t.build.test_libs) do
+      if not myplat:search_ldlibpath(lib) or arguments.force or arguments.rebuild then
+        table.insert(missing, lib)
+      end
     end
-  end
-
-  if t.build.test_libs and (#missing == 0) and not arguments.force then
-    util.log.info("All libraries of",nameversion,"are already installed in your system. Use --force if you wish recompile them.")
-    return nil
+    if (#missing == 0) and not arguments.force then
+      util.log.info("All libraries of",nameversion,"are already installed in your system. Use --force if you wish recompile them.")
+      return nil
+    end
   end
 
   -- verifying if all build dependencies are ok, if don't we'll abort
@@ -118,32 +116,41 @@ function old_run(t,arguments)
 
   -- when '--force' is requested we will rebuild the soft or when any
   -- test library is missing on library path
-  for _,lib in ipairs(t.build.test_libs or {"no_test_lib"}) do
-    if arguments.force or arguments.rebuild or not myplat:search_ldlibpath(lib) then
-      -- verifying if all build dependencies are ok, if don't we'll abort
-      check_external_deps(t)
-
-      local build_dir = config.PRODAPP .."/".. nameversion
-
-      -- running the build and install command
-      local build_cmd = t.build[plat]
-      -- prepend clean target to makefile if rebuild is setted
-      if arguments.rebuild then
-        build_cmd = "make distclean || make clean || "..
-                   "gmake distclean || gmake clean; " .. build_cmd
+  local rebuild = arguments.force
+               or arguments.rebuild
+               or t.build.test_libs == nil
+               or next(t.build.test_libs) == nil
+  if not rebuild then
+    for _,lib in ipairs(t.build.test_libs) do
+      if not myplat:search_ldlibpath(lib) then
+        rebuild = true
+        break
       end
-
-      -- prepend the command to enter on software directory
-      build_cmd = "cd ".. build_dir .."; ".. build_cmd
-
-      util.log.info("Building",nameversion,"using autotools driver.")
-      local ret = os.execute(build_cmd)
-      -- assert ensure that we could continue
-      assert(ret == 0,"error compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
-
-      -- re-using copy method to parse install_files, conf_files, dev_files
-      copy.run(t,arguments,build_dir)
-      break
     end
+  end
+  if rebuild then
+    -- verifying if all build dependencies are ok, if don't we'll abort
+    check_external_deps(t)
+
+    local build_dir = config.PRODAPP .."/".. nameversion
+
+    -- running the build and install command
+    local build_cmd = t.build[plat]
+    -- prepend clean target to makefile if rebuild is setted
+    if arguments.rebuild then
+      build_cmd = "make distclean || make clean || "..
+                 "gmake distclean || gmake clean; " .. build_cmd
+    end
+
+    -- prepend the command to enter on software directory
+    build_cmd = "cd ".. build_dir .."; ".. build_cmd
+
+    util.log.info("Building",nameversion,"using autotools driver.")
+    local ret = os.execute(build_cmd)
+    -- assert ensure that we could continue
+    assert(ret == 0,"error compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
+
+    -- re-using copy method to parse install_files, conf_files, dev_files
+    copy.run(t,arguments,build_dir)
   end
 end
