@@ -349,6 +349,9 @@ function serialize_table(filename,tbl,name)
           assert(type(k)=="string")
           f:write(k.." = ")
           serialize(f,v)
+          if type(v) ~= "table" then
+            f:write("\n")
+          end
         end
       else
         f:write("{\n")
