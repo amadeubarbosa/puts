@@ -259,8 +259,7 @@ local compat = {
         ------------------------------------------------------------------------------
         -- Auxiliar local function 'compile' -----------------------------------------
         ------------------------------------------------------------------------------
-        local function compile(t)
-          local nameversion = util.nameversion(t)
+        local function compile(t, nameversion)
           -- Back-compatibility to support the old Openbus (=< 1.4.2) package descriptions
           if arguments.compat_v1_04 and t.source then
             t.url = t.source
@@ -277,9 +276,10 @@ local compat = {
         end
 
         for i, t in ipairs(desc) do
+          local nameversion = util.nameversion(t)
           -- check if already compiled in last faulty compilation 
           if not checkpoint.packages[nameversion] then
-            local ok, err = compile(t)
+            local ok, err = compile(t, nameversion)
             if not ok then
               -- returning the package index of the desc table to identify
               --  the package that was the last successfully compiled
