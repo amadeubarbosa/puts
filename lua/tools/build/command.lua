@@ -18,27 +18,25 @@ function run(t, arguments)
     build_dir = path.pathname(t.directory or default_location, t.build.src or "")
   end
 
-  local build_table = t.build[config.TEC_UNAME] or t.build[config.TEC_SYSNAME] or t.build
-
-  if not build_table.cmd then
+  if not t.build.cmd then
     util.log.error("No build command provided to compile", nameversion,
-      "in", config.TEC_UNAME, "or", config.TEC_SYSNAME, "platforms.")
+      "on", config.TEC_UNAME, "neither", config.TEC_SYSNAME, "platforms.")
     return nil
   end
 
-  command = build_table.cmd
+  local command = t.build.cmd
 
   -- Adding arguments
-  if not arguments["rebuild"] and build_table.rebuild then
-    command = command .. " " .. build_table.rebuild
+  if arguments["rebuild"] and t.build.rebuild then
+    command = command .. " " .. t.build.rebuild
   end
 
-  if not arguments["verbose"] and build_table.verbose then
-    command = command .. " " .. build_table.verbose
+  if arguments["verbose"] and t.build.verbose then
+    command = command .. " " .. t.build.verbose
   end
   
-  if build_table.arguments then
-    command = command .. " " .. build_table.arguments
+  if t.build.arguments then
+    command = command .. " " .. t.build.arguments
   end
 
   build_cmd = "cd " .. build_dir .. " && " .. command

@@ -66,22 +66,17 @@ function run(t, arguments, dir)
   bjam_cmd = "cd " .. build_dir .. " && " .. bjam_cmd
 
 
-  if t.build.features then
-    for n,v in pairs(t.build.features) do
+  if type(t.build.variables) == "table" then
+    for n,v in pairs(t.build.variables) do
       if type(v) == "string" then
         bjam_cmd = bjam_cmd .. " " .. n .. "=" .. v
+      elseif type(v) == "table" then
+        for _, vv in ipairs(v) do
+          bjam_cmd = bjam_cmd .. " " .. n .. "=" .. vv
+        end
       else
-        util.log.debug("Bjam build features... this is n: " .. n .. " and this is TEC_UNAME " .. config.TEC_UNAME)
-      end
-    end
-    if t.build.features[config.TEC_UNAME] then
-      for n,v in pairs(t.build.features[config.TEC_UNAME]) do
-        bjam_cmd = bjam_cmd .. " " .. n .. "=" .. v
-      end
-    end
-    if t.build.features[config.TEC_SYSNAME] then
-      for n,v in pairs(t.build.features[config.TEC_SYSNAME]) do
-        bjam_cmd = bjam_cmd .. " " .. n .. "=" .. v
+        util.log.error("Bjam build variables not recognized",
+          "n=",n," v=",tostring(v),"(type:"..type(v)..")")
       end
     end
   end

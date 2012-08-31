@@ -31,11 +31,17 @@ local function indexByName(table)
   return table
 end
 -- Merges two tables into the first one
-local function mergeTables (t1, t2)
+local function mergeTables (t1, t2, replace)
   assert(t1 and t2,"both parameters must be tables")
-  for i,elem in ipairs(t2) do
-    table.insert(t1,elem)
-  end
+  local k, v = next(t2)
+  repeat
+    if (type(k) == "number") and not replace then
+      table.insert(t1,v)
+    else
+      t1[k] = v
+    end
+    k, v = next(t2,k)
+  until (k == nil)
   return t1
 end
 -- Usefull for back-compatibility mode in descriptors that need the PUTS variables
@@ -51,22 +57,41 @@ local function build_driver (spec, arguments, memoized)
     spec.build = { type = "copy" }
   end
 
-  -- parsing our simple dependency query language
-  if spec.build.variables then
+  -- per platform support
+  local overrides = { config.TEC_SYSNAME, config.TEC_UNAME }
+  for _, plat in ipairs(overrides) do
+    if type(spec.build[plat]) == "table" then
+      for context, replacement in pairs(spec.build[plat]) do
+        if type(spec.build[context]) == "table" and type(replacement) == "table" then
+          spec.build[context] = mergeTables(spec.build[context], replacement, true)
+        else
+          spec.build[context] = replacement
+        end
+      end
+      spec.build[plat] = nil
+    end
+  end
+
+  if type(spec.build.variables) == "table" then
     local pattern = "%$%((.-)%)%.?(.*)"
-    for dep, meta in pairs(memoized) do
-      if type(dep) == "table" then
-        for var, value in pairs(spec.build.variables) do
-          -- currently we only support queries about 'directory', 'arch' and 'repo' fields
-          local query_pkgname, query_pkgfield = value:match(pattern)
-          if (query_pkgname == dep.name) and query_pkgfield and meta[1][query_pkgfield] then
-            spec.build.variables[var] = meta[1][query_pkgfield]
-            break
+    for var, value in pairs(spec.build.variables) do
+      if type(value) == "string" then
+        -- parsing our simple dependency query language
+        -- TODO: we only support table fields 'directory', 'arch' and 'repo'
+        local query_pkgname, query_pkgfield = value:match(pattern)
+        if query_pkgname and query_pkgfield then
+          for dep, meta in pairs(memoized) do
+            if (type(dep) == "table") and
+              (query_pkgname == dep.name) and meta[1][query_pkgfield] then
+              spec.build.variables[var] = meta[1][query_pkgfield]
+              break
+            end
           end
         end
       end
     end
-    -- giving a good error message if any variable couldn't be translated
+
+    -- giving a good error message if the queries couldn't be translated
     local not_translated = ""
     for var, value in pairs(spec.build.variables) do
       if value:match(pattern) then
@@ -77,7 +102,7 @@ local function build_driver (spec, arguments, memoized)
       return nil, "aborting compilation of "..nameversion..
         " because some build variables couldn't be translated:"..
         not_translated..". Check "..nameversion.." descriptor. "..
-        "All names used in build.variables queries must be listed as dependencies."
+        "All names used in build.variables queries must be direct dependencies."
     end
   end
 

@@ -28,8 +28,7 @@ function run(t, arguments, dir)
   -- Making command
   local cmake_cmd = "cd " .. build_dir .. " && " .. "cmake .."
 
-  local build = t.build[config.TEC_UNAME] or t.build[config.TEC_SYSNAME] or t.build
-  for n,v in pairs(build.definitions or {}) do
+  for n,v in pairs(t.build.variables or {}) do
      cmake_cmd = cmake_cmd.." -D"..n.."="..v
   end
 

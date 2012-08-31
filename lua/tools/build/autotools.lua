@@ -66,17 +66,10 @@ function run(t,arguments)
   check_external_deps(t)
 
   local build_dir = t.directory or path.pathname(config.PRODAPP, nameversion)
-  local configure_cmd, build_cmd, install_cmd = "./configure", "make", "make install"
 
-  local configure_cmd = (t.build[uname] and t.build[uname].configure) or
-                        (t.build[sysname] and t.build[sysname].configure) or
-                        t.build.configure or configure_cmd
-  local build_cmd = (t.build[uname] and t.build[uname].compile) or
-                    (t.build[sysname] and t.build[sysname].compile) or
-                    t.build.compile or build_cmd
-  local install_cmd = (t.build[uname] and t.build[uname].install) or
-                      (t.build[sysname] and t.build[sysname].install) or 
-                      t.build.install or install_cmd
+  local configure_cmd = t.build.configure or "./configure"
+  local build_cmd     = t.build.compile   or "make"
+  local install_cmd   = t.build.install   or "make install"
 
   if arguments.rebuild then
     configure_cmd = "make distclean || make clean || "..

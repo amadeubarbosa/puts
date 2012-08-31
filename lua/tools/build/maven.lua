@@ -20,6 +20,16 @@ function run(t, arguments)
 
   -- Making command
   local maven_cmd =  "mvn "
+
+  -- maven variables 
+  if t.build and type(t.build.variables) == "table" then
+    local variables = ""
+    for k, v in pairs(t.build.variables) do
+      variables = variables.." -D"..k.."="..v
+    end
+    maven_cmd = maven_cmd .. variables
+  end
+
   if arguments["rebuild"] then
     maven_cmd = maven_cmd .. "clean "
   end
