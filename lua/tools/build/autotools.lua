@@ -76,6 +76,15 @@ function run(t,arguments)
                    "gmake distclean || gmake clean; " .. configure_cmd
   end
 
+  local variables = ""
+  if type(t.build.variables) == "table" then
+    for k, v in pairs(t.build.variables) do
+      variables = variables.." "..k.."="..v
+    end
+  end
+
+  configure_cmd = configure_cmd .. variables
+
   -- configure phase
   local cmd, ret = nil, nil
   cmd = "cd ".. build_dir .."; ".. configure_cmd
