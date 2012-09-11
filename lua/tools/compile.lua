@@ -94,7 +94,7 @@ local function build_driver (spec, arguments, memoized)
     -- giving a good error message if the queries couldn't be translated
     local not_translated = ""
     for var, value in pairs(spec.build.variables) do
-      if value:match(pattern) then
+      if type(value) == "string" and value:match(pattern) then
         not_translated = not_translated.." "..var.."="..value
       end
     end
