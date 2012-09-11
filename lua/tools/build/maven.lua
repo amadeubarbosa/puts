@@ -25,7 +25,7 @@ function run(t, arguments)
   if t.build and type(t.build.variables) == "table" then
     local variables = ""
     for k, v in pairs(t.build.variables) do
-      variables = variables.." -D"..k.."="..v
+      variables = variables.."-D"..k.."="..v.." "
     end
     maven_cmd = maven_cmd .. variables
   end
