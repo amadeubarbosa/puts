@@ -72,37 +72,77 @@ local function build_driver (spec, arguments, memoized)
     end
   end
 
+  -- parsing build.variables
   if type(spec.build.variables) == "table" then
-    local pattern = "%$%((.-)%)%.?(.*)"
-    for var, value in pairs(spec.build.variables) do
-      if type(value) == "string" then
-        -- parsing our simple dependency query language
-        -- TODO: we only support table fields 'directory', 'arch' and 'repo'
-        local query_pkgname, query_pkgfield = value:match(pattern)
-        if query_pkgname and query_pkgfield then
-          for dep, meta in pairs(memoized) do
-            if (type(dep) == "table") and
-              (query_pkgname == dep.name) and meta[1][query_pkgfield] then
-              spec.build.variables[var] = meta[1][query_pkgfield]
-              break
-            end
-          end
+    -- get_metadata is a command supported in our query language
+    local function get_metadata(pkgname, field)
+      local name, version = util.split_nameversion(pkgname)
+      for dep, meta in pairs(memoized) do
+        if (type(dep) == "table") and (name == dep.name) and ((version and version == dep.version) or not version) then
+           return assert(meta[1][field])
+        end
+      end
+      return nil, "dependency '"..pkgname.."' not found"
+    end
+    -- directory is command supported in our query language
+    local function directory(name)
+      return get_metadata(name, "directory")
+    end
+
+    local sandbox = {
+      type = type, pairs = pairs, assert = assert,
+      util = util, directory = directory, 
+      get_metadata = get_metadata, meta = meta, memoized = memoized,
+    }
+
+    local function quote(str)
+        return string.format("%q",str)
+    end
+
+    local function quote_args(str)
+      local opname, arg_list = str:match("%s*(.-)%s*(%b())%s*")
+      arg_list = arg_list:sub(2,#arg_list-1) -- parenthesis removal
+      return opname.."("..quote(arg_list:gsub("^%s*(.-)%s*$","%1"))..")"
+    end
+
+    local function expand(str)
+      local InvalidQueryMsg = "Failure to query dependencies metadata (cause: %s)"
+      local chunk = quote_args(str)
+      local f, errmsg = loadstring("return ".. chunk)
+      if not f then
+        log.warning(InvalidQueryMsg:format(tostring(errmsg)))
+        return false
+      else
+        setfenv(f, sandbox)
+        local ret, errmsg = f()
+        if not ret then
+          log.warning(InvalidQueryMsg:format(tostring(errmsg)))
+          return false
+        else
+          return ret
         end
       end
     end
 
+    local pattern = "%%(.-)%%"
+    for var, value in util.sortedpairs(spec.build.variables) do
+      if type(value) == "string" then
+        -- parsing our simple dependency query language
+        local str = value:gsub(pattern, expand)
+        spec.build.variables[var] = str
+      end
+    end
     -- giving a good error message if the queries couldn't be translated
-    local not_translated = ""
+    local not_translated = {}
     for var, value in pairs(spec.build.variables) do
       if type(value) == "string" and value:match(pattern) then
-        not_translated = not_translated.." "..var.."="..value
+        table.insert(not_translated,"'"..var.."="..value.."'")
       end
     end
     if #not_translated > 0 then
       return nil, "aborting compilation of "..nameversion..
-        " because some build variables couldn't be translated:"..
-        not_translated..". Check "..nameversion.." descriptor. "..
-        "All names used in build.variables queries must be direct dependencies."
+        " because some build variables couldn't be translated: "..
+        table.concat(not_translated,", ").."."
     end
   end
 
@@ -627,7 +667,7 @@ function run()
     for i, pkg in ipairs(descriptors) do
       local ok, err = pcall(processing,pkg,nil,arguments)
       if not ok then
-        log.error("Failure on compilation of",util.nameversion(pkg),"software.")
+        log.error("Failure to compile",util.nameversion(pkg),"software.")
         log.error(err)
         os.execute(myplat.cmd.rm .. config.TMPDIR)
         util.close_cache()

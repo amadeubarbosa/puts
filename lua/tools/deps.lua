@@ -456,7 +456,7 @@ function fulfill_dependencies(spec, servers, buildtree, local_manifest, missing_
             elseif (type(results) == "table") then
               return nil, "Multiple packages available for "..show_dep(dep)..". The descriptor of "..nameversion.." must specify one of these."
             elseif (type(results) == "string") then
-              log.info("The following dependency was found at servers but it isn't installed", show_dep(dep))
+              log.info("The following dependency is on repositories but it isn't installed:", show_dep(dep))
               if missing_hook then 
                 assert(missing_hook(nil,results,...))
               end
