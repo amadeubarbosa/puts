@@ -79,7 +79,7 @@ end
 function split_nameversion(nameversion)
   local name, version = nameversion:match("(.-)%-(%d+.*)$")
   if not name and not version then
-    name = nameversion:match("^[%w%-%_]+$") -- second by pass
+    name = nameversion:match("^[%w%.%-%_]+$") -- second by pass
     return name
   end
   return name, version
