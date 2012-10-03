@@ -29,8 +29,10 @@ function run(t, arguments, dir)
 
   local bjam_cmd = "bjam"
 
-  if t.build.bjam_source then
-    local bjam_source = t.build.bjam_source
+  local bjam_source = t.build.bjam_source or (t.build.variables and t.build.variables.BJAM_SOURCE)
+  t.build.variables.BJAM_SOURCE = nil
+
+  if bjam_source then
     if not path.is_absolute(bjam_source) then
       bjam_source = path.pathname(src_dir,bjam_source)
     end
@@ -56,15 +58,13 @@ function run(t, arguments, dir)
   end
 
   local boost_build_path = t.build.boost_build_path or (t.build.variables and t.build.variables.BOOST_BUILD_PATH)
+  t.build.variables.BOOST_BUILD_PATH = nil
 
   if boost_build_path then
     if not path.is_absolute(boost_build_path) then
       boost_build_path = path.pathname(src_dir,boost_build_path)
     end
     bjam_cmd = "BOOST_BUILD_PATH=" .. boost_build_path .. " " .. bjam_cmd
-    if (t.build.variables and t.build.variables.BOOST_BUILD_PATH) then
-      t.build.variables.BOOST_BUILD_PATH = nil
-    end
   end
 
   bjam_cmd = "cd " .. build_dir .. " && " .. bjam_cmd
