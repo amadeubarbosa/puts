@@ -130,6 +130,13 @@ local function build_driver (spec, arguments, memoized)
         -- parsing our simple dependency query language
         local str = value:gsub(pattern, expand)
         spec.build.variables[var] = str
+      elseif type(value) == "table" then
+         for i, vv in ipairs(value) do
+            if type(vv) == "string" then
+               local str = vv:gsub(pattern, expand)
+               spec.build.variables[var][i] = str
+            end
+         end
       end
     end
     -- giving a good error message if the queries couldn't be translated
