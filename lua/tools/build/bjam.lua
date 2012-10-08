@@ -56,6 +56,10 @@ function run(t, arguments, dir)
     assert(bjam_bin, "error because we couldn't find compiled bjam")
     bjam_cmd = bjam_bin .. "/bjam"
   end
+  user_config_path = config.TMPDIR .. "/user-config.jam"
+  bjam_cmd = bjam_cmd .. " --user-config="..user_config_path
+
+  user_config = assert(io.open(user_config_path, "w"))
 
   local boost_build_path = t.build.boost_build_path or (t.build.variables and t.build.variables.BOOST_BUILD_PATH)
   t.build.variables.BOOST_BUILD_PATH = nil
@@ -69,15 +73,25 @@ function run(t, arguments, dir)
 
   bjam_cmd = "cd " .. build_dir .. " && " .. bjam_cmd
 
-
   if type(t.build.variables) == "table" then
     for n,v in pairs(t.build.variables) do
       if type(v) == "string" then
         bjam_cmd = bjam_cmd .. " " .. n .. "=" .. v
       elseif type(v) == "table" then
-        for _, vv in ipairs(v) do
-          bjam_cmd = bjam_cmd .. " " .. n .. "=" .. vv
-        end
+         if v[1] == "USING" then
+            user_config_line = "using " .. n .. " "
+            for i, vv in ipairs(v) do
+               if i ~= 1 then
+                  user_config_line = user_config_line .. " : " .. vv .. " "
+               end
+            end
+            user_config_line = user_config_line .. ";\n"
+            user_config:write(user_config_line)
+         else
+            for _, vv in ipairs(v) do
+               bjam_cmd = bjam_cmd .. " " .. n .. "=" .. vv
+            end
+         end
       else
         util.log.error("Bjam build variables not recognized",
           "n=",n," v=",tostring(v),"(type:"..type(v)..")")
@@ -93,7 +107,13 @@ function run(t, arguments, dir)
     bjam_cmd = bjam_cmd .. " " .. v
   end
 
+  user_config:close()
   util.log.debug("Running " .. bjam_cmd)
+  util.log.debug("With user-config.jam's contents: ")
+  for line in io.lines(user_config_path) do
+     util.log.debug(line)
+  end
+  util.log.debug("End of user-config.jam's contents")
 
   local ret = os.execute(bjam_cmd)
   -- assert ensure that we could continue
