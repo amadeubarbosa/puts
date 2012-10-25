@@ -4,8 +4,9 @@ APPNAME= ${PROJNAME}
 LUABIN= ${LUA51}/bin/${TEC_UNAME}/lua5.1
 LUASRC_DIR= ../lua
 
-OPENBUSLIB= ${OPENBUS_HOME}/lib
-LUA_FLAGS= -e "package.path='${OPENBUS_HOME}/lib/lua/5.1/?.lua;'..package.path"
+INCDIR= ${PREFIX}/include
+LIBDIR= ${PREFIX}/lib
+LUA_FLAGS= -e "package.path='${LIBDIR}/lua/5.1/?.lua;'..package.path"
 
 PRELOAD_DIR= ../obj/${TEC_UNAME}
 PRELOAD_LUA= ../lua/preloader.lua
@@ -60,13 +61,20 @@ ${PRELOAD_DIR}/puts.c ${PRELOAD_DIR}/puts.h: $(PRELOAD_LUA) $(PUTS_LUA)
 
 SRC= ${PRELOAD_DIR}/puts.c lua.c
 
-INCLUDES= . ${PRELOAD_DIR}
-LDIR += ${OPENBUSLIB}
+INCLUDES= . ${INCDIR}/luafilesystem ${PRELOAD_DIR}
+LDIR += ${LIBDIR}
 
 USE_LUA51=YES
 USE_STATIC=YES
 NO_SCRIPTS=YES
 USE_NODEPEND=YES
+
+LIBS += lfs
+
+ifdef USE_STATIC
+  SLIB:= $(foreach libname, $(LIBS), $(LIBDIR)/lib$(libname).a)
+  LIBS:=
+endif
 
 LIBS += dl
 

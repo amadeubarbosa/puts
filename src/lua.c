@@ -18,9 +18,8 @@
 #include "lualib.h"
 
 #include "puts.h"
-//#include "compile.h"
-//#include "installer.h"
-//#include "makepack.h"
+
+#include "lfs.h"
 
 static lua_State *globalL = NULL;
 
@@ -347,6 +346,8 @@ static int pmain (lua_State *L) {
   if (argv[0] && argv[0][0]) progname = argv[0];
   lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
   luaL_openlibs(L);  /* open libraries */
+  luaL_findtable(L, LUA_GLOBALSINDEX, "package.preload", 1);
+  lua_pushcfunction(L,luaopen_lfs);lua_setfield(L,-2,"lfs"); /* preload binded C libraries */
   s->status = handle_luainit(L);
   // arguments treatment to create the luatable named 'arg'
   getargs(L, argv, 0);  /* collect arguments */
