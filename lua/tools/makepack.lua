@@ -306,3 +306,7 @@ function run()
 
   return pack(arguments.arch, arguments.profile, arguments.release, arguments.project)
 end
+
+if not package.loaded["tools.console"] then
+  os.exit((run() and 0) or 1)
+end

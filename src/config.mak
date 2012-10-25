@@ -25,6 +25,7 @@ PUTS_MODULES=$(addprefix tools., \
 	fetch.file \
 	fetch.http \
 	fetch.svn \
+        make_manifest \
 	checklibdeps \
 	platforms \
 	split \

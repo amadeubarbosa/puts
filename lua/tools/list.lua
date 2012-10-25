@@ -54,3 +54,7 @@ function run()
   os.execute(myplat.cmd.rm .. config.TMPDIR)
   return true
 end
+
+if not package.loaded["tools.console"] then
+  os.exit((run() and 0) or 1)
+end

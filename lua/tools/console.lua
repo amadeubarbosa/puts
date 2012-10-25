@@ -1,7 +1,7 @@
 #!/usr/bin/env lua5.1
 package.path = "?.lua;../?.lua;" .. package.path
 
-local assistants = { "compile" , "makepack" , "installer" , "hook" , "list", "remove" }
+local assistants = { "compile" , "makepack" , "installer" , "hook" , "list", "remove", "make_manifest" }
 
 module("tools.console", package.seeall)
 
@@ -10,7 +10,7 @@ module("tools.console", package.seeall)
 --------------------------------------------------------------------------------
 -- ATTENTION: Important just reconfigure 'tools.config' after the configuration
 -- be proceed on arguments manipulation. So we can't use 'tools.util' now!
-local patt="%-?%-?(%w+)(=?)(.*)"
+local patt="%-?%-?([%w%_]+)(=?)(.*)"
 local valid_options = false
 local reconfigure = false 
 local opt,_,value
