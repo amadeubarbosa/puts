@@ -47,10 +47,30 @@ function run(t, arguments)
   -- assert ensure that we could continue
   assert(ret == 0,"error compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
   
+  if t.build.javadoc then
+    javadoc(t,arguments,build_dir)
+  end
+  
   -- re-using copy method to parse install_files, conf_files, dev_files
   copyDependence(t,arguments,build_dir)
   copy.run(t,arguments,build_dir)
 end
+function javadoc(t,arguments,build_dir)
+  local nameversion = util.nameversion(t)
+  local maven_cmd = "mvn "
+  maven_cmd = maven_cmd .. "javadoc:javadoc "
+  maven_args = ""
+
+  -- Adding arguments
+  if not arguments["verbose"] then
+    maven_args = maven_args .. " -Dsilent=true "
+  end
+
+  build_cmd = "cd " .. build_dir .. " && " .. maven_cmd .. maven_args
+
+  local ret = os.execute(build_cmd)
+  assert(ret == 0, "error on mvn javadoc:javadoc of " .. nameversion)
+end 
 
 function copyDependence(t,arguments,build_dir)
   local nameversion = util.nameversion(t)
