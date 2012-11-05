@@ -75,5 +75,9 @@ function load( filename )
     table.insert(spec.dependencies, 1, parent_dep)
   end
 
+  if (not spec.build.MacOS or not spec.build.Darwin) then
+    spec.build.MacOS  = spec.build.MacOS or spec.build.Darwin
+    spec.build.Darwin = spec.build.Darwin or spec.build.MacOS
+  end
   return spec
 end
