@@ -361,6 +361,7 @@ end
 --- Check dependencies of a package descriptor and execute custom hooks.
 -- @param spec Package description which dependencies will be resolved
 -- @param servers List of URLs pointing to package description servers
+-- @param buildtree Directory where package are being installed 
 -- @param local_manifest Local manifest of available packages
 -- @param missing_hook Lua function to be called when some dependency is missing
 -- @param matched_hook Lua function to be called when some dependency is present
