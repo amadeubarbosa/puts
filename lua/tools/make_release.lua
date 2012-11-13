@@ -44,8 +44,9 @@ SPEC_SERVERS = {
 
 DEPENDENCY_LIST = {}
 REPLACEMENT = { --[[ from = "to" ]]}
+BUILDTREE = config.TMPDIR
 
-_, MANIFEST = assert(manifest.rebuild_manifest(config.TMPDIR))
+_, MANIFEST = assert(manifest.rebuild_manifest(BUILDTREE))
 
 tag_creation = function(pkg, specfile, ...)
   if pkg and type(pkg) == "table" then
@@ -129,6 +130,9 @@ tag_creation = function(pkg, specfile, ...)
       svn_list:close()
     end
     local function svn_list_with_last_change(url,subdir,sorted)
+      if subdir then
+        subdir = "/"..subdir
+      end
       local last_changes = sorted or {}
       local svn_list = io.popen("svn list "..url.." 2>/dev/null","r")
       while true do
@@ -137,9 +141,6 @@ tag_creation = function(pkg, specfile, ...)
           break
         end
         tag = tag:gsub("%/$","")
-        if subdir then
-          subdir = "/"..subdir
-        end
         local complete_url = url.."/"..tag..(subdir or "")
         local last_change = svn_retrieve_last_change_revision(complete_url)
         if last_change > 0 then -- is valid
@@ -161,6 +162,7 @@ tag_creation = function(pkg, specfile, ...)
 
     local function giveme(pkg)
       assert(pkg.version)
+      local sugg_newversion = ""
       if pkg.url then
         local url = pkg.url
         local is_under_subversion = false
@@ -201,6 +203,7 @@ tag_creation = function(pkg, specfile, ...)
 
         print("[question]","inform a new url or suggestion or press return to skip")
         local newurl = io.read("*l")
+
         if newurl ~= "" then
           if newurl:lower() == "suggestion" then
             newurl = sugg[1][1]
@@ -211,6 +214,18 @@ tag_creation = function(pkg, specfile, ...)
               print("[question]","would you like to create a tag for this branch? inform a new tag url or press return to skip")
               local newtag = io.read("*l")
               if newtag ~= "" then
+                local version_mark = newtag:match("/(.-)$")
+                local m = version_mark:gmatch("(%d%d)%_?")
+                repeat
+                  local num = m()
+                  if num ~= nil then
+                    sugg_newversion = sugg_newversion..tonumber(num).."."
+                  else
+                    sugg_newversion = sugg_newversion:sub(1,#sugg_newversion-1)
+                  end
+                  print("[debug]",sugg_newversion)
+                until (num == nil)
+
                 print("[script]","svn cp "..newurl.." "..newtag)
               end
             end
@@ -226,11 +241,18 @@ tag_creation = function(pkg, specfile, ...)
         end
         print("[info]","current version is:",pkg.version)
         print("[info]","versions stored in repositories:")
-        print("[debug]",pkg.name)
         svn_list_similar_names(repository, pkg.name)
-        print("[question]","inform a new version or press return to skip")
+
+        if #sugg_newversion > 0 then 
+          print("[suggestion]",sugg_newversion)
+        end
+
+        print("[question]","inform a new version or suggestion or press return to skip")
         local newversion = io.read("*l")
         if newversion ~= "" then
+          if newversion:lower() == "suggestion" then
+            newversion = sugg_newversion
+          end
           local newnameversion = pkg.name.."-"..newversion
           if os.execute("svn info "..repository..newnameversion..".desc 2>/dev/null >/dev/null") ~= 0 then
             print("[script]","svn cp "..repository..util.nameversion(pkg)..".desc "..
@@ -244,13 +266,17 @@ tag_creation = function(pkg, specfile, ...)
             print(diff_out)
             print("[debug]")
             print("[question]","are you sure to use "..newversion.."? yes or no")
+            local ok
             repeat
-              local ok = io.read("*l")
+              ok = io.read("*l")
               if ok ~= "" and ok == "no" then
                 print("[restart]","trying again for the package "..util.nameversion(pkg))
                 giveme(pkg)
               end
             until (ok and ok ~= "" and (ok == "yes" or ok == "no"))
+            if ok == "yes" then
+              print("[script] [replace]",util.nameversion(pkg),newnameversion)
+            end
           end
         end
       else
@@ -264,36 +290,56 @@ tag_creation = function(pkg, specfile, ...)
   
 
   if not manifest.is_installed(MANIFEST, pkg.name, pkg.version) then
-    assert(deps.fulfill_dependencies(pkg, SPEC_SERVERS, config.TMPDIR, MANIFEST, tag_creation, nil, DEPENDENCY_LIST))
-    assert(manifest.update_manifest(pkg, config.TMPDIR, MANIFEST))
+    assert(deps.fulfill_dependencies(pkg, SPEC_SERVERS, BUILDTREE, MANIFEST, tag_creation, nil, DEPENDENCY_LIST))
+    assert(manifest.update_manifest(pkg, BUILDTREE, MANIFEST))
   end
   
   return true, pkg
 end
 
 function temporary_load(specfile)
-  local ok, tempfile = util.download(util.base_name(specfile),specfile,config.TMPDIR)
-  assert(ok)
+  local ok, tempfile = util.download(util.base_name(specfile),specfile,BUILDTREE)
+  if not ok then
+    io.stderr:write("[error] package doesn't exist\n")
+    io.stderr:flush()
+    os.exit(1)
+  end
   local desc = assert(descriptor.load(tempfile))
   assert(desc.name and desc.version)
   assert(os.remove(tempfile))
   return desc
 end
 
-if not arg[1]:find("^/") then
-  specfile = path.pathname(SPEC_SERVERS[1],arg[1]..".desc")
+if arg[1] then
+  if not arg[1]:find("^/") then
+    specfile = path.pathname(SPEC_SERVERS[1],arg[1]..".desc")
+  else
+    specfile = arg[1]
+  end
+
+  if arg[2] then
+    BUILDTREE = arg[2]
+    if os.execute("test -d "..BUILDTREE) == 0 then
+      MANIFEST = manifest.load(BUILDTREE)
+    end
+  end
+
+  print("[timestamp]",os.time())
+  assert(tag_creation(nil,specfile,nil))
+  print("[timestamp]",os.time())
+
+  -- dump all dependencies
+  --table.foreach(DEPENDENCY_LIST, print)
+
+  -- dump all replacement
+  print("[debug]","dependency replacement list:")
+  table.foreach(REPLACEMENT, print)
+  print("[debug]","end of dependency replacement")
+
 else
-  specfile = arg[1]
+  io.stderr:write("[error] nothing to do! Usage: <package id> <buildtree>\n")
+  io.stderr:flush()
+  os.exit(1)
 end
-
-assert(tag_creation(nil,specfile,nil))
-
--- dump all dependencies
---table.foreach(DEPENDENCY_LIST, print)
-
--- dump all replacement
-print("[debug]","dependency replacement list:")
-table.foreach(REPLACEMENT, print)
-print("[debug]","end of dependency replacement")
 
 myplat.exec(myplat.cmd.rm..config.TMPDIR)
