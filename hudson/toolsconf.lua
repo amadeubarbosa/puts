@@ -1,0 +1,1 @@
+BASEDIR = os.getenv("WORKSPACE")
