@@ -46,8 +46,6 @@ DEPENDENCY_LIST = {}
 REPLACEMENT = { --[[ from = "to" ]]}
 BUILDTREE = config.TMPDIR
 
-_, MANIFEST = assert(manifest.rebuild_manifest(BUILDTREE))
-
 tag_creation = function(pkg, specfile, ...)
   if pkg and type(pkg) == "table" then
     specfile =  config.SPEC_SERVERS[1].."/"..util.nameversion(pkg)..".desc"
@@ -59,50 +57,6 @@ tag_creation = function(pkg, specfile, ...)
   assert(pkg.version)
   
   if pkg.version:match("snapshot") then
-    --guess
-    local function guess(pkg)
-      if pkg.url then
-        local protocol = util.split_url(pkg.url)
-        if protocol:match("^svn") then
-          if pkg.url:match("branches") then
-            local branch = pkg.url:match("branches/(.+)")
-            branch = branch:match("(.-)/") or branch
-            --[[example:
-            SCS_CORE_LUA_v1_02_02_2011_07_08
-            |----------|                     = project id
-                         v                   = mandatory character
-                         |------|            = project version (can be composed by one, two, three or more numbers)
-                                  |--------| = release date
-            ]]
-            tecgraf_version_patt = ".-v(%d)_(.-)_(%d%d%d%d)_(%d%d)_(%d%d)"
-            function is_year(num)
-              return num and tonumber(num) and ((num/1000) > 1)
-            end
-            --[[
-            100+ultimo
-            1000+penultimo
-            10000+antepenultimo ...
-            ]]
-            version_num = {branch:match(tecgraf_version_patt)}
-            
-            print("[info]"," parse versions",branch:match(".-v([_%d]+)"),"#"..#version_num, unpack(version_num))
-            local year = version_num[#version_num-2]
-            print("[info]"," year check",year,is_year(year))
-            
-            return "branches", branch
-          elseif pkg.url:match("tags") then
-            return "tags"
-          elseif pkg.url:match("trunk") then
-            return "trunk"
-          end
-        else
-          io.stderr:write("cannot create a tag of a package hosted in a "..protocol.." service\n")
-          return nil
-        end
-      end
-      return nil
-    end
-
     local function svn_retrieve_last_change_revision(url)
       assert(type(url) == "string")
       local svn_info = io.popen("svn info "..url.." 2>/dev/null","r")
@@ -223,7 +177,6 @@ tag_creation = function(pkg, specfile, ...)
                   else
                     sugg_newversion = sugg_newversion:sub(1,#sugg_newversion-1)
                   end
-                  print("[debug]",sugg_newversion)
                 until (num == nil)
 
                 print("[script]","svn cp "..newurl.." "..newtag)
@@ -264,7 +217,7 @@ tag_creation = function(pkg, specfile, ...)
             diff_out = io.popen(diff_cmd,"r"):read("*a")
             print("[debug]",diff_cmd)
             print(diff_out)
-            print("[debug]")
+            print("[debug] ---------------------------------------------------")
             print("[question]","are you sure to use "..newversion.."? yes or no")
             local ok
             repeat
@@ -321,7 +274,13 @@ if arg[1] then
     BUILDTREE = arg[2]
     if os.execute("test -d "..BUILDTREE) == 0 then
       MANIFEST = manifest.load(BUILDTREE)
+    else
+      myplat.exec(myplat.cmd.mkdir..BUILDTREE)
     end
+  end
+
+  if not MANIFEST then
+    _, MANIFEST = assert(manifest.rebuild_manifest(BUILDTREE))
   end
 
   print("[timestamp]",os.time())
