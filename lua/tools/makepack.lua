@@ -221,7 +221,7 @@ function pack(arch,profile,release,project)
   already_included = nil
 
   -- Creating a .tar.gz with all metadata files 
-  local metadata_dirname = "metadata-"..release.."-"..name
+  local metadata_dirname = "metadata-"..name.."-"..release
   assert(os.execute(myplat.cmd.mkdir .. config.TMPDIR .."/"..metadata_dirname) == 0)
   assert(os.execute(myplat.cmd.install .. metadata_files .." "..config.TMPDIR.."/"..metadata_dirname) == 0)
   assert(os.execute("cd ".. config.TMPDIR .." && ".. myplat.cmd.tar .."-cf - ".. metadata_dirname .." |gzip > ".. metadata_dirname ..".tar.gz") == 0)
@@ -235,7 +235,7 @@ function pack(arch,profile,release,project)
   local tar_cmd = "cd ".. config.INSTALL.TOP .." && "
   tar_cmd = tar_cmd .. "find . -name .svn -type d |sed \"s#^./##\" >"..excludefile.." && ".. myplat.cmd.tar .."cfX - "..excludefile.." "
   tar_cmd = tar_cmd .. tarball_files
-  local tarball = config.DOWNLOADDIR.."/".. pkgprefix .. release .."-"..name.."-".. arch .. ".tar.gz"
+  local tarball = config.DOWNLOADDIR.."/".. pkgprefix .. name .."-"..release.."-".. arch .. ".tar.gz"
   tar_cmd = tar_cmd .. "|gzip > "..tarball
   assert(os.execute(tar_cmd) == 0, "Cannot execute the command \n"..tar_cmd..
                     "\n, ensure that 'tar' command supports --exclude option!")
@@ -301,7 +301,10 @@ function run()
   end
 
   if arguments.project then
-    log.info("Package name will be something like:",arguments.project.."-"..(arguments.release or "<release>").."-"..arguments.profile.."-"..arguments.arch..".tar.gz")
+    local _,name = arguments.profile:match("(.*)/(.*)") --extracts name "dir/name.profile"
+    name = name or arguments.profile                    --could nil only if "name.profile"
+    name = name:gsub(".profile","")           --deletes the suffix ".profile"
+    log.info("Package name will be something like:",arguments.project.."-"..name.."-"..(arguments.release or "<release>").."-"..arguments.arch..".tar.gz")
   end
 
   return pack(arguments.arch, arguments.profile, arguments.release, arguments.project)
