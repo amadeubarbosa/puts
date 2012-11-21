@@ -7,12 +7,17 @@ _puts()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     command="${COMP_WORDS[1]}"
-    opts="help config compile makepack installer hook"
+    opts="help config compile makepack installer hook list remove make_manifest"
 
     #
     #  Complete the arguments to some of the basic commands.
     #
     case "${prev}" in
+        make_manifest)
+            local files=$(for x in `find . -type d -depth 1`; do echo "${x}" ; done )
+            COMPREPLY=( $(compgen -W "${files}" -- ${cur/=/}) )
+            return 0
+            ;;
         descriptors)
             local files=$(for x in `ls *.desc`; do echo "${x}" ; done )
             COMPREPLY=( $(compgen -W "${files}" -- ${cur/=/}) )
@@ -28,6 +33,11 @@ _puts()
     esac
 
     case "${command}" in
+        list)
+            local running="help verbose installed repository"
+            COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
+            return 0
+            ;;
         compile)
             local running="help verbose list rebuild force descriptors select profile exclude update"
             COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
@@ -41,6 +51,16 @@ _puts()
         installer)
             local names="help config package template path"
             COMPREPLY=( $(compgen -W "${names}" -- ${cur}) )
+            return 0
+            ;;
+        remove)
+            local running="help verbose select force"
+            COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
+            return 0
+            ;;
+        make_manifest)
+            local running="help"
+            COMPREPLY=( $(compgen -W "${running}" -- ${cur}) )
             return 0
             ;;
         *)
