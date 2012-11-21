@@ -153,6 +153,10 @@ function parse_version(vstring)
    if revision then
       vstring = main
       version.revision = tonumber(revision)
+   else
+      --REMEMBER: force revision zero to be able to compare two versions 
+      -- when one of them has no revision (no revision same than zero)
+      version.revision = 0
    end
    while #vstring > 0 do
       -- extract a number
