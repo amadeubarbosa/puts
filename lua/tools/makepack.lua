@@ -224,6 +224,8 @@ function pack(arch,profile,release,project)
   local metadata_dirname = "metadata-"..name.."-"..release
   assert(os.execute(myplat.cmd.mkdir .. config.TMPDIR .."/"..metadata_dirname) == 0)
   assert(os.execute(myplat.cmd.install .. metadata_files .." "..config.TMPDIR.."/"..metadata_dirname) == 0)
+  assert(os.execute("cd ".. config.INSTALL.TOP .."; "..
+    "find "..tarball_files.." -type f -exec openssl md5 {} + | sort > "..config.TMPDIR.."/"..metadata_dirname.."/md5sums.txt ;") == 0)
   assert(os.execute("cd ".. config.TMPDIR .." && ".. myplat.cmd.tar .."-cf - ".. metadata_dirname .." |gzip > ".. metadata_dirname ..".tar.gz") == 0)
   assert(os.execute("mv ".. config.TMPDIR .."/".. metadata_dirname ..".tar.gz ".. config.INSTALL.TOP) == 0)
   assert(os.execute(myplat.cmd.rm .. config.TMPDIR) == 0)
