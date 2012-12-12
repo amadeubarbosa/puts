@@ -125,7 +125,7 @@ function pack(arch,profile,release,project)
   -- Overwriting some global variables with arch values
   -- Using 'tools.config.changePlatform' global function
   local pkgdir
-  if arch == "all" then
+  if arch == "all" or arch:match("jre") then
     pkgdir = config.changePlatform(config.TEC_UNAME)
   else
     pkgdir = config.changePlatform(arch)
