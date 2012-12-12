@@ -115,6 +115,7 @@ function install(package, orig, dest)
   if not cache[package] or not cache[package].files then
     if not cache[package] then cache[package] = { } end
     cache[package].files = assert(io.open(config.PKGDIR.."/"..package..".files", "w"))
+    cache[package].copied = {}
   end
 
   -- parsing possible regular expression of orig specification and listing
@@ -126,13 +127,16 @@ function install(package, orig, dest)
     -- ... register your dest/basename to cachefile
     local dir, name = line:gmatch("(.*%/+)(.+)")()
     name = name or line
-    cache[package].files:write(dest.."/"..name.."\n")
-    -- ... and real install of files on destination
-    os.execute(myplat.cmd.mkdir .. config.INSTALL.TOP.. "/".. dest)
-    os.execute(myplat.cmd.install .." "..orig.." "..config.INSTALL.TOP.."/"..dest)
+    local installed_file = dest.."/"..name
+    if not cache[package].copied[installed_file] then
+      cache[package].copied[installed_file] = true
+      cache[package].files:write(installed_file.."\n")
+      -- ... and real install of files on destination
+      os.execute(myplat.cmd.mkdir .. config.INSTALL.TOP.. "/".. dest)
+      os.execute(myplat.cmd.install .." "..line.." "..config.INSTALL.TOP.."/"..dest)
+    end
     line = next()
   end
-
 end
 
 -- Link method registering what is linking on file 'config.BASEDIR/pkg_name.links'
@@ -289,7 +293,11 @@ end
 function close_cache()
   for p, t in pairs(cache) do
     for _, file_cache in pairs(t) do
-      file_cache:close()
+      if _ ~= "copied" then
+        file_cache:close()
+      else
+        t.copied = nil
+      end
     end
   end
 end
