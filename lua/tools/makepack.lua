@@ -54,14 +54,16 @@ end
 
 --- Packs in a tarball named by profile
 function pack(arch,profile,release,project)
-  local tarball_files = ""
-  local metadata_files = ""
+  local CONTENT = { files = {}, metadata = {} }
   -- Adds file contents to a big string
-  local function add(f)
-    if f then
-      local str = f:read("*a"):gsub("\n"," "):gsub("${TEC_UNAME}",arch)
-      tarball_files = tarball_files .. str
-      f:close()
+  local function add(filename)
+    assert(type(filename) == "string")
+    if io.open(filename,"r") then
+      for line in io.lines(filename) do
+        local realname = line:gsub("${TEC_UNAME}",arch)
+        log.debug("realname:",realname)
+        CONTENT.files[realname] = true
+      end
     end
   end
 
@@ -71,12 +73,12 @@ function pack(arch,profile,release,project)
       local i = 1
       local filename = name ..".template.".. i
       while io.open(filename,"r") do
-        metadata_files = metadata_files .." ".. filename
+        CONTENT.metadata[filename] = true
         i = i + 1
         filename = name ..".template."..i
       end
     elseif io.open(filename,"r") then
-      metadata_files = metadata_files .." ".. filename
+      CONTENT.metadata[filename] = true
     end
   end
 
@@ -178,11 +180,11 @@ function pack(arch,profile,release,project)
           if categories["+conf"] then
             addmetadata(pkgdir.."/"..name..".template")   --gerado pelo conf_template
             addmetadata(pkgdir.."/"..name..".conf.files") --gerado pelo conf_files
-            add(io.open(pkgdir.."/"..name..".conf.files"))
+            add(pkgdir.."/"..name..".conf.files")
           end
           if categories["+dev"] then
             addmetadata(pkgdir.."/"..name..".dev.files")  --gerado pelo conf_files          
-            add(io.open(pkgdir.."/"..name..".dev.files","r"))
+            add(pkgdir.."/"..name..".dev.files")
           end
           local path = pkgdir.."/"..name..".dependencies"
           if util.fs.is_file(path) then
@@ -194,9 +196,9 @@ function pack(arch,profile,release,project)
             end
           end
           addmetadata(pkgdir.."/"..name..".files")      --gerado pelo install_files
-          add(io.open(pkgdir.."/"..name..".files","r"))
+          add(pkgdir.."/"..name..".files")
           addmetadata(pkgdir.."/"..name..".links")      --gerado pelo simbolic_links
-          add(io.open(pkgdir.."/"..name..".links","r"))
+          add(pkgdir.."/"..name..".links")
           already_included[name] = true
         end
       end
@@ -220,7 +222,31 @@ function pack(arch,profile,release,project)
   end
   already_included = nil
 
-  -- Creating a .tar.gz with all metadata files 
+  -- Removing .svn directories
+  assert(os.execute("find "..config.INSTALL.TOP.." -name .svn -type d -exec rm -rf {} +") == 0)
+
+  local tarball_files = ""
+  local metadata_files = ""
+  for file,_ in pairs(CONTENT.metadata) do
+    metadata_files = metadata_files .." ".. file
+  end
+  for file,_ in pairs(CONTENT.files) do
+    tarball_files = tarball_files .." ".. file
+  end
+
+  CONTENT.files = nil
+  CONTENT.metadata = nil
+  CONTENT = nil
+
+  assert(#metadata_files > 0, "Metadata files not found, probably it's a bug.")
+
+  if (#tarball_files <= 0) then 
+    log.error("Content files not found, profile",profile,"for architecture",arch,
+      "probably doesn't provide any files.")
+    return false 
+  end
+
+  -- Creating a .tar.gz with all metadata files
   local metadata_dirname = "metadata-"..name.."-"..release
   assert(os.execute(myplat.cmd.mkdir .. config.TMPDIR .."/"..metadata_dirname) == 0)
   assert(os.execute(myplat.cmd.install .. metadata_files .." "..config.TMPDIR.."/"..metadata_dirname) == 0)
@@ -232,18 +258,13 @@ function pack(arch,profile,release,project)
   tarball_files = tarball_files .." ".. metadata_dirname..".tar.gz "
 
   -- Creating a .tar.gz with all regular files
-  local excludefile = os.tmpname()
   local pkgprefix = (project and project.."-") or config.PKGPREFIX
-  local tar_cmd = "cd ".. config.INSTALL.TOP .." && "
-  tar_cmd = tar_cmd .. "find . -name .svn -type d |sed \"s#^./##\" >"..excludefile.." && ".. myplat.cmd.tar .."cfX - "..excludefile.." "
-  tar_cmd = tar_cmd .. tarball_files
+  local tar_cmd = "cd ".. config.INSTALL.TOP .." && ".. myplat.cmd.tar .."cf - "..tarball_files
   local tarball = config.DOWNLOADDIR.."/".. pkgprefix .. name .."-"..release.."-".. arch .. ".tar.gz"
   tar_cmd = tar_cmd .. "|gzip > "..tarball
   assert(os.execute(tar_cmd) == 0, "Cannot execute the command \n"..tar_cmd..
                     "\n, ensure that 'tar' command supports --exclude option!")
 
-  -- Cleans the temporary excludefile
-  os.remove(excludefile)
   log.info("Package",tarball,"created.")
   return true
 end
