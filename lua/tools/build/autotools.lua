@@ -69,6 +69,9 @@ function run(t,arguments)
 
   local configure_cmd = t.build.configure or "./configure"
   local build_cmd     = t.build.compile   or "make"
+  if t.build.compile == nil and config.PARALLEL_JOBS then
+     build_cmd = build_cmd .. " -j" .. config.PARALLEL_JOBS
+  end
   local install_cmd   = t.build.install   or "make install"
 
   if arguments.rebuild then

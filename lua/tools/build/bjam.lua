@@ -56,6 +56,9 @@ function run(t, arguments, dir)
     assert(bjam_bin, "error because we couldn't find compiled bjam")
     bjam_cmd = bjam_bin .. "/bjam"
   end
+  if config.PARALLEL_JOBS then
+     bjam_cmd = bjam_cmd .. " -j" .. config.PARALLEL_JOBS
+  end
   user_config_path = config.TMPDIR .. "/user-config.jam"
   bjam_cmd = bjam_cmd .. " --user-config="..user_config_path
 
