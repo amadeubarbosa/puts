@@ -21,16 +21,17 @@ function run(dir, url)
   
   -- checking if dir has a previous checkout
   if os.execute(info_cmd..dir..no_out_matter) == 0 then
-    local info = util.execute(info_cmd..dir)
-    if info:find(url,1,true) == nil then
-      local current = info:match("URL: ([%w%c%p]*)\n") or "?"
+    local info = util.execute(info_cmd.." --xml "..dir)
+    local current = info:match("<url>(.-)</url>")
+    if current ~= url then
       error(string.format("A different SVN URL (%s) has been used in '%s' directory. " ..
           "Remove '%s' directory if you need to use '%s' in this directory.", current, dir, dir, url))
     end
   end
   
   -- when url is about a file, will use svn export
-  local kind = util.execute(info_cmd..url):match("Node Kind: (%w+)")
+  local info = util.execute(info_cmd.." --xml "..url)
+  local kind = info:match('<entry.-kind="(%a+)"')
   if kind == "file" then
     assert(
       os.execute("test -d " .. dir) == 0,
