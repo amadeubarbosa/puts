@@ -22,8 +22,8 @@ function run(t, arguments)
   local maven_cmd =  "mvn "
 
   -- maven variables 
+  local variables = ""
   if t.build and type(t.build.variables) == "table" then
-    local variables = ""
     for k, v in pairs(t.build.variables) do
       variables = variables.."-D"..k.."="..v.." "
     end
@@ -48,18 +48,18 @@ function run(t, arguments)
   assert(ret == 0,"error compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
   
   if t.build.javadoc then
-    javadoc(t,arguments,build_dir)
+    javadoc(t,arguments,build_dir,variables)
   end
   
   -- re-using copy method to parse install_files, conf_files, dev_files
   copyDependence(t,arguments,build_dir)
   copy.run(t,arguments,build_dir)
 end
-function javadoc(t,arguments,build_dir)
+function javadoc(t,arguments,build_dir,variables)
   local nameversion = util.nameversion(t)
   local maven_cmd = "mvn "
   maven_cmd = maven_cmd .. "javadoc:javadoc "
-  maven_args = ""
+  maven_args = variables
 
   -- Adding arguments
   if not arguments["verbose"] then
