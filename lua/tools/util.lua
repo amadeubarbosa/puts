@@ -228,7 +228,7 @@ function download(pkgname, from, targetdir)
     -- ATTENTION: ignoring the targetdir to use a common directory to put the
     -- downloaded files
     targetdir = targetdir or config.DOWNLOADDIR
-    assert(os.execute(myplat.cmd.mkdir .. targetdir) == 0, "ERROR: Cannot create the directory '".. targetdir .."' to download the package into it.")
+    assert(os.execute(myplat.cmd.mkdir .. targetdir) == 0, "Cannot create the directory '".. targetdir .."' to download the package into it.")
     if exists_pkgfile(targetdir, pkgname) then
       filepath = targetdir.."/"..base_name(url)
       log.info("Skipping the download of the "..pkgname.." because is already downloaded. If you need update it so you must to remove the file '"..filepath.."'")
@@ -250,7 +250,7 @@ function download(pkgname, from, targetdir)
     -- trying load from disk a handler
     ok, handler = pcall(require, "tools.fetch."..proto)
     if not ok then
-      error("ERROR: Unknown protocol '"..proto.."'. The URL was '"..from.."'.")
+      error("Unknown protocol '"..proto.."'. The URL was '"..from.."'.")
     end
   end
   log.debug("Downloading",pkgname,"using the protocol",proto)
@@ -279,12 +279,12 @@ function fetch_and_unpack(package,from,targetdir)
   if not targetdir then
     targetdir = config.PRODAPP .."/".. package
   end
-  assert(ok, "ERROR: Unable to download the package. You must download this package manually from '"..from.."' and extract it in the '"..targetdir.."' directory.")
+  assert(ok, "Error downloading the package '"..package.."' from '"..from.."'")
   -- it only extracts the source once
   local exists = os.execute("test -d ".. targetdir)
   if exists ~= 0 then
     -- it will extract inside the config.PRODAPP directory using the filename
-    assert(unpack_archive(config.PRODAPP,filepath), "ERROR: Unable to extract the package '".. filepath.."' in the directory '".. config.PRODAPP .."'.")
+    assert(unpack_archive(config.PRODAPP,filepath), "Error extracting the package '".. filepath.."' in the directory '".. config.PRODAPP .."'.")
   end
   return true
 end

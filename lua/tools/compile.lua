@@ -810,12 +810,20 @@ function processing (pkg, specfile, arguments)
     buildtree_manifest = assert(manifest.load(buildtree))
 
     if not manifest.is_installed(buildtree_manifest, desc.name, desc.version) then
-      dependencies_resolved[desc] = {{arch="installing", repo=buildtree, 
-        directory=desc.directory or path.pathname(config.PRODAPP, nameversion)}}
-      update_and_compile(desc, buildtree, buildtree_manifest, true, dependencies_resolved)
+      dependencies_resolved[desc] = { {
+        arch="installing", repo=buildtree, 
+        directory=desc.directory or path.pathname(config.PRODAPP, nameversion)
+      } }
+      local ok, errmsg = update_and_compile(desc, buildtree, buildtree_manifest, true, dependencies_resolved)
+      if not ok then 
+        return false, errmsg
+      end
     elseif --[[but]] arguments.force or arguments.update or arguments.rebuild then
       dependencies_resolved[desc] = manifest.get_metadata(buildtree_manifest, desc.name, desc.version)
-      update_and_compile(desc, buildtree, buildtree_manifest, arguments.update, dependencies_resolved)
+      local ok, errmsg = update_and_compile(desc, buildtree, buildtree_manifest, arguments.update, dependencies_resolved)
+      if not ok then 
+        return false, errmsg
+      end
     else
       log.info("Package",nameversion,"is already compiled")
     end
