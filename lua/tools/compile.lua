@@ -815,13 +815,15 @@ function processing (pkg, specfile, arguments)
         directory=desc.directory or path.pathname(config.PRODAPP, nameversion)
       } }
       local ok, errmsg = update_and_compile(desc, buildtree, buildtree_manifest, true, dependencies_resolved)
-      if not ok then 
+      if not ok then
+        log.error("Failure to compile",nameversion,"software.")
         return false, errmsg
       end
     elseif --[[but]] arguments.force or arguments.update or arguments.rebuild then
       dependencies_resolved[desc] = manifest.get_metadata(buildtree_manifest, desc.name, desc.version)
       local ok, errmsg = update_and_compile(desc, buildtree, buildtree_manifest, arguments.update, dependencies_resolved)
-      if not ok then 
+      if not ok then
+        log.error("Failure to compile",nameversion,"software.")
         return false, errmsg
       end
     else
