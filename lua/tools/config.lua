@@ -36,7 +36,7 @@ TEC_SYSNAME = TEC_SYSNAME or os.getenv("TEC_SYSNAME") or id.TEC_SYSNAME
 assert(TEC_SYSNAME, "ERROR: TEC_SYSNAME env var not defined")
 
 -- Base variables to compile and install time
-BASEDIR = BASEDIR or os.getenv("HOME") .."/puts"
+BASEDIR = BASEDIR or os.getenv("WORKSPACE") or os.getenv("HOME") .."/puts"
 assert(BASEDIR or os.getenv("HOME"), "ERROR: HOME env var not defined")
 
 PRODAPP = PRODAPP or BASEDIR .."/build"
