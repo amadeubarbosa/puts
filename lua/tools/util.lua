@@ -246,6 +246,17 @@ function download(pkgname, from, targetdir)
       proto = tunnel
       from = proto .."://".. url
     end
+  elseif proto:match("^git") then
+    -- location as the clone directory
+    targetdir = targetdir or  config.PRODAPP.."/".. pkgname
+    handler = require "tools.fetch.git"
+    -- https or http isn't a valid tunnel in subversion syntax
+    -- we use the "git+https" to represent "git" protocol using an "https" url
+    local tunnel = proto:match("^git%+(.*)")
+    if tunnel == "https" or tunnel == "http" or tunnel == "ssh" then
+      proto = tunnel
+      from = proto .."://".. url
+    end
   else
     -- trying load from disk a handler
     ok, handler = pcall(require, "tools.fetch."..proto)
