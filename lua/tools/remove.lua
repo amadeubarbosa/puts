@@ -26,7 +26,7 @@ function delete_version(name, version, local_repo, manifest, force)
     local dependents = {}
     for installed_name, installed_versions in pairs(installed) do
       for installed_version, metadata in pairs(installed_versions) do
-        local spec_url = search.find_suitable_rock( search.make_query(installed_name, installed_version), config.SPEC_SERVERS, false)
+        local spec_url, err = search.find_suitable_rock( search.make_query(installed_name, installed_version), config.SPEC_SERVERS, false)
         if spec_url and type(spec_url) == "string" then
           local ok, tempfile = util.download(util.base_name(spec_url), spec_url, config.TMPDIR)
           assert(ok, "failed to download the "..spec_url.." from remote repositories")
@@ -39,7 +39,11 @@ function delete_version(name, version, local_repo, manifest, force)
             table.insert(dependents, {name = installed_name, version = installed_version})
           end
         else
-          log.debug("Search results was:",spec_url)
+          if spec_url == nil then
+            log.error(err)
+          else
+            log.debug("Search results was:",spec_url)
+          end
           log.warning("Descriptor of the package "..installed_name.."-"..installed_version.." is unavailable on remote repositories.")
         end
       end
@@ -136,13 +140,24 @@ function run()
   end
 
   if arguments.select then
-    local manifest = manif_m.load(path.pathname(config.PRODAPP))
-    assert(manifest)
+    -- remote repository manifest check
+    local manifest, err = manif_m.load(config.SPEC_SERVERS[1])
+    if not manifest then
+      log.warning(err)
+    end
+    -- local installation manifest check
+    local manifest, err = manif_m.load(path.pathname(config.PRODAPP))
+    if not manifest then
+      log.error(err)
+      os.execute(myplat.cmd.rm .. config.TMPDIR)
+      return false
+    end
+
     local errors = {}
     for _, selection in ipairs(arguments.select) do
       local name, version = util.split_nameversion(selection)
       if name and version then
-        log.info("Trying to remove package", name.."-"..version.."...")
+        log.info("Removal of package", name.."-"..version.."...")
         local ok, err = delete_version(name, version, config.PRODAPP, manifest, arguments.force)
         if not ok then
           log.error("Package",name.."-"..version,"wasn't removed because",err)

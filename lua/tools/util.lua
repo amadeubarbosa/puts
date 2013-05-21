@@ -169,6 +169,9 @@ end
 -- @return A resposta do comando em questão.
 ---
 function execute(cmd)
+  if log._levels.debug == true then
+    log.debug(cmd)
+  end
   local pipe = io.popen(cmd,"r")
   local out = pipe:read("*a")
   pipe:close()

@@ -165,7 +165,7 @@ function search_repos(query, servers)
       end
       local ok, err = manifest_search(results, repo, query)
       if not ok then
-         log.warning("Failed searching manifest: "..err)
+         return nil, err
       end
    end
    return results

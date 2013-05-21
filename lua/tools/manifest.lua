@@ -132,13 +132,17 @@ function load(repo_url)
       local url = path.pathname(repo_url, "manifest")
       local fakename = repo_url:gsub("[/:]","_")
       local ok, file = util.download(fakename, url, config.TMPDIR)
-      if not file then
-         return nil, "Failed fetching manifest for "..repo_url
+      if not ok then
+         local err = file
+         return nil, "cannot access repository "..repo_url..": "..err
       end
       pathname = file
    end
 
-   local manifest = local_loader(pathname)
+   local manifest, err = local_loader(pathname)
+   if not manifest then
+      return nil, err
+   end
 
    if protocol ~= "file" then
      os.remove(pathname)
@@ -187,7 +191,7 @@ function update_manifest(spec, repo, manifest)
 
    local manifest, err = manifest or load(repo)
    if not manifest then
-      log.error("No existing manifest. Attempting to rebuild...")
+      log.error("Manifest not found. Attempting to rebuild...")
       local ok, err = rebuild_manifest(repo)
       if not ok then
          return nil, err

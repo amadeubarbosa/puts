@@ -20,8 +20,9 @@ function run(dir, url)
   url = url:match("(.+)/$") or url
   
   -- checking if dir has a previous checkout
-  if os.execute(info_cmd..dir..no_out_matter) == 0 then
-    local info = util.execute(info_cmd.." --xml "..dir)
+  local previous_checkout_retcode = os.execute(info_cmd..dir..no_out_matter)
+  if previous_checkout_retcode == 0 then
+    local info = util.execute(info_cmd .."--xml ".. dir)
     local current = info:match("<url>(.-)</url>")
     if current ~= url then
       error(string.format("A different SVN URL (%s) has been used in '%s' directory. " ..
@@ -29,8 +30,12 @@ function run(dir, url)
     end
   end
   
+  if os.execute(info_cmd .."--xml ".. url .. no_out_matter) ~= 0 then
+    return false, "URL '"..url.."' is not valid or server is down."
+  end
+
   -- when url is about a file, will use svn export
-  local info = util.execute(info_cmd.." --xml "..url)
+  local info = util.execute(info_cmd .."--xml ".. url)
   local kind = info:match('<entry.-kind="(%a+)"')
   if kind == "file" then
     assert(

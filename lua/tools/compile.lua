@@ -549,7 +549,7 @@ function run()
         if arguments.list then
           accept_multiple_results = true
         end
-        local results = search.find_suitable_rock( search.make_query(util.split_nameversion(item)), 
+        local results, err = search.find_suitable_rock( search.make_query(util.split_nameversion(item)), 
                                                    config.SPEC_SERVERS, accept_multiple_results )
 
         local function _put_on(descriptorList, pkg, spec_url)
@@ -575,7 +575,7 @@ function run()
           local spec_url = results
           _put_on(filteredDescriptorsTable, item, spec_url)
         else
-          log.warning("Package",item,"wasn't found in remote repositories, skipping its compilation.")
+          log.warning("Package",item,"wasn't found in remote repositories (error: "..err.."). Skipping its compilation.")
         end
       end
     end

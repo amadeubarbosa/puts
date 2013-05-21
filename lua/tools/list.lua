@@ -7,19 +7,22 @@ local myplat     = platforms[config.TEC_SYSNAME]
 
 module("tools.list",package.seeall)
 
-function list_installed(name, version, buildtree)
-  
+function list(name, version, buildtree)
   local query = search.make_query(name and name:lower() or "", version)
   query.exact_name = false
-  local results = search.search_repos(query, {buildtree})
+  local results, err = search.search_repos(query, {buildtree})
+  if not results then
+    return "", err
+  end
 
-
+  local availables = {}
   for pkg, versions in util.sortedpairs(results) do
     for version, _ in util.sortedpairs(versions, deps.compare_versions) do
-      print("\t",pkg.."-"..version)
+      availables[#availables+1] = pkg.."-"..version
     end
   end
-  
+
+  return (#availables > 0) and "\t\t"..table.concat(availables,"\n\t\t") or ""
 end
 
 function run()  
@@ -27,6 +30,7 @@ function run()
   local arguments = util.parse_args(arg,[[
   --help          : show this help
   --verbose       : turn ON the VERBOSE mode (show the system commands)
+  --filter        : filter to be applied while searching (default: return all packages)
   --installed     : list all installed packages in your machine
   --repository    : list all available descriptors in remote repositories
   
@@ -37,18 +41,33 @@ function run()
   if arguments["v"] or arguments["verbose"] then
     util.verbose(1)
   end
-  
+
   os.execute(myplat.cmd.mkdir .. config.TMPDIR)
-  
+
+  local buildtree, infomsg
   if arguments.installed then
-    log.info("Packages installed on "..config.PRODAPP)
-    list_installed("",nil,config.PRODAPP)
+    buildtree = config.PRODAPP
+    infomsg = "Listing packages installed on "..buildtree
   elseif arguments.repository then
-    log.info("Available descriptors on repository "..config.SPEC_SERVERS[1])
-    list_installed("",nil,config.SPEC_SERVERS[1])
+    buildtree = config.SPEC_SERVERS[1]
+    infomsg = "Listing available descriptors on repository "..buildtree
   else
+    log.error("Mandatory options --repository or --installed at least.")
     os.execute(myplat.cmd.rm .. config.TMPDIR)
     return false
+  end
+
+  local str, err = list(arguments.filter, nil, buildtree)
+  if #str > 0 then
+    log.info(infomsg)
+    print(str)
+  elseif err ~= nil then 
+    log.error(err)
+    os.execute(myplat.cmd.rm .. config.TMPDIR)
+    return false
+  else
+    log.info(infomsg)
+    log.info("No package found".. (arguments.filter and " for --filter="..arguments.filter or "."))
   end
   
   os.execute(myplat.cmd.rm .. config.TMPDIR)
