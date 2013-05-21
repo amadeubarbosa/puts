@@ -23,9 +23,10 @@ end
 
 debug.sethook(trace, "c")
 --]]
+local timestamp = os.date("%Y%m%d_%H%M%S")
 
 print_original = print
-local filelog = io.open("release.log","w")
+local filelog = io.open("release-"..timestamp..".log","w")
 print=function(...)
   filelog:write(table.concat({...}," ").."\n")
   print_original(...)
@@ -261,6 +262,11 @@ function temporary_load(specfile)
   assert(desc.name and desc.version)
   assert(os.remove(tempfile))
   return desc
+end
+
+if not arg[1] or not arg[2] then
+  print("Usage: "..arg[0].." <nome do pacote com versão> <diretório de compilação>")
+  os.exit(1)
 end
 
 if arg[1] then
