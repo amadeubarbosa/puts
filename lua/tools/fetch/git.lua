@@ -2,6 +2,7 @@
 local config = require "tools.config"
 local util = require "tools.util"
 local path = require "tools.path"
+local log  = util.log
 
 module("tools.fetch.git", package.seeall)
 
@@ -12,20 +13,48 @@ function run(dir, url)
   if os.execute("which git"..no_out_matter) ~= 0 then
     error("Git client unavailable (tried git).")
   end
-  
+
   -- checking if dir has a previous checkout
   -- 'git remote -v show' para verificar diferenças entre a url e o workdir
 
-  -- when dir isn't a directory, svn checkout will create it
-  if os.execute("test -d " .. dir) ~= 0 then
-    return (os.execute("git clone "..url.." "..dir) == 0), dir
+  -- to understand URI segments: http://tools.ietf.org/html/rfc3986#section-3.3
+  local segments = {}
+  local segments_pos = url:find(";")
+  if segments_pos ~= nil then
+    local function segments2table(segment)
+      local key, value = segment:match("(.*)=(.*)")
+      if (key == "tag" or key == "branch") and value ~= nil then
+        segments[key] = value
+      else
+        log.warning("Unsupported segment '"..segment.."' of URL '"..url.."'")
+      end
+    end
+    string.gsub(url:sub(segments_pos, #url), ";([^;]+)", segments2table)
+    url = url:sub(1, segments_pos-1)
   end
 
-  -- svn up returns errors like 'old working copy'
-  if os.execute("cd "..dir.. " && git pull ") ~= 0 then
-    util.log.warning("Couldn't pull from remotes to directory '" .. dir ..
-        "'. Your Git client has returned an error on pull.")
+  if os.execute("test -d " .. dir) ~= 0 then
+    local code = os.execute("git clone "..url.." "..dir)
+    if code ~= 0 then
+      return false, dir
+    end
   end
+
+  local version = segments.tag or segments.branch
+  if version ~= nil then
+    local code = os.execute("cd "..dir.." && git checkout "..version)
+    if code ~= 0 then 
+      log.warning("Git checking out to "..tostring(version)..
+        " failed with return code "..tostring(code))
+    end
+  end
+
+  if segments.tag == nil then
+    if os.execute("cd "..dir.. " && git pull ") ~= 0 then
+      log.warning("Couldn't pull from remotes to directory '" .. dir ..
+          "'. Your Git client has returned an error on pull.")
+    end
+  end
+
   return true, dir
 end
-
