@@ -52,8 +52,8 @@ function getrelease()
   end
 end
 
---- Packs in a tarball named by profile
-function pack(arch,profile,release,project)
+--- Packs in a tarball named by profile (or pkgname)
+function pack(arch,profile,release,project,pkgname)
   local CONTENT = { files = {}, metadata = {} }
   -- Adds file contents to a big string
   local function add(filename)
@@ -121,6 +121,11 @@ function pack(arch,profile,release,project)
       end
     end
     return false
+  end
+
+  -- In case of --name argument being used, we'll use it to generate the tarball file
+  if pkgname then
+    name = pkgname
   end
 
   log.info("Generating the tarball for architecture",arch,"using profile",name)
@@ -277,16 +282,18 @@ function run()
   local help_msg = [[
     --help                   : show this help
     --verbose                : turn ON the VERBOSE mode (show the system commands)
+    --project=STRING_PROJECT : string to be used as prefix in package names
+                               (default: openbus)
     --profile=filename       : use the 'filename' as input for profile with the
                                list of packages to packaging
-    --arch=STRING_ARCH       : specifies the Tecmake-based architecture identification 
-                               or 'all' for platform-independent packages
+    --name=STRING            : string to be used instead of profile filename 
+                               for the package name
     --svndir=/my/directory   : path to directory where are the source codes
                                (generates automatically the release information)
     --release=STRING_RELEASE : string to be used as release information
                                (bypass manually the release information)
-    --project=STRING_PROJECT : string to be used as prefix in package names
-                               (default: openbus)
+    --arch=STRING_ARCH       : specifies the Tecmake-based architecture identification 
+                               or 'all' for platform-independent packages
 
    NOTES:
     The prefix '--' is optional in all options.
@@ -330,7 +337,7 @@ function run()
     log.info("Package name will be something like:",arguments.project.."-"..name.."-"..(arguments.release or "<release>").."-"..arguments.arch..".tar.gz")
   end
 
-  return pack(arguments.arch, arguments.profile, arguments.release, arguments.project)
+  return pack(arguments.arch, arguments.profile, arguments.release, arguments.project, arguments.name)
 end
 
 if not package.loaded["tools.console"] then
