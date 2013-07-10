@@ -54,7 +54,7 @@ local function store_results(results, manifest)
       end
       manifest.repository[name] = pkgtable
    end
-   --TODO: ainda n√£o precisamos do recurso de update_dependencies(manifest)
+   --TODO: ainda n„o precisamos do recurso de update_dependencies(manifest)
    return true
 end
 
@@ -67,7 +67,7 @@ local function local_loader(filename)
   setfenv(loader,manifest)
   loader()
   assert(type(manifest) == "table")
-  -- TODO: chamar fun√ßao checker() para validar a estrutura do manifesto
+  -- TODO: chamar funÁao checker() para validar a estrutura do manifesto
   return manifest
 end
 

@@ -183,7 +183,7 @@ function find_suitable_rock(query, servers, all_results)
    if not first then
       return nil, "No results matching query were found."
    else
-     if next(results,first) then -- TODO: situaÃ§Ã£o desconhecida
+     if next(results,first) then -- TODO: situação desconhecida
        local tmp1,tmp2,tmp3 = os.tmpname(),os.tmpname(),os.tmpname()
        assert(util.serialize_table(tmp1,query,"query"))
        assert(util.serialize_table(tmp2,results,"results"))

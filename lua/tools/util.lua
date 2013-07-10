@@ -166,7 +166,7 @@ end
 ---
 -- Executa um comando no sistema operacional.
 --
--- @return A resposta do comando em quest√£o.
+-- @return A resposta do comando em quest„o.
 ---
 function execute(cmd)
   if log._levels.debug == true then

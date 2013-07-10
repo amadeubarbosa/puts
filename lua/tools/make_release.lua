@@ -131,7 +131,7 @@ tag_creation = function(pkg, specfile, ...)
         end
         print("[info]","current url is:",url,revision)
         local sugg = {}
-        -- se for trunk vou precisar criar o branch (caso n√£o exista) e a tag
+        -- se for trunk vou precisar criar o branch (caso n„o exista) e a tag
         if url:match("/trunk") then
           local subdir = url:match("/trunk/(.*)")
           local parent = url:gsub("/trunk.*","")
@@ -265,7 +265,7 @@ function temporary_load(specfile)
 end
 
 if not arg[1] or not arg[2] then
-  print("Usage: "..arg[0].." <nome do pacote com vers√£o> <diret√≥rio de compila√ß√£o>")
+  print("Usage: "..arg[0].." <nome do pacote com vers„o> <diretÛrio de compilaÁ„o>")
   os.exit(1)
 end
 
