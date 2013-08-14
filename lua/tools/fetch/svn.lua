@@ -5,38 +5,56 @@ local path = require "tools.path"
 
 module("tools.fetch.svn", package.seeall)
 
+local info_cmd = "svn info --xml "
+
+function get_info_url(path)
+  local info = util.execute(info_cmd..path)
+  local url = info:match("<url>(.-)</url>")
+  return url
+end
+
+function get_info_entry_kind(path)
+  local info = util.execute(info_cmd..path)
+  local kind = info:match('<entry.-kind="(%a+)"')
+  return kind
+end
+
+function get_info_revision(path)
+  local info = util.execute(info_cmd..path)
+  local rev = info:match('<commit.-revision="(%d+)"')
+  return rev
+end
+
 function run(dir, url)
   assert(dir and url)
-  local checkout_cmd, export_cmd, info_cmd, update_cmd = 
-    "svn checkout ", "svn export ", "svn info ", "svn update "
-  local no_out_matter = " >/dev/null 2>/dev/null"
+  local checkout_cmd, export_cmd, update_cmd = 
+    "svn checkout ", "svn export ",  "svn update "
+  local discard_output = " >/dev/null"
 
   -- checking svn client
-  if os.execute("which svn"..no_out_matter) ~= 0 then
-    error("SVN client unavailable (tried svn).")
+  if os.execute("which svn"..discard_output) ~= 0 then
+    error("SVN client not found (tried svn).")
   end
   
   -- dummy url normalization
   url = url:match("(.+)/$") or url
   
   -- checking if dir has a previous checkout
-  local previous_checkout_retcode = os.execute(info_cmd..dir..no_out_matter)
+  local previous_checkout_retcode = os.execute(info_cmd..dir..discard_output)
   if previous_checkout_retcode == 0 then
-    local info = util.execute(info_cmd .."--xml ".. dir)
-    local current = info:match("<url>(.-)</url>")
+    local current = get_info_url(dir)
     if current ~= url then
       error(string.format("A different SVN URL (%s) has been used in '%s' directory. " ..
           "Remove '%s' directory if you need to use '%s' in this directory.", current, dir, dir, url))
     end
   end
   
-  if os.execute(info_cmd .."--xml ".. url .. no_out_matter) ~= 0 then
+  if os.execute(info_cmd..url..discard_output) ~= 0 then
     return false, "URL '"..url.."' is not valid or server is down."
   end
 
-  -- when url is about a file, will use svn export
-  local info = util.execute(info_cmd .."--xml ".. url)
-  local kind = info:match('<entry.-kind="(%a+)"')
+  -- when url reference to a file, we will use svn export
+  local kind = get_info_entry_kind(url)
   if kind == "file" then
     assert(
       os.execute("test -d " .. dir) == 0,
@@ -54,7 +72,7 @@ function run(dir, url)
   -- svn up returns errors like 'old working copy'
   if os.execute(update_cmd..dir) ~= 0 then
     util.log.warning("Couldn't update the directory '" .. dir ..
-        "'. Your SVN client has returned an error on update.")
+        "'. SVN client returned an error on update.")
   end
   return true, dir
 end

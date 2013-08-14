@@ -8,9 +8,8 @@ module("tools.fetch.git", package.seeall)
 
 function run(dir, url)
   assert(dir and url)
-  local no_out_matter = " >/dev/null 2>/dev/null"
 
-  if os.execute("which git"..no_out_matter) ~= 0 then
+  if os.execute("which git >/dev/null 2>/dev/null") ~= 0 then
     error("Git client unavailable (tried git).")
   end
 
