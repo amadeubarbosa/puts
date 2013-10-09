@@ -790,8 +790,8 @@ function processing (pkg, specfile, arguments)
           -- não foi registrado qual versão foi usada no ato da "instalação",
           -- GERA OUTROS BUGS: usar uma heurística qualquer para escolher
           local dep_version = next(dep_results[dep_query.name])
-          local dep = { name = dep_query.name,
-                        version = dep_version,
+          local dep = { name = assert(dep_query.name),
+                        version = assert(dep_version),
                       }
           memoized[dep] = manifest.get_metadata(buildtree_manifest, dep.name, dep.version)
           assert(forced_reprocessing(dep, memoized, arguments))

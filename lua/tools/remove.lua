@@ -35,8 +35,10 @@ function delete_version(name, version, local_repo, manifest, force)
           assert(os.remove(tempfile))
 
           local _, missing = deps.match_deps(spec, blacklist, manifest)
-          if missing[checkName] then
-            table.insert(dependents, {name = installed_name, version = installed_version})
+          for _, missing_dep in ipairs(missing) do 
+            if missing_dep.name == checkName then
+              table.insert(dependents, {name = installed_name, version = installed_version})
+            end
           end
         else
           if spec_url == nil then

@@ -326,9 +326,12 @@ function parse_args(arg, usage_msg, allowempty)
   local arguments = {}
   -- concatenates with the custom usage_msg
   usage_msg=[[
+
  Usage: ]]..tostring(arg[0])..[[ OPTIONS
  Valid OPTIONS:
-]] ..usage_msg
+]] ..usage_msg.. [[
+
+]]
 
   if not (arg[1]) and not allowempty then print(usage_msg) ; os.exit(1) end
 
