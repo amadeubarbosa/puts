@@ -97,8 +97,10 @@ local version_mt = {
             return false
          end
       end
-      if v1.revision and v2.revision then
-         return (v1.revision == v2.revision)
+      if v1.revision or v2.revision then
+         local v1_revision = v1.revision or 0
+         local v2_revision = v2.revision or 0
+         return (v1_revision == v2_revision)
       end
       return true
    end,
@@ -116,8 +118,10 @@ local version_mt = {
             return (v1i < v2i)
          end
       end
-      if v1.revision and v2.revision then
-         return (v1.revision < v2.revision)
+      if v1.revision or v2.revision then
+         local v1_revision = v1.revision or 0
+         local v2_revision = v2.revision or 0
+         return (v1_revision < v2_revision)
       end
       return false
    end
@@ -153,10 +157,6 @@ function parse_version(vstring)
    if revision then
       vstring = main
       version.revision = tonumber(revision)
-   else
-      --REMEMBER: force revision zero to be able to compare two versions 
-      -- when one of them has no revision (no revision same than zero)
-      version.revision = 0
    end
    while #vstring > 0 do
       -- extract a number
@@ -338,14 +338,12 @@ function match_deps(spec, blacklist, manifest)
      for _, dep in ipairs(spec.dependencies) do
         local found = match_dep(dep, blacklist and blacklist[dep.name] or nil, manifest)
         if found then
-  --         if dep.name ~= "lua" then 
-              matched[dep] = found
-  --         end
+           matched[#matched+1] = found
         else
            if dep.constraints[1] and dep.constraints[1].no_upgrade then
-              no_upgrade[dep.name] = dep
+              no_upgrade[#no_upgrade+1] = dep
            else
-              missing[dep.name] = dep
+              missing[#missing+1] = dep
            end
         end
      end
@@ -414,7 +412,7 @@ function fulfill_dependencies(spec, servers, buildtree, local_manifest, missing_
    local matched, missing, no_upgrade = match_deps(spec, nil, local_manifest)
 
    if next(matched) then
-      for _, dep in util.sortedpairs(matched) do
+      for _, dep in ipairs(matched) do
          if memoized then 
            table.insert(memoized, util.nameversion(dep))
            memoized[dep] = manifest.get_metadata(local_manifest, dep.name, dep.version)
@@ -427,15 +425,15 @@ function fulfill_dependencies(spec, servers, buildtree, local_manifest, missing_
 
    if next(no_upgrade) then
       log.error("Missing dependencies for "..nameversion..":")
-      for _, dep in pairs(no_upgrade) do
+      for _, dep in ipairs(no_upgrade) do
          log.error("\t",show_dep(dep))
       end
       if next(missing) then
-         for _, dep in pairs(missing) do
+         for _, dep in ipairs(missing) do
             log.error("\t",show_dep(dep))
          end
       end
-      for _, dep in pairs(no_upgrade) do
+      for _, dep in ipairs(no_upgrade) do
          log.error("This version of "..spec.name.." is designed for use with")
          log.error(show_dep(dep)..", but is configured to avoid upgrading it")
          log.error("automatically.")
@@ -445,14 +443,14 @@ function fulfill_dependencies(spec, servers, buildtree, local_manifest, missing_
 
    if next(missing) then
       log.info("Missing dependencies for "..spec.name..":")
-      for _, dep in util.sortedpairs(missing) do
+      for _, dep in ipairs(missing) do
          log.info("\t",show_dep(dep))
       end
 
-      for _, dep in util.sortedpairs(missing) do
+      for _, dep in ipairs(missing) do
+        local search = require "tools.search"
          -- Double-check in case dependency was filled by recursion.
          if not match_dep(dep, nil, local_manifest) then
-            local search = require "tools.search"
             local results, name, version = search.find_suitable_rock(dep, servers)
             if not results then
               -- when search.find_suitable_rock returns nil, second result can be an error message
@@ -474,10 +472,18 @@ function fulfill_dependencies(spec, servers, buildtree, local_manifest, missing_
             end
          else
             if memoized then
-               local pkg = { name = dep.name,
-                        version = dep.constraints[1].version.string
-                      }
-               assert(pkg.name and pkg.version)
+               local dep_results = search.search_repos(dep, {buildtree})
+               if type(dep_results[dep.name]) ~= "table" then
+                return nil, "Failure to search buildtree ("..buildtree..") "..
+                            "for dependency already resolved recursively '"..dep.name.."'."
+               end
+               -- TODO: podemos ter várias versões compatíveis com a dependência,
+               -- não foi registrado qual versão foi usada no ato da "instalação",
+               -- GERA OUTROS BUGS: usar uma heurística qualquer para escolher
+               local dep_version = next(dep_results[dep.name])
+               local pkg = { name = assert(dep.name),
+                             version = assert(dep_version),
+                           }               
                table.insert(memoized, util.nameversion(pkg))
                memoized[pkg] = manifest.get_metadata(local_manifest, pkg.name, pkg.version)
             end

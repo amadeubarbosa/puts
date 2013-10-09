@@ -1,0 +1,8 @@
+name = "test-thirdlevel"
+version = "1.0"
+description = "test-firstlevel package should be compiled only once"
+
+dependencies = {
+	"test-secondlevel == 1.0",
+	"test-firstlevel == 1.0",
+}

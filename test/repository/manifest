@@ -1,0 +1,36 @@
+commands = {
+}
+modules = {
+}
+repository = {
+  ["test-firstlevel"] = {
+    ["1.0"] = {
+      [1] = {
+        ["arch"] = "desc",
+      }
+      ,
+    }
+    ,
+  }
+  ,
+  ["test-secondlevel"] = {
+    ["1.0"] = {
+      [1] = {
+        ["arch"] = "desc",
+      }
+      ,
+    }
+    ,
+  }
+  ,
+  ["test-thirdlevel"] = {
+    ["1.0"] = {
+      [1] = {
+        ["arch"] = "desc",
+      }
+      ,
+    }
+    ,
+  }
+  ,
+}

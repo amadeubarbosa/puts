@@ -1,0 +1,6 @@
+name = "test-secondlevel"
+version = "1.0"
+
+dependencies = {
+	"test-firstlevel == 1.0",
+}

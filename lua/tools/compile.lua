@@ -781,10 +781,17 @@ function processing (pkg, specfile, arguments)
 
         for _, dep_query in ipairs(desc.dependencies) do
           assert(#dep_query.constraints == 1)
-          --TODO: usar manifest_search(buildtree_manifest, dep_query)
-          --FIXME: only works with operator '=='
+          local dep_results = search.search_repos(dep_query, {buildtree})
+          if type(dep_results[dep_query.name]) ~= "table" then
+            return false, "failure to search buildtree ("..buildtree..") "..
+                          "for dependency already resolved recursively '"..dep_query.name.."'."
+          end
+          -- TODO: podemos ter várias versões compatíveis com a dependência,
+          -- não foi registrado qual versão foi usada no ato da "instalação",
+          -- GERA OUTROS BUGS: usar uma heurística qualquer para escolher
+          local dep_version = next(dep_results[dep_query.name])
           local dep = { name = dep_query.name,
-                        version = dep_query.constraints[1].version.string
+                        version = dep_version,
                       }
           memoized[dep] = manifest.get_metadata(buildtree_manifest, dep.name, dep.version)
           assert(forced_reprocessing(dep, memoized, arguments))
