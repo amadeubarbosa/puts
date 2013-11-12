@@ -29,7 +29,7 @@ function delete_version(name, version, local_repo, manifest, force)
         local spec_url, err = search.find_suitable_rock( search.make_query(installed_name, installed_version), config.SPEC_SERVERS, false)
         if spec_url and type(spec_url) == "string" then
           local ok, tempfile = util.download(util.base_name(spec_url), spec_url, config.TMPDIR)
-          assert(ok, "failed to download the "..spec_url.." from remote repositories")
+          assert(ok, "failed to download "..spec_url)
           -- dowloading the descriptor of the package
           local spec = descriptor.load(tempfile)
           assert(os.remove(tempfile))

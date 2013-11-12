@@ -3,6 +3,7 @@ package.path = "?.lua;../?.lua;" .. package.path
 
 -- Basic variables (global vars are in upper case)
 local config = require "tools.config"
+local path = require "tools.path"
 local util = require "tools.util"
 local log  = util.log
 
@@ -177,7 +178,7 @@ end
 -- Checkpoint allows us to 'restore' and 'save' recover files.
 -- Recover files register when the compiler assistant fails on building a package.
 -- The compiler will continue the package building from the last package compiled successfully.
-local checkpoint = { filename = config.BASEDIR.."/compiler.recover", packages = {} }
+local checkpoint = { filename = path.pathname(config.BASEDIR,"compiler.recover"), packages = {} }
 
 function checkpoint:clean()
   os.remove(self.filename)
@@ -251,7 +252,7 @@ local compat = {
         -- Earlier we used config.DEPLOYDIR = config.SVNDIR.."/tools"
         -- Hack needed to convert from SVNDIR.."/specs" to old name
         local oldDirectory = config.DEPLOYDIR:gsub("specs$","tools")
-        local filepath = arguments.basesoft or oldDirectory.."/basesoft.desc"
+        local filepath = arguments.basesoft or path.pathname(oldDirectory,"basesoft.desc")
 
         -- Loading basesoft description table
         local f, err = loadfile(filepath)
@@ -266,7 +267,7 @@ local compat = {
         end
 
         -- Loading packages description table
-        filepath = arguments.packages or oldDirectory.."/packages.desc"
+        filepath = arguments.packages or path.pathname(oldDirectory,"packages.desc")
         local f, err = loadfile(filepath)
         if not f then
           log.error(err)
@@ -503,13 +504,12 @@ function run()
   if (arguments.compat_v1_05 or arguments.compat_v1_04) and arguments.profile then
     assert(type(arguments.profile) == "table")
     for _,profile in ipairs(arguments.profile) do 
-    local _,name = profile:match("(.*)/(.*)") --extracts name "dir/name.profile"
-    name = name or profile                    --could nil only if "name.profile"
-    name = name:gsub(".profile","")           --deletes the suffix ".profile"
+      local name = util.base_name(profile)
+      name = name:gsub(".profile","")
       local file = assert(io.open(profile,"r") or 
           io.open(name..".profile","r") or 
-          io.open(config.DEPLOYDIR .."/profiles/".. name,"r") or 
-          io.open(config.DEPLOYDIR .."/profiles/".. name ..".profile","r"))
+          io.open(path.pathname(config.DEPLOYDIR,"profiles",name), "r") or 
+          io.open(path.pathname(config.DEPLOYDIR,"profiles",name..".profile"),"r"))
       
       -- Listing packages from profile description
       local l = file:lines()
@@ -616,7 +616,7 @@ function run()
         if t.dependencies then
           for i, dep in ipairs(t.dependencies) do
             local dep_spec_url = search.find_suitable_rock( dep, config.SPEC_SERVERS, false )
-            local nameversion = util.base_name(dep_spec_url):gsub("(%.desc)","")
+            local nameversion = util.base_name(dep_spec_url):gsub("%.desc$","")
             if arguments.exclude and arguments.exclude[nameversion] then
               -- nothing
             else
@@ -716,9 +716,9 @@ function processing (pkg, specfile, arguments)
         log.info("Excluding the package:", nameversion)
         return true
       end
-      specfile =  config.SPEC_SERVERS[1].."/"..nameversion..".desc"
+      specfile =  path.pathname(config.SPEC_SERVERS[1], nameversion..".desc")
     elseif specfile ~= nil and type(specfile) == "string" then
-      local nameversion = util.base_name(specfile):gsub(".desc$","")
+      local nameversion = util.base_name(specfile):gsub("%.desc$","")
       if arguments.exclude and arguments.exclude[nameversion] then
         log.info("Excluding the package:", nameversion)
         return true
@@ -726,7 +726,7 @@ function processing (pkg, specfile, arguments)
       log.info("Fetching descriptor",specfile)
 
       local ok, tempfile = util.download(util.base_name(specfile),specfile,config.TMPDIR)
-      assert(ok)
+      if not ok then error("failed to download "..specfile) end
       desc = assert(descriptor.load(tempfile))
       assert(desc.name and desc.version)
       assert(os.remove(tempfile))
@@ -774,7 +774,7 @@ function processing (pkg, specfile, arguments)
         assert(type(specfile) == 'string') -- fixme: unique result
 
         local ok, tempfile = util.download(util.base_name(specfile),specfile,config.TMPDIR)
-        assert(ok)
+        if not ok then error("failed to download "..specfile) end
         local desc = assert(descriptor.load(tempfile))
         assert(desc.name and desc.version)
         assert(os.remove(tempfile))
@@ -839,7 +839,7 @@ function processing (pkg, specfile, arguments)
     
     -- persist resolved dependencies information (used in makepack assistent, for example)
     if #dependencies_resolved > 0 then
-      local metadata = assert(io.open(config.PKGDIR.."/"..nameversion..".dependencies","w"))
+      local metadata = assert(io.open(path.pathname(config.PKGDIR, nameversion..".dependencies"),"w"))
       for _, dep in ipairs(dependencies_resolved) do
         metadata:write(dep.."\n")
       end

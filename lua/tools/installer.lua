@@ -124,22 +124,23 @@ function run()
       end
 
       log.info("Configuring the installation using package metadata...")
+      local metadataDirPath = path.pathname(tools_cfg.TMPDIR, metadataDirname)
       -- Configure main step, using all .template contained in package metadata
-      local files = myplat.exec(myplat.cmd.ls .. tools_cfg.TMPDIR .."/".. metadataDirname)
+      local files = myplat.exec(myplat.cmd.ls .. metadataDirPath)
       local nexttmpl = files:gmatch("%S+.template%.?%d*")
       local tmplname, template
       tmplname = nexttmpl()
       -- For each template ...
       while type(tmplname) == "string" do
         -- parse the template
-        local filename = path.pathname(tools_cfg.TMPDIR,metadataDirname,tmplname)
+        local filename = path.pathname(metadataDirPath, tmplname)
         configuration = hook.hookTemplate(filename,configuration)
         -- go to next template!
         tmplname = nexttmpl()
       end
       -- Removing metadata files to clean the temporary tree
       -- Maybe it's important for futher actions like uninstall or pos-install checks
-      assert(os.execute(myplat.cmd.rm .. path.pathname(tools_cfg.TMPDIR,metadataDirname)) == 0)
+      assert(os.execute(myplat.cmd.rm .. metadataDirPath) == 0)
       -- Moving the temporary tree to real tree (given by user)
       local msgInvalidPath = "ERROR: The installation path (".. arguments.path.. ") is invalid or you don't have write permission there!"
       assert(os.execute(myplat.cmd.mkdir .. arguments.path) == 0, msgInvalidPath)

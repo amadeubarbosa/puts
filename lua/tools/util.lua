@@ -114,26 +114,26 @@ function install(package, orig, dest)
   -- ensure open the cache file if not already
   if not cache[package] or not cache[package].files then
     if not cache[package] then cache[package] = { } end
-    cache[package].files = assert(io.open(config.PKGDIR.."/"..package..".files", "w"))
+    cache[package].files = assert(io.open(path.pathname(config.PKGDIR, package..".files"), "w"))
     cache[package].copied = {}
   end
 
-  -- parsing possible regular expression of orig specification and listing
+  -- is expected the usage of shell expansion in 'orig'
   local files = myplat.exec(myplat.cmd.ls.." -d "..orig)
   -- foreach filename...
   local next = files:gmatch("[^\n]+")
   local line = next()
   while (line) do
     -- ... register your dest/basename to cachefile
-    local dir, name = line:gmatch("(.*%/+)(.+)")()
-    name = name or line
-    local installed_file = dest.."/"..name
+    local name = base_name(line)
+    local installed_file = path.pathname(dest, name)
     if not cache[package].copied[installed_file] then
       cache[package].copied[installed_file] = true
       cache[package].files:write(installed_file.."\n")
       -- ... and real install of files on destination
-      os.execute(myplat.cmd.mkdir .. config.INSTALL.TOP.. "/".. dest)
-      os.execute(myplat.cmd.install .." "..line.." "..config.INSTALL.TOP.."/"..dest)
+      local destination = path.pathname(config.INSTALL.TOP, dest)
+      os.execute(myplat.cmd.mkdir .. destination)
+      os.execute(myplat.cmd.install .." "..line.." "..destination)
     end
     line = next()
   end
@@ -145,7 +145,7 @@ function link(package, orig, linkpath)
   -- ensure open the cache file if not already
   if not cache[package] or not cache[package].links then
     if not cache[package] then cache[package] = { } end
-    cache[package].links = assert(io.open(config.PKGDIR.."/"..package..".links", "w"))
+    cache[package].links = assert(io.open(path.pathname(config.PKGDIR, package..".links"), "w"))
   end
   local dir, name = linkpath:match("(.*%/+)(.+)")
   if not dir then
@@ -183,14 +183,13 @@ end
 -- LuaRocks (http://www.luarocks.org) code. Thanks LuaRocks Team!
 -- ... from "luarocks/fs/unix.lua"
 
---- Strip the path off a path+filename.
--- @param pathname string: A path+name, such as "/a/b/c".
+--- Strip the path off a path/filename.
+-- @param path string: A path, such as "/a/b/c".
 -- @return string: The filename without its path, such as "c".
-function base_name(pathname)
-   assert(type(pathname) == "string")
+function base_name(path)
+   assert(type(path) == "string")
 
-   local base = pathname:match(".*/([^/]*)")
-   return base or pathname
+   return path:match("([^/]+)%/*$")
 end
 
 --- Unpack an archive.
@@ -220,7 +219,14 @@ function unpack_archive(path,archive)
   return true
 end
 ------------------------------------------------------------------------------
--- Downloading
+--- Downloads some source-code from a URL and store to targetdir
+-- ATTENTION: targetdir will be ignored if from is 'http' or 'ftp', because
+-- this function assumes that from points to a compressed file
+--
+-- @param pkgname string: Package name and version stringfied
+-- @param from string: An URL of source-code
+-- @param targetdir string: A path where to download to the source-code
+-- @return boolean and string: true and filepath, or false and error message
 function download(pkgname, from, targetdir)
   assert(type(pkgname) == "string" and type(from) == "string")
   local proto, url = path.split_url(from)
@@ -228,19 +234,18 @@ function download(pkgname, from, targetdir)
   local handler
   if proto == "http" or proto == "https" or proto == "ftp" then
     -- location where put the downloaded file
-    -- ATTENTION: ignoring the targetdir to use a common directory to put the
-    -- downloaded files
     targetdir = config.DOWNLOADDIR
     assert(os.execute(myplat.cmd.mkdir .. targetdir) == 0, "Cannot create the directory '".. targetdir .."' to download the package into it.")
-    if exists_pkgfile(targetdir, pkgname) then
-      filepath = targetdir.."/"..base_name(url)
-      log.info("Skipping the download of the "..pkgname.." because is already downloaded. If you need update it so you must to remove the file '"..filepath.."'")
+    local basename = base_name(url)
+    local filepath = path.pathname(targetdir, basename)
+    if fs.is_file(filepath) then
+      log.info("Skipping the download of the "..basename.." because is already downloaded. If you need update it so you must to remove the file '"..filepath.."'")
       return true, filepath
     end
     handler = require "tools.fetch.http"
   elseif proto:match("^svn") then
     -- location as the checkout directory
-    targetdir = targetdir or  config.PRODAPP.."/".. pkgname
+    targetdir = targetdir or path.pathname(config.PRODAPP, pkgname)
     handler = require "tools.fetch.svn"
     -- https or http isn't a valid tunnel in subversion syntax
     -- we use the "svn+https" to represent "svn" protocol using an "https" url
@@ -251,7 +256,7 @@ function download(pkgname, from, targetdir)
     end
   elseif proto:match("^git") then
     -- location as the clone directory
-    targetdir = targetdir or  config.PRODAPP.."/".. pkgname
+    targetdir = targetdir or path.pathname(config.PRODAPP, pkgname)
     handler = require "tools.fetch.git"
     -- https or http isn't a valid tunnel in subversion syntax
     -- we use the "git+https" to represent "git" protocol using an "https" url
@@ -272,13 +277,13 @@ function download(pkgname, from, targetdir)
 end
 
 -- Testing the archive existance
-function exists_pkgfile(path,pkgname)
+function exists_pkgfile(dir,pkgname)
   assert(type(pkgname) == "string")
   local known_exts = ".tar.gz .tgz .tar.bz2 .zip"
   local ext
   while(type(known_exts) == "string") do
     ext,known_exts = known_exts:match("(%S+)(.*)")
-    if ext and (os.execute("test -f "..path.."/"..pkgname..ext) == 0) then
+    if ext and fs.is_file(path.pathname(dir, pkgname..ext)) then
       return true
     end
   end
@@ -291,12 +296,11 @@ function fetch_and_unpack(package,from,targetdir)
          type(from) == "string")
   local ok, filepath = download(package,from,targetdir)
   if not targetdir then
-    targetdir = config.PRODAPP .."/".. package
+    targetdir = path.pathname(config.PRODAPP, package)
   end
   assert(ok, "Error downloading the package '"..package.."' from '"..from.."'")
   -- it only extracts the source once
-  local exists = os.execute("test -d ".. targetdir)
-  if exists ~= 0 then
+  if not fs.is_dir(targetdir) then
     -- it will extract inside the config.PRODAPP directory using the filename
     assert(unpack_archive(config.PRODAPP,filepath), "Error extracting the package '".. filepath.."' in the directory '".. config.PRODAPP .."'.")
   end

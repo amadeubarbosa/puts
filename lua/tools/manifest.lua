@@ -101,6 +101,10 @@ function get_metadata(manifest, name, version)
     return nil
   end
 
+  if not version then
+    return manifest.repository[name][next(manifest.repository[name])]
+  end
+  
   for v, metadata in pairs(manifest.repository[name]) do
     if version and version == v then
       return metadata

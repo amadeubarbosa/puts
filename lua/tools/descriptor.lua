@@ -40,14 +40,14 @@ function load( filename )
       return nil, "parse error processing dependency '"..spec.subpackage_of.."'"
     end
     -- AFAIK deps.parse_dep and search.make_query return compatible results so..
-    local parent_url = search.find_suitable_rock( parent_dep, config.SPEC_SERVERS, false)
-    if not parent_url then
+    local parent_spec_url = search.find_suitable_rock( parent_dep, config.SPEC_SERVERS, false)
+    if not parent_spec_url then
       error("package '"..util.nameversion(spec).."' is dependent of '"..
         spec.subpackage_of.."' but it doesn't exist")
     end
     -- parent's descriptor loading
-    local ok, tempfile = util.download(util.base_name(parent_url), parent_url, config.TMPDIR)
-    assert(ok)
+    local ok, tempfile = util.download(util.base_name(parent_spec_url), parent_spec_url, config.TMPDIR)
+    if not ok then error("failed to download "..parent_spec_url) end
     local parent_spec = assert(load(tempfile))
     assert(parent_spec.name and parent_spec.version)
     assert(os.remove(tempfile))
