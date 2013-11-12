@@ -230,7 +230,7 @@ function download(pkgname, from, targetdir)
     -- location where put the downloaded file
     -- ATTENTION: ignoring the targetdir to use a common directory to put the
     -- downloaded files
-    targetdir = targetdir or config.DOWNLOADDIR
+    targetdir = config.DOWNLOADDIR
     assert(os.execute(myplat.cmd.mkdir .. targetdir) == 0, "Cannot create the directory '".. targetdir .."' to download the package into it.")
     if exists_pkgfile(targetdir, pkgname) then
       filepath = targetdir.."/"..base_name(url)
