@@ -384,6 +384,11 @@ function run()
     --exclude="pkg1 pkg2 ..."   : list of package names to exclude of the compile process
     --list                      : list all package names to be compiled by your selection.
 
+   EXPERIMENTAL FEATURES:
+    --directory=<path>          : overrides the source directory of a package being compiled
+                                  ATTENTION: select only one package to compile at once
+                                  ATTENTION: cannot be used with back-compatibility options
+
    BACK-COMPATIBILITY OPTIONS:
     --compat_v1_04           : changes the parsing of the package descriptions to
                                support the format used until the OpenBus 1.4.2
@@ -407,11 +412,28 @@ function run()
     return false
   end
 
+  local backcompatibility_version = (arguments.compat_v1_04 and "--compat_v1_04") or (arguments.compat_v1_05 and "--compat_v1_05")
+  if backcompatibility_version then
+    log.info("Back-compatibility mode activated ("..backcompatibility_version..")")
+  end
+
   -- support to multiple values in these following options
   for _,parameterName in ipairs{"descriptors","select","profile","exclude"} do
     if arguments[parameterName] then
       local valueString = arguments[parameterName]
       arguments[parameterName] = {valueString:split("[^%s]+")}
+    end
+  end
+  
+  -- restriction
+  if arguments.directory then
+    if backcompatibility_version then
+      log.error("The argument --directory cannot be used when back-compatibility mode is activated.")
+      return false
+    end
+    if #arguments.select > 1 then
+      log.error("The argument --directory only works when --select is used only once")
+      return false
     end
   end
 
@@ -557,6 +579,10 @@ function run()
           if not descriptorList[pkg] then
             local _, filename = assert(util.download(pkg,spec_url,config.TMPDIR))
             local desc = assert(descriptor.load(filename))
+            if arguments.directory then
+              log.warning("Overriding the source directory of the package '"..pkg.."' with '"..arguments.directory.."'")
+              desc.directory = arguments.directory
+            end
             table.insert(descriptorList, desc)
             descriptorList[pkg] = desc
             assert(os.remove(filename))
