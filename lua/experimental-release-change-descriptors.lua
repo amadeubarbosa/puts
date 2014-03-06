@@ -5,6 +5,7 @@ local descreplace = {}
 -- by hand (no handled by make_release.lua)
 descreplace[ [[lua-5.2.2]] ]=[[lua-5.2.2.1]]
 descreplace[ [[lua-bin-5.2.2]] ]=[[lua-bin-5.2.2.1]]
+descreplace[ [[openbus-busconsole-2.0.0compatLua52]] ]=[[openbus-busconsole-2.0.0.2]]
 -- semi-automatic
 descreplace[ [[openbus-busadmin-2.0.0compatLua52]] ]=[[openbus-busadmin-2.0.0.4]]
 descreplace[ [[openbus-busservice-2.0.0compatLua52]] ]=[[openbus-busservice-2.0.0.4]]
@@ -69,7 +70,7 @@ do
   for old, new in pairs(descreplace) do 
     local oldname = name(old)
     local oldversion = version(old)
-    deps_replacement[ oldname.." == "..oldversion ] = '"'..new..'"'
+    deps_replacement[ oldname.." == "..oldversion ] = '"'..name(new)..' == '..version(new)..'"'
   end
   --[[DEBUG]] for k,v in pairs(deps_replacement) do
   --[[DEBUG]]   print("[debug] dep("..k..") = "..v)
@@ -81,7 +82,7 @@ do
   for old, new in pairs(descreplace) do 
     print("[info] replacing "..old.." by "..new)
     filename = path(svnrepository,new..".desc")
-    f = io.open(filename,"r")
+    f = assert(io.open(filename,"r"))
     content = f:read("*a")
     f:close()
     --[[DEBUG]] print("[debug] old name = "..name(old).." version = "..version(old))
