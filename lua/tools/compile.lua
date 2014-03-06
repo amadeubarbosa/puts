@@ -642,11 +642,15 @@ function run()
         if t.dependencies then
           for i, dep in ipairs(t.dependencies) do
             local dep_spec_url = search.find_suitable_rock( dep, config.SPEC_SERVERS, false )
-            local nameversion = util.base_name(dep_spec_url):gsub("%.desc$","")
-            if arguments.exclude and arguments.exclude[nameversion] then
-              -- nothing
+            if dep_spec_url == nil then
+              log.warning("\t  |--> "..deps.show_dep(dep).. " ( not found in repositories )")
             else
-              log.info("\t  |--> "..nameversion)
+              local nameversion = util.base_name(dep_spec_url):gsub("%.desc$","")
+              if arguments.exclude and arguments.exclude[nameversion] then
+                -- nothing
+              else
+                log.info("\t  |--> "..nameversion)
+              end
             end
           end
         end
