@@ -36,6 +36,16 @@ for key,_ in pairs(util.log._levels) do
   util.log._levels[key] = false
 end
 
+local function is_snapshot(version)
+  assert(type(version) == "string")
+
+  if version:match("snapshot") or version:lower():match("compatlua52") then
+    return true
+  else
+    return false
+  end
+end
+
 myplat.exec(myplat.cmd.mkdir..config.TMPDIR)
  
 SPEC_SERVERS = { 
@@ -57,7 +67,7 @@ tag_creation = function(pkg, specfile, ...)
   assert(pkg.name)
   assert(pkg.version)
   
-  if pkg.version:match("snapshot") then
+  if is_snapshot(pkg.version) then
     local function svn_retrieve_last_change_revision(url)
       assert(type(url) == "string")
       local svn_info = io.popen("svn info "..url.." 2>/dev/null","r")
@@ -78,7 +88,7 @@ tag_creation = function(pkg, specfile, ...)
         if patt then
           local version = item:match(patt)
           if version then
-            print(version, "("..url.."/"..item..")")
+            print("  "..version, "("..url.."/"..item..")")
           end
         end
       end
@@ -188,7 +198,7 @@ tag_creation = function(pkg, specfile, ...)
           end
         end
       end
-      if pkg.version:match("snapshot") then
+      if is_snapshot(pkg.version) then
         local repository = config.SPEC_SERVERS[1].."/"
         if repository:match("^file") then
           repository = repository:gsub("file://","")
@@ -264,8 +274,11 @@ function temporary_load(specfile)
   return desc
 end
 
+--------------
+-- Main
+--------------
 if not arg[1] or not arg[2] then
-  print("Usage: "..arg[0].." <nome do pacote com versão> <diretório de compilação>")
+  print("Usage: "..arg[0].." <nome do pacote com versão> <diretório vazio que conterá o manifesto>")
   os.exit(1)
 end
 
