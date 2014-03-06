@@ -1,7 +1,7 @@
 local fsep = "/"
 local svnrepository = ...
 local descreplace = {}
--- instructions: fill this table with log of make_release.lua script (tag: [script] [replace])
+-- instruction: fill this table with log of make_release.lua script (tag: [script] [replace])
 -- by hand (no handled by make_release.lua)
 descreplace[ [[lua-5.2.2]] ]=[[lua-5.2.2.1]]
 descreplace[ [[lua-bin-5.2.2]] ]=[[lua-bin-5.2.2.1]]
@@ -27,6 +27,26 @@ descreplace[ [[lualdap-1.1.0CompatLua52]] ]=[[lualdap-1.1.0.1]]
 descreplace[ [[openldap-2.4.11snapshot]] ]=[[openldap-2.4.11-oblibs1.3.2-1]]
 -- end of editable table
 
+-- instruction: fill this table with log of make_release.lua script (tag: [script] about new tags)
+local url = {}
+-- by hand (no handled by make_release.lua)
+url[ [[/openbus/libs/lua/branches/5.2.2]] ]=[[/openbus/libs/lua/tags/5.2.2.1]]
+-- semi-automatic
+url[ [[/loop/trunk]] ]=[[/loop/tags/LOOP_3_0_beta2]]
+url[ [[/oil/trunk]] ]=[[/oil/tags/OIL_0_6_beta2]]
+url[ [[/luautils/lce/trunk]] ]=[[/luautils/lce/tags/02_00_01]]
+url[ [[/scs/core/lua/branches/SCS_CORE_LUA_v1_02_03_2012_05_10]] ]=[[/scs/core/lua/tags/01_02_03_01]]
+url[ [[/openbus/core/branches/02_00_00]] ]=[[/openbus/core/tags/02_00_00_04]]
+url[ [[/openbus/idl/branches/02_00]] ]=[[/openbus/idl/tags/02_00_02]]
+url[ [[/openbus/sdk/lua/branches/02_00_00]] ]=[[/openbus/sdk/lua/tags/02_00_00_02]]
+url[ [[/openbus/libs/luafilesystem/branches/1.4.2/]] ]=[[/openbus/libs/luafilesystem/tags/1.4.2.1]]
+url[ [[/openbus/libs/lualdap/branches/1.1.0]] ]=[[/openbus/libs/lualdap/tags/1.1.0.1]]
+url[ [[/openbus/libs/luasocket/branches/2.0.2]] ]=[[/openbus/libs/luasocket/tags/2.0.2.1]]
+url[ [[/openbus/libs/luuid/branches/1.0]] ]=[[/openbus/libs/luuid/tags/1.0.1]]
+url[ [[/openbus/libs/struct/branches/1.2]] ]=[[/openbus/libs/struct/tags/1.2.1]]
+url[ [[/openbus/libs/vararg/branches/1.1]] ]=[[/openbus/libs/vararg/tags/1.1.1]]
+-- end of editable table
+
 local function path(...)
   return table.concat({...}, fsep)
 end
@@ -43,6 +63,7 @@ local function quote(s)
   return s:gsub("%.","%%."):gsub("%-","%%-")
 end
 
+-- create replacement table to use string.gsub
 local deps_replacement = {}
 do
   for old, new in pairs(descreplace) do 
@@ -55,6 +76,7 @@ do
   --[[DEBUG]] end
 end
 
+-- replace all the descriptors files
 do
   for old, new in pairs(descreplace) do 
     print("[info] replacing "..old.." by "..new)
@@ -71,6 +93,15 @@ do
     --[[DEBUG]] print("[debug] ------------>8---------")
     replace,num = replace:gsub('version.-%=%s*%p'..quote(version(old)).."%p", 'version = "'..version(new)..'"')
     print("[info] "..num.." matches done about version")
+    --[[DEBUG]] print("[debug] ------------8<---------")
+    --[[DEBUG]] print(replace)
+    --[[DEBUG]] print("[debug] ------------>8---------")
+    replace,num = replace:gsub('url.-%=%s*SVNREPURL.-(%/[%/%w%.%-%_]+)%p', function(oldurl) 
+        if url[oldurl] then 
+          return [[url = SVNREPURL.."]]..url[oldurl]..[["]] 
+        end 
+      end)
+    print("[info] "..num.." matches done about url")
     --[[DEBUG]] print("[debug] ------------8<---------")
     --[[DEBUG]] print(replace)
     --[[DEBUG]] print("[debug] ------------>8---------")
