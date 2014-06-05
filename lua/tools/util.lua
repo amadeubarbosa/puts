@@ -266,6 +266,8 @@ function download(pkgname, from, targetdir)
       from = proto .."://".. url
     end
   else
+    -- default location where put the target file
+    targetdir = targetdir or config.DOWNLOADDIR
     -- trying load from disk a handler
     ok, handler = pcall(require, "tools.fetch."..proto)
     if not ok then
