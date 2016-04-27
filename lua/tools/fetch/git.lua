@@ -6,6 +6,8 @@ local log  = util.log
 
 module("tools.fetch.git", package.seeall)
 
+local SSL_NO_VERIFY = "GIT_SSL_NO_VERIFY=true"
+
 function run(dir, url)
   assert(dir and url)
 
@@ -33,7 +35,7 @@ function run(dir, url)
   end
 
   if os.execute("test -d " .. dir) ~= 0 then
-    local code = os.execute("git clone "..url.." "..dir)
+    local code = os.execute(SSL_NO_VERIFY.." git clone "..url.." "..dir)
     if code ~= 0 then
       return false, dir
     end
@@ -49,7 +51,7 @@ function run(dir, url)
   end
 
   if segments.tag == nil then
-    if os.execute("cd "..dir.. " && git pull ") ~= 0 then
+    if os.execute("cd "..dir.. " && "..SSL_NO_VERIFY.." git pull ") ~= 0 then
       log.warning("Couldn't pull from remotes to directory '" .. dir ..
           "'. Your Git client has returned an error on pull.")
     end

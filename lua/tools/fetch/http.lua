@@ -12,7 +12,7 @@ function run(path, url)
   local filename = util.base_name(url)
   local download_cmd
   if os.execute("which wget >/dev/null 2>/dev/null") == 0 then
-    download_cmd = "wget -nv "..url
+    download_cmd = "wget -nv --no-check-certificate "..url
   elseif os.execute("which curl >/dev/null 2>/dev/null") == 0 then
     download_cmd = "curl -o "..filename.." "..url
   end

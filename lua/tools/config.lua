@@ -27,7 +27,7 @@ local id = require "tools.platformid"
 module("tools.config", package.seeall)
 
 SPEC_SERVERS = SPEC_SERVERS or {
-  "svn+https://subversion.tecgraf.puc-rio.br/engdist/openbus/puts/repository",
+  "https://git.tecgraf.puc-rio.br/openbus/puts-repository/raw/master", 
 }
 
 TEC_UNAME = TEC_UNAME or os.getenv("TEC_UNAME") or id.TEC_UNAME
@@ -41,6 +41,7 @@ assert(BASEDIR or os.getenv("HOME"), "ERROR: HOME env var not defined")
 
 PRODAPP = PRODAPP or BASEDIR .."/build"
 
+GITREPURL = GITREPURL or "git+https://git.tecgraf.puc-rio.br" 
 SVNREPURL = SVNREPURL or "svn+https://subversion.tecgraf.puc-rio.br/engdist"
 SVNURL = SVNURL or SVNREPURL .. "/openbus/trunk"
 SVNDIR = SVNDIR or BASEDIR .."/source"
