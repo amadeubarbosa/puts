@@ -28,7 +28,7 @@ function run(t, arguments)
   local variables = ""
   if type(t.build.variables) == "table" then
     for k, v in pairs(t.build.variables) do
-      variables = variables.." "..k.."="..v.." && "
+      variables = variables.." "..k.."="..v.." "
     end
   end
 
