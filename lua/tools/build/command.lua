@@ -30,6 +30,7 @@ function run(t, arguments)
     for k, v in pairs(t.build.variables) do
       variables = variables.." "..k.."="..v.." "
     end
+    variables = variables.." ;"
   end
 
   local command = t.build.cmd
@@ -47,7 +48,7 @@ function run(t, arguments)
     command = command .. " " .. t.build.arguments
   end
 
-  build_cmd = "cd " .. build_dir .. " && " .. variables .. "; " .. command
+  build_cmd = "cd " .. build_dir .. " && " .. variables .. " " .. command
 
   local ret = os.execute(build_cmd)
   assert(ret == 0,"error compiling the software ".. nameversion .." when performed the command '"..build_cmd.."'")
